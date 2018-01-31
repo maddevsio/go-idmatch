@@ -1,0 +1,30 @@
+{"card":
+    [
+        {
+        "type": "KG idcard old",
+        "structure": 
+            [
+               {"field": "serial", "x": 1, "y": 1},
+               {"field": "firstname", "x": 2, "y": 2},
+               {"field": "middlename", "x": 3, "y": 3},
+               {"field": "surname", "x": 4, "y": 4},
+               {"field": "inn", "x": 5, "y": 5},
+               {"field": "birthday", "x": 6, "y": 6},
+               {"field": "gender", "x": 7, "y": 7}
+            ]
+        },
+        {
+        "type": "KG idcard new",
+        "structure": 
+            [
+               {"field": "serial", "x": 1, "y": 1},
+               {"field": "firstname", "x": 2, "y": 2},
+               {"field": "middlename", "x": 3, "y": 3},
+               {"field": "surname", "x": 4, "y": 4},
+               {"field": "inn", "x": 5, "y": 5},
+               {"field": "birthday", "x": 6, "y": 6},
+               {"field": "gender", "x": 7, "y": 7}
+            ]
+        }
+    ]
+}

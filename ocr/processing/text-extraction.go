@@ -10,7 +10,7 @@ import (
 )
 
 type block struct {
-	x, y, h, w int
+	x, y, h, w float64
 	text       string
 }
 
@@ -52,10 +52,10 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point) (result []block) {
 			continue
 		}
 		result = append(result, block{
-			x:    region.Min.X,
-			y:    region.Min.Y,
-			w:    region.Dx(),
-			h:    region.Dy(),
+			x:    float64(region.Min.X) / float64(img.Cols()),
+			y:    float64(region.Min.Y) / float64(img.Rows()),
+			w:    float64(region.Dx()) / float64(img.Cols()),
+			h:    float64(region.Dy()) / float64(img.Rows()),
 			text: text,
 		})
 		os.Remove(file)

@@ -1,0 +1,15 @@
+{"card":
+    [
+        {
+        "type": "KZ idcard",
+        "structure": 
+            [
+               {"field": "serial", "x": 1, "y": 1},
+               {"field": "firstname", "x": 2, "y": 2},
+               {"field": "surname", "x": 4, "y": 4},
+               {"field": "birthday", "x": 6, "y": 6},
+               {"field": "gender", "x": 7, "y": 7}
+            ]
+        }
+    ]
+}

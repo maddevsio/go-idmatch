@@ -1,1 +1,3 @@
 package web
+
+func Service() {}

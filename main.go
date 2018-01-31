@@ -22,7 +22,7 @@ func main() {
 		{
 			Name: "image",
 			Action: func(c *cli.Context) error {
-				ocr.Recognize(c.Args().First())
+				ocr.Recognize(c.Args().First(), "KG idcard old")
 				return nil
 			},
 		},
