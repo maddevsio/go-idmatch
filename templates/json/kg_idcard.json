@@ -4,13 +4,13 @@
         "type": "KG idcard old",
         "structure": 
             [
-               {"field": "serial", "x": 1, "y": 1},
-               {"field": "firstname", "x": 2, "y": 2},
-               {"field": "middlename", "x": 3, "y": 3},
-               {"field": "surname", "x": 4, "y": 4},
-               {"field": "inn", "x": 5, "y": 5},
+               {"field": "serial", "x": 0.127, "y": 0.83},
+               {"field": "firstname", "x": 0.36, "y": 0.48},
+               {"field": "middlename", "x": 0.36, "y": 0.58},
+               {"field": "surname", "x": 0.36, "y": 0.38},
+               {"field": "inn", "x": 0.63, "y": 0.91},
                {"field": "birthday", "x": 6, "y": 6},
-               {"field": "gender", "x": 7, "y": 7}
+               {"field": "gender", "x": 0.71, "y": 0.65}
             ]
         },
         {

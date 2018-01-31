@@ -33,8 +33,7 @@ func extractText(file string) (string, error) {
 	defer client.Close()
 	client.SetLanguage("kir", "eng")
 	client.SetImage(file)
-	text, err := client.Text()
-	return text, err
+	return client.Text()
 }
 
 func RecognizeRegions(img gocv.Mat, regions [][]image.Point) (result []block) {

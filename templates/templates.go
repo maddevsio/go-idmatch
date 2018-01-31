@@ -13,9 +13,9 @@ type TemplateFile struct {
 type Card struct {
 	Type      string `json:"type"`
 	Structure []struct {
-		Field string `json:"field"`
-		X     int    `json:"x"`
-		Y     int    `json:"y"`
+		Field string  `json:"field"`
+		X     float64 `json:"x"`
+		Y     float64 `json:"y"`
 	} `json:"structure"`
 }
 
