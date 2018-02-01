@@ -7,10 +7,12 @@ import (
 )
 
 func Contours(file string) gocv.Mat {
-	var maxArea float64
+	var maxArea int
 	var rect image.Rectangle
 	edged := gocv.NewMat()
 	original := gocv.NewMat()
+	defer edged.Close()
+	defer original.Close()
 
 	img := gocv.IMRead(file, gocv.IMReadColor)
 	img.CopyTo(original)
@@ -19,12 +21,13 @@ func Contours(file string) gocv.Mat {
 	gocv.Canny(img, edged, 20, 180)
 	contours := gocv.FindContours(edged, gocv.RetrievalList, gocv.ChainApproxSimple)
 	for _, v := range contours {
-		contourArea := gocv.ContourArea(v)
-		rect = gocv.BoundingRect(v)
-		if contourArea > maxArea {
+		r := gocv.BoundingRect(v)
+		if contourArea := r.Dx() * r.Dy(); contourArea > maxArea {
+			rect = r
 			maxArea = contourArea
 		}
 	}
-	// gocv.Rectangle(original, rect, color.RGBA{255, 0, 0, 255}, 2)
+	// gocv.Rectangle(edged, rect, color.RGBA{255, 0, 0, 255}, 2)
+	// utils.ShowImage(edged)
 	return original.Region(rect)
 }
