@@ -23,5 +23,5 @@ func MatchBlocks(blocks []block, template string) ([]byte, error) {
 			}
 		}
 	}
-	return json.Marshal(data)
+	return json.MarshalIndent(data, "", "	")
 }
