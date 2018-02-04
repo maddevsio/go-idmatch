@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/tzununbekov/go-idmatch/ocr"
@@ -20,10 +21,19 @@ func main() {
 			},
 		},
 		{
-			Name: "image",
-			Action: func(c *cli.Context) error {
-				ocr.Recognize(c.Args().First(), "KG idcard old")
-				return nil
+			Name: "ocr",
+			Subcommands: []cli.Command{
+				{
+					Name:  "image",
+					Usage: "send the image to ocr recognition",
+					Flags: []cli.Flag{
+						cli.StringFlag{Name: "template", Value: "KG idcard old", Usage: "document template to use"},
+						cli.StringFlag{Name: "preview", Usage: "path to export preview image"}},
+					Action: func(c *cli.Context) error {
+						fmt.Println(ocr.Recognize(c.Args().Get(0), c.String("template"), c.String("preview")))
+						return nil
+					},
+				},
 			},
 		},
 	}

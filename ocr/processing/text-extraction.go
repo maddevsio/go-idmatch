@@ -1,7 +1,10 @@
 package processing
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"image"
+	"image/color"
 	"os"
 	"strconv"
 
@@ -36,7 +39,7 @@ func extractText(file string) (string, error) {
 	return client.Text()
 }
 
-func RecognizeRegions(img gocv.Mat, regions [][]image.Point) (result []block) {
+func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (result []block, path string) {
 	for k, v := range regions {
 		region := gocv.BoundingRect(v)
 		// Replace absolute size with relative values
@@ -58,8 +61,14 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point) (result []block) {
 			text: text,
 		})
 		os.Remove(file)
-		// gocv.Rectangle(img, gocv.BoundingRect(v), color.RGBA{255, 0, 0, 255}, 2)
+		gocv.Rectangle(img, gocv.BoundingRect(v), color.RGBA{255, 0, 0, 255}, 2)
 	}
-	// utils.ShowImage(img)
-	return result
+	if len(preview) != 0 {
+		hash := md5.New()
+		hash.Write(img.ToBytes())
+		path = preview + "/" + hex.EncodeToString(hash.Sum(nil)) + ".jpeg"
+		gocv.IMWrite(path, img)
+		// utils.ShowImage(img)
+	}
+	return result, path
 }
