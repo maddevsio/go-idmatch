@@ -7,13 +7,9 @@ import (
 	"gocv.io/x/gocv"
 )
 
-func rotate(edged, original gocv.Mat) gocv.Mat {
+func rotate(edged gocv.Mat) gocv.Mat {
 	var positive, negative float64
-	// var point1, point2 image.Point
-	var c1, c2 int
-	tmp := gocv.NewMat()
-	defer tmp.Close()
-
+	var posCount, negCount int
 	lines := gocv.NewMat()
 	defer lines.Close()
 
@@ -27,25 +23,20 @@ func rotate(edged, original gocv.Mat) gocv.Mat {
 			continue
 		}
 		if distance > 20 {
-			// original.CopyTo(tmp)
-			// point1 = image.Point{int(x1), int(y1)}
-			// point2 = image.Point{int(x2), int(y2)}
-			// gocv.Line(tmp, point1, point2, color.RGBA{0, 255, 0, 255}, 4)
-			// utils.ShowImage(tmp)
 			if theta > 0 {
 				positive += theta
-				c1++
+				posCount++
 			} else {
 				negative += theta
-				c2++
+				negCount++
 			}
 		}
 	}
-	if c1 > 0 {
-		positive = positive / float64(c1)
+	if posCount > 0 {
+		positive /= float64(posCount)
 	}
-	if c2 > 0 {
-		negative = negative / float64(c2)
+	if negCount > 0 {
+		negative /= float64(negCount)
 	}
 
 	if math.Abs(positive) < math.Abs(negative) {
@@ -54,26 +45,25 @@ func rotate(edged, original gocv.Mat) gocv.Mat {
 	return gocv.GetRotationMatrix2D(image.Point{edged.Cols() / 2, edged.Rows() / 2}, negative, 1)
 }
 
+// Contours takes image file path and crops it by contour
 func Contours(file string) gocv.Mat {
 	var maxArea int
 	var rect image.Rectangle
 
-	edged := gocv.NewMat()
 	original := gocv.NewMat()
-	defer edged.Close()
 	defer original.Close()
 
 	img := gocv.IMRead(file, gocv.IMReadColor)
 	img.CopyTo(original)
 	gocv.CvtColor(img, img, gocv.ColorBGRToGray)
 	gocv.MedianBlur(img, img, 7)
-	gocv.Canny(img, edged, 20, 170)
+	gocv.Canny(img, img, 20, 170)
 
-	rotation := rotate(edged, original)
-	gocv.WarpAffine(edged, edged, rotation, image.Point{edged.Cols(), edged.Cols()})
-	gocv.WarpAffine(original, original, rotation, image.Point{edged.Cols(), edged.Cols()})
+	rotation := rotate(img)
+	gocv.WarpAffine(img, img, rotation, image.Point{img.Cols(), img.Cols()})
+	gocv.WarpAffine(original, original, rotation, image.Point{img.Cols(), img.Cols()})
 
-	contours := gocv.FindContours(edged, gocv.RetrievalList, gocv.ChainApproxSimple)
+	contours := gocv.FindContours(img, gocv.RetrievalList, gocv.ChainApproxSimple)
 	for _, v := range contours {
 		r := gocv.BoundingRect(v)
 		if contourArea := r.Dx() * r.Dy(); contourArea > maxArea {
