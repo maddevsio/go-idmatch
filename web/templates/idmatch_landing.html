@@ -122,7 +122,7 @@
             <i data-message="Загрузите вашу фотографию" class="filename">Загрузите вашу фотографию</i>
           </label>
           <input class="inputfile" type="file" id="face" name="face">
-          <div class="webcam_btn">
+          <!-- <div class="webcam_btn">
             <input name="faceWebcam" type="hidden" id="webcam-face">
             <i class="or">или</i>
             <button type="button" id="open_takePhoto">
@@ -143,7 +143,7 @@
                 </svg>
               </span>
             </button>
-          </div>
+          </div> -->
         </div>
         <svg class="arrows" id="arrows" xmlns="http://www.w3.org/2000/svg" width="50px" viewBox="0 0 756.19 477.18">
           <g id="Capa_1" data-name="Capa 1">
@@ -182,8 +182,16 @@
       {{ if . }}
       <div class="results">
         <div class="results-images">
+            {{ if .face_preview }}
+            <div class="results-images--item-wrap">
+                <img src="/{{ .face_preview }}">
+              </div>
+              <div class="results-info">
+                Совпадение <span><i class="match-percent">1</i><i>%</i></span>
+              </div>
+              {{ end }}
           <div class="results-images--item-wrap">
-            <img src="/{{ .preview }}">
+            <img src="/{{ .id_preview }}">
           </div>
         </div>
         <div class="results-code">

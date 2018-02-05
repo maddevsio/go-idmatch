@@ -3,7 +3,6 @@ package processing
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"fmt"
 	"image"
 	"image/color"
 	"os"
@@ -86,8 +85,6 @@ func TextRegions(img gocv.Mat) [][]image.Point {
 }
 
 func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (result []block, path string) {
-
-	fmt.Println(preview)
 	client := gosseract.NewClient()
 	defer client.Close()
 	client.SetLanguage("kir", "eng")

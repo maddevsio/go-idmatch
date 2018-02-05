@@ -3,6 +3,7 @@ package web
 import (
 	"html/template"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"os"
 
@@ -19,15 +20,7 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
-func landing(c echo.Context) error {
-	return c.Render(http.StatusOK, "landing", "")
-}
-
-func result(c echo.Context) error {
-	file, err := c.FormFile("id")
-	if err != nil {
-		return err
-	}
+func saveFile(file *multipart.FileHeader) error {
 	src, err := file.Open()
 	if err != nil {
 		return err
@@ -43,12 +36,37 @@ func result(c echo.Context) error {
 	if _, err = io.Copy(dst, src); err != nil {
 		return err
 	}
+	return nil
+}
 
-	data, preview := ocr.Recognize("web/uploads/"+file.Filename, "KG idcard old", "web/preview")
+func landing(c echo.Context) error {
+	return c.Render(http.StatusOK, "landing", "")
+}
+
+func result(c echo.Context) error {
+	var facePreview string
+
+	face, err := c.FormFile("face")
+	if face != nil && err == nil {
+		if err := saveFile(face); err == nil {
+			facePreview = "web/uploads/" + face.Filename
+		}
+	}
+
+	id, err := c.FormFile("id")
+	if err != nil {
+		return err
+	}
+	if err := saveFile(id); err != nil {
+		return err
+	}
+
+	data, idPreview := ocr.Recognize("web/uploads/"+id.Filename, "KG idcard old", "web/preview")
 
 	return c.Render(http.StatusOK, "landing", map[string]interface{}{
-		"data":    data,
-		"preview": preview,
+		"data":         data,
+		"id_preview":   idPreview,
+		"face_preview": facePreview,
 	})
 }
 
@@ -58,6 +76,7 @@ func Service() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Static("/static", "web/static")
+	e.Static("web/uploads", "web/uploads")
 	e.Static("web/preview", "web/preview")
 
 	t := &Template{
