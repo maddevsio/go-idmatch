@@ -36,20 +36,22 @@ func TextRegions(img gocv.Mat) [][]image.Point {
 
 	gray := gocv.NewMat()
 	defer gray.Close()
+	gocv.CvtColor(original, gray, gocv.ColorBGRToGray)
 
-	kernel := gocv.GetStructuringElement(gocv.MorphEllipse, image.Point{5, 7})
+	kernel := gocv.GetStructuringElement(gocv.MorphEllipse, image.Point{5, 5})
 	defer kernel.Close()
-
 	opening := gocv.NewMat()
 	defer opening.Close()
-	gocv.MorphologyEx(original, opening, gocv.MorphGradient, kernel)
 
-	gocv.CvtColor(opening, gray, gocv.ColorBGRToGray)
+	gocv.MorphologyEx(gray, opening, gocv.MorphGradient, kernel)
+
 	binarization := gocv.NewMat()
 	defer binarization.Close()
-	gocv.Threshold(gray, binarization, 0.0, 255.0, gocv.ThresholdBinary|gocv.ThresholdOtsu)
 
-	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{9, 1})
+	gocv.Threshold(opening, binarization, 0.0, 255.0, gocv.ThresholdBinary|gocv.ThresholdOtsu)
+
+	//AHTUNG!!!!! size is (height, width). not (width, height)
+	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{1, 9})
 	connected := gocv.NewMat()
 	defer connected.Close()
 
