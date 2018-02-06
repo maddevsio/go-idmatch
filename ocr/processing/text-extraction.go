@@ -10,7 +10,6 @@ import (
 	"strconv"
 
 	"github.com/otiai10/gosseract"
-	"github.com/tzununbekov/go-idmatch/utils"
 	"gocv.io/x/gocv"
 )
 
@@ -89,7 +88,7 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 	fmt.Println(preview)
 	client := gosseract.NewClient()
 	defer client.Close()
-	client.SetLanguage("rus", "eng")
+	client.SetLanguage("kir", "eng")
 
 	gray := gocv.NewMat()
 	defer gray.Close()
@@ -99,7 +98,7 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 	for k, v := range regions {
 		region := gocv.BoundingRect(v)
 		// Replace absolute size with relative values
-		if region.Dx() < 20 || region.Dy() < 20 {
+		if region.Dx() < 20 || region.Dy() < 20 || region.Dy() > 64 {
 			continue
 		}
 
@@ -131,7 +130,7 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 		hash.Write(img.ToBytes())
 		path = preview + "/" + hex.EncodeToString(hash.Sum(nil)) + ".jpeg"
 		gocv.IMWrite(path, img)
-		utils.ShowImage(img)
+		// utils.ShowImage(img)
 	}
 	return result, path
 }
