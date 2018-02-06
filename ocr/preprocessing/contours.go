@@ -39,7 +39,9 @@ func rotate(edged gocv.Mat) gocv.Mat {
 		negative /= float64(negCount)
 	}
 
-	if math.Abs(positive) < math.Abs(negative) {
+	if math.Abs(positive) == math.Abs(negative) {
+		return gocv.GetRotationMatrix2D(image.Point{edged.Cols() / 2, edged.Rows() / 2}, 0, 1)
+	} else if math.Abs(positive) < math.Abs(negative) {
 		return gocv.GetRotationMatrix2D(image.Point{edged.Cols() / 2, edged.Rows() / 2}, positive, 1)
 	}
 	return gocv.GetRotationMatrix2D(image.Point{edged.Cols() / 2, edged.Rows() / 2}, negative, 1)
