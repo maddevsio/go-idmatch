@@ -56,7 +56,7 @@ func Contours(file string) gocv.Mat {
 
 	img := gocv.IMRead(file, gocv.IMReadColor)
 	img.CopyTo(original)
-	// gocv.ApplyColorMap(img, img, gocv.ColormapHot)
+	gocv.ApplyColorMap(img, img, gocv.ColormapHot)
 	gocv.CvtColor(img, img, gocv.ColorRGBToGray)
 	gocv.MedianBlur(img, img, 7)
 	gocv.Canny(img, img, 20, 170)
