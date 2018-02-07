@@ -8,8 +8,6 @@ import (
 	"os"
 	"strconv"
 
-	// "github.com/maddevsio/go-idmatch/utils"
-	"github.com/go-idmatch/utils"
 	"github.com/otiai10/gosseract"
 	"gocv.io/x/gocv"
 )
@@ -44,19 +42,16 @@ func TextRegions(img gocv.Mat) [][]image.Point {
 	defer grad.Close()
 
 	gocv.MorphologyEx(gray, grad, gocv.MorphGradient, kernel)
-	utils.ShowImage(grad)
 
 	binarization := gocv.NewMat()
 	defer binarization.Close()
 
 	gocv.Threshold(grad, binarization, 0.0, 255.0, gocv.ThresholdBinary|gocv.ThresholdOtsu)
-	utils.ShowImage(binarization)
 
 	opening := gocv.NewMat()
 	defer opening.Close()
 	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{sw / 2, sh * 2 / 3})
 	gocv.MorphologyEx(binarization, opening, gocv.MorphOpen, kernel)
-	utils.ShowImage(opening)
 
 	//AHTUNG!!!!! size is (height, width). not (width, height)
 	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{1, sw})
@@ -64,7 +59,6 @@ func TextRegions(img gocv.Mat) [][]image.Point {
 	defer connected.Close()
 
 	gocv.MorphologyEx(opening, connected, gocv.MorphClose, kernel)
-	utils.ShowImage(connected)
 	return gocv.FindContours(connected, gocv.RetrievalCComp, gocv.ChainApproxSimple)
 }
 
@@ -83,7 +77,6 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 		region := gocv.BoundingRect(v)
 		// Replace absolute size with relative values
 		if region.Dx() < sw || region.Dy() < sh || region.Dy() > sh*3 {
-			// fmt.Println("%d %d", region.Dx(), region.Dy())
 			continue
 		}
 
@@ -115,7 +108,6 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 		hash.Write(img.ToBytes())
 		path = preview + "/" + hex.EncodeToString(hash.Sum(nil)) + ".jpeg"
 		gocv.IMWrite(path, img)
-		// utils.ShowImage(img)
-	}
+
 	return result, path
 }
