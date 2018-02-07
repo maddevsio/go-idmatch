@@ -3,14 +3,13 @@ package processing
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"fmt"
 	"image"
 	"image/color"
 	"os"
 	"strconv"
 
+	"github.com/go-idmatch/utils"
 	"github.com/otiai10/gosseract"
-	"github.com/tzununbekov/go-idmatch/utils"
 	"gocv.io/x/gocv"
 )
 
@@ -20,7 +19,13 @@ type block struct {
 }
 
 func TextRegions(img gocv.Mat) [][]image.Point {
-	/*old python variant*/
+
+	//We have to get these values from JSON or somehow from document
+	hc := 1.0 / 25.0
+	wc := 1.0 / 41.0
+	sw := int(float64(img.Cols()) * wc)
+	sh := int(float64(img.Rows()) * hc)
+
 	original := img.Clone()
 
 	gray := gocv.NewMat()
@@ -32,7 +37,7 @@ func TextRegions(img gocv.Mat) [][]image.Point {
 	//we need some document size and dpi based value!!!!!
 	//We need to know maximum symbol width and hight in pixels
 	//and stroke's width
-	kernel := gocv.GetStructuringElement(gocv.MorphEllipse, image.Point{9, 9})
+	kernel := gocv.GetStructuringElement(gocv.MorphEllipse, image.Point{sw / 2, sh / 2})
 	defer kernel.Close()
 	grad := gocv.NewMat()
 	defer grad.Close()
@@ -48,12 +53,12 @@ func TextRegions(img gocv.Mat) [][]image.Point {
 
 	opening := gocv.NewMat()
 	defer opening.Close()
-	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{7, 7})
+	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{sw / 2, sh * 2 / 3})
 	gocv.MorphologyEx(binarization, opening, gocv.MorphOpen, kernel)
 	utils.ShowImage(opening)
 
 	//AHTUNG!!!!! size is (height, width). not (width, height)
-	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{1, 15})
+	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{1, sw})
 	connected := gocv.NewMat()
 	defer connected.Close()
 
@@ -63,19 +68,20 @@ func TextRegions(img gocv.Mat) [][]image.Point {
 }
 
 func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (result []block, path string) {
+	//We have to get these values from JSON or somehow from document
+	hc := 1.0 / 25.0
+	wc := 1.0 / 41.0
+	sw := int(float64(img.Cols()) * wc)
+	sh := int(float64(img.Rows()) * hc)
+
 	client := gosseract.NewClient()
 	defer client.Close()
 	client.SetLanguage("kir", "eng")
 
-	// gray := gocv.NewMat()
-	// defer gray.Close()
-
-	// gocv.CvtColor(img, gray, gocv.ColorBGRToGray)
-
 	for k, v := range regions {
 		region := gocv.BoundingRect(v)
 		// Replace absolute size with relative values
-		if region.Dx() < 10 || region.Dy() < 16 || region.Dy() > 60 {
+		if region.Dx() < sw || region.Dy() < sh || region.Dy() > sh*3 {
 			// fmt.Println("%d %d", region.Dx(), region.Dy())
 			continue
 		}
@@ -85,13 +91,11 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 
 		gocv.IMWrite(file, roi)
 		client.SetImage(file)
-		text, err := client.Text()
 
+		text, err := client.Text()
 		if err != nil {
 			continue
 		}
-
-		fmt.Println(text)
 
 		result = append(result, block{
 			x:    float64(region.Min.X) / float64(img.Cols()),
@@ -109,7 +113,7 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 		hash := md5.New()
 		hash.Write(img.ToBytes())
 		path = preview + "/" + hex.EncodeToString(hash.Sum(nil)) + ".jpeg"
-		gocv.IMWrite(path, img)
+		// gocv.IMWrite(path, img)
 		utils.ShowImage(img)
 	}
 	return result, path
