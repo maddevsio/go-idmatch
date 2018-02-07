@@ -9,7 +9,7 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"github.com/tzununbekov/go-idmatch/ocr"
+	"github.com/maddevsio/go-idmatch/ocr"
 )
 
 type Template struct {

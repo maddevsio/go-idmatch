@@ -44,10 +44,12 @@ RUN make build
 RUN make clean
 RUN go install gocv.io/x/gocv
 
-WORKDIR /go/src/github.com/tzununbekov/go-idmatch
+WORKDIR /go/src/github.com/maddevsio/go-idmatch
 COPY . .
 
 RUN go get -d -v ./...
 RUN go install -v ./...
+
+EXPOSE 8080
 
 CMD ["./go-idmatch", "service"]

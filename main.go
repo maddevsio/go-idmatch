@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/tzununbekov/go-idmatch/ocr"
-	"github.com/tzununbekov/go-idmatch/web"
+	"github.com/maddevsio/go-idmatch/ocr"
+	"github.com/maddevsio/go-idmatch/web"
 	"github.com/urfave/cli"
 )
 
