@@ -8,7 +8,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/maddevsio/go-idmatch/utils"
+	// "github.com/maddevsio/go-idmatch/utils"
+	"github.com/go-idmatch/utils"
 	"github.com/otiai10/gosseract"
 	"gocv.io/x/gocv"
 )
@@ -31,7 +32,7 @@ func TextRegions(img gocv.Mat) [][]image.Point {
 	gray := gocv.NewMat()
 	defer gray.Close()
 	gocv.CvtColor(original, gray, gocv.ColorBGRToGray)
-	utils.ShowImage(gray)
+	// utils.ShowImage(gray)
 
 	//WARNING!!!
 	//we need some document size and dpi based value!!!!!
