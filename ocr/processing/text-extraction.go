@@ -108,6 +108,7 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 		hash.Write(img.ToBytes())
 		path = preview + "/" + hex.EncodeToString(hash.Sum(nil)) + ".jpeg"
 		gocv.IMWrite(path, img)
+	}
 
 	return result, path
 }

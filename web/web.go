@@ -1,11 +1,13 @@
 package web
 
 import (
+	"errors"
 	"html/template"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -27,15 +29,29 @@ func saveFile(file *multipart.FileHeader) error {
 	}
 	defer src.Close()
 
+	buff := make([]byte, 512)
+	if _, err := src.Read(buff); err != nil {
+		return err
+	}
+
+	if format := http.DetectContentType(buff); !strings.HasPrefix(format, "image/") {
+		return errors.New("Unsupported file format")
+	}
+
 	dst, err := os.Create("web/uploads/" + file.Filename)
 	if err != nil {
 		return err
 	}
 	defer dst.Close()
 
+	if _, err := src.Seek(0, 0); err != nil {
+		return err
+	}
+
 	if _, err = io.Copy(dst, src); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -71,6 +87,9 @@ func result(c echo.Context) error {
 }
 
 func Service() {
+	os.MkdirAll("web/uploads", os.ModePerm)
+	os.MkdirAll("web/preview", os.ModePerm)
+
 	e := echo.New()
 
 	e.Use(middleware.Logger())

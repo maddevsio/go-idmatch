@@ -5,7 +5,7 @@ LABEL maintainer="rock@maddevs.io"
 ARG GO_VERSION="1.9.3"
 
 ENV GOPATH="/go"
-ENV PATH=$PATH:/usr/local/go/bin
+ENV PATH=$PATH:/usr/local/go/bin:/go/bin
 ENV CGO_CPPFLAGS="-I/usr/local/include"
 ENV CGO_CXXFLAGS="--std=c++1z"
 ENV CGO_LDFLAGS="-L/usr/local/lib -lopencv_core -lopencv_face -lopencv_videoio -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs -lopencv_objdetect -lopencv_features2d -lopencv_video -lopencv_dnn -lopencv_xfeatures2d"
@@ -23,6 +23,9 @@ RUN apt-get update && apt-get -y install \
     libavformat-dev \
     libswscale-dev \
     tesseract-ocr-dev \
+    tesseract-ocr-eng \
+    tesseract-ocr-kir \
+    tesseract-ocr-rus \
     libleptonica-dev \
     liblept5 \
     libtbb2 \
@@ -52,4 +55,4 @@ RUN go install -v ./...
 
 EXPOSE 8080
 
-CMD ["./go-idmatch", "service"]
+CMD ["go-idmatch", "service"]
