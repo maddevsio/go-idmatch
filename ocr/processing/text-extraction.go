@@ -8,7 +8,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/go-idmatch/utils"
+	"github.com/maddevsio/go-idmatch/utils"
 	"github.com/otiai10/gosseract"
 	"gocv.io/x/gocv"
 )
@@ -113,8 +113,8 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 		hash := md5.New()
 		hash.Write(img.ToBytes())
 		path = preview + "/" + hex.EncodeToString(hash.Sum(nil)) + ".jpeg"
-		// gocv.IMWrite(path, img)
-		utils.ShowImage(img)
+		gocv.IMWrite(path, img)
+		// utils.ShowImage(img)
 	}
 	return result, path
 }
