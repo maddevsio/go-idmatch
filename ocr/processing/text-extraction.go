@@ -18,96 +18,75 @@ type block struct {
 }
 
 func TextRegions(img gocv.Mat) [][]image.Point {
-	/*old golang variant*/
-	// binarized := gocv.NewMat()
-	// gocv.CvtColor(img, binarized, gocv.ColorBGRToGray)
-	// kernel := gocv.GetStructuringElement(gocv.MorphEllipse, image.Point{5, 5})
-	// gocv.MorphologyEx(binarized, binarized, gocv.MorphGradient, kernel)
-	// gocv.Threshold(binarized, binarized, 0, 255, gocv.ThresholdBinary|gocv.ThresholdOtsu)
 
-	// connected := gocv.NewMat()
-	// kernel = gocv.GetStructuringElement(gocv.MorphEllipse, image.Point{9, 1})
-	// gocv.MorphologyEx(binarized, connected, gocv.MorphClose, kernel)
+	//We have to get these values from JSON or somehow from document
+	hc := 1.0 / 25.0
+	wc := 1.0 / 41.0
+	sw := int(float64(img.Cols()) * wc)
+	sh := int(float64(img.Rows()) * hc)
 
-	// return gocv.FindContours(connected, gocv.RetrievalCComp, gocv.ChainApproxSimple)
-	/*old python variant*/
 	original := img.Clone()
 
 	gray := gocv.NewMat()
 	defer gray.Close()
 	gocv.CvtColor(original, gray, gocv.ColorBGRToGray)
+	// utils.ShowImage(gray)
 
-	kernel := gocv.GetStructuringElement(gocv.MorphEllipse, image.Point{5, 5})
+	//WARNING!!!
+	//we need some document size and dpi based value!!!!!
+	//We need to know maximum symbol width and hight in pixels
+	//and stroke's width
+	kernel := gocv.GetStructuringElement(gocv.MorphEllipse, image.Point{sw / 2, sh / 2})
 	defer kernel.Close()
-	opening := gocv.NewMat()
-	defer opening.Close()
+	grad := gocv.NewMat()
+	defer grad.Close()
 
-	gocv.MorphologyEx(gray, opening, gocv.MorphGradient, kernel)
+	gocv.MorphologyEx(gray, grad, gocv.MorphGradient, kernel)
 
 	binarization := gocv.NewMat()
 	defer binarization.Close()
 
-	gocv.Threshold(opening, binarization, 0.0, 255.0, gocv.ThresholdBinary|gocv.ThresholdOtsu)
+	gocv.Threshold(grad, binarization, 0.0, 255.0, gocv.ThresholdBinary|gocv.ThresholdOtsu)
+
+	opening := gocv.NewMat()
+	defer opening.Close()
+	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{sw / 2, sh * 2 / 3})
+	gocv.MorphologyEx(binarization, opening, gocv.MorphOpen, kernel)
 
 	//AHTUNG!!!!! size is (height, width). not (width, height)
-	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{1, 9})
+	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{1, sw})
 	connected := gocv.NewMat()
 	defer connected.Close()
 
-	gocv.MorphologyEx(binarization, connected, gocv.MorphClose, kernel)
+	gocv.MorphologyEx(opening, connected, gocv.MorphClose, kernel)
 	return gocv.FindContours(connected, gocv.RetrievalCComp, gocv.ChainApproxSimple)
-
-	/*old C variant*/
-	// gray := gocv.NewMat()
-	// defer gray.Close()
-
-	// grad := gocv.NewMat()
-	// defer grad.Close()
-
-	// binarized := gocv.NewMat()
-	// defer binarized.Close()
-
-	// kernel := gocv.GetStructuringElement(gocv.MorphEllipse, image.Point{5, 7})
-	// defer kernel.Close()
-
-	// //convert to gray
-	// gocv.CvtColor(img, gray, gocv.ColorBGRToGray)
-	// gocv.MorphologyEx(gray, grad, gocv.MorphGradient, kernel)
-	// gocv.Threshold(grad, binarized, 0, 255, gocv.ThresholdBinary|gocv.ThresholdOtsu)
-
-	// connected := gocv.NewMat()
-	// defer connected.Close()
-
-	// kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{9, 1})
-	// gocv.MorphologyEx(binarized, connected, gocv.MorphClose, kernel)
-
-	// return gocv.FindContours(connected, gocv.RetrievalCComp, gocv.ChainApproxSimple)
 }
 
 func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (result []block, path string) {
+	//We have to get these values from JSON or somehow from document
+	hc := 1.0 / 25.0
+	wc := 1.0 / 41.0
+	sw := int(float64(img.Cols()) * wc)
+	sh := int(float64(img.Rows()) * hc)
+
 	client := gosseract.NewClient()
 	defer client.Close()
 	client.SetLanguage("kir", "eng")
 
-	gray := gocv.NewMat()
-	defer gray.Close()
-
-	gocv.CvtColor(img, gray, gocv.ColorBGRToGray)
-
 	for k, v := range regions {
 		region := gocv.BoundingRect(v)
 		// Replace absolute size with relative values
-		if region.Dx() < 20 || region.Dy() < 20 || region.Dy() > 64 {
+		if region.Dx() < sw || region.Dy() < sh || region.Dy() > sh*3 {
 			continue
 		}
 
-		roi := gray.Region(region)
+		roi := img.Region(region)
 		file := strconv.Itoa(k) + ".jpeg"
 
 		gocv.IMWrite(file, roi)
 		client.SetImage(file)
-		text, err := client.Text()
 
+		text, err := client.Text()
 		if err != nil {
 			continue
 		}
@@ -129,7 +108,6 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 		hash.Write(img.ToBytes())
 		path = preview + "/" + hex.EncodeToString(hash.Sum(nil)) + ".jpeg"
 		gocv.IMWrite(path, img)
-		// utils.ShowImage(img)
-	}
+
 	return result, path
 }
