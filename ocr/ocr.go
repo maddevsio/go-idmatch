@@ -3,8 +3,8 @@ package ocr
 import (
 	"log"
 
-	"github.com/tzununbekov/go-idmatch/ocr/preprocessing"
-	"github.com/tzununbekov/go-idmatch/ocr/processing"
+	"github.com/maddevsio/go-idmatch/ocr/preprocessing"
+	"github.com/maddevsio/go-idmatch/ocr/processing"
 )
 
 func Recognize(file, template, preview string) (string, string) {

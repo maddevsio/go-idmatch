@@ -1,0 +1,35 @@
+nginx-proxy:
+  restart: always
+  image: jwilder/nginx-proxy
+  ports:
+    - 80:80
+    - 443:443
+  environment:
+    - DEFAULT_HOST=idmatch.co
+  volumes:
+    - /var/run/docker.sock:/tmp/docker.sock:ro
+    - /data/vhost.d:/etc/nginx/vhost.d
+    - /data/conf.d:/etc/nginx/conf.d
+    - /data/certs/:/etc/nginx/certs:ro
+    - /usr/share/nginx/html
+
+le-companion:
+  restart: always
+  image: jrcs/letsencrypt-nginx-proxy-companion
+  volumes_from:
+    - nginx-proxy
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    - /data/certs/:/etc/nginx/certs:rw
+
+idmatch:
+  restart: always
+  image: maddevsio/go-idmatch
+  autoredeploy: true
+  volumes:
+    - /data/uploads:/go/src/github.com/maddevsio/go-idmatch/web/uploads
+  environment:
+    - VIRTUAL_HOST=idmatch.co
+    - VIRTUAL_PORT=80
+    - LETSENCRYPT_HOST=idmatch.co
+    - LETSENCRYPT_EMAIL=rock@idmatch.co

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 
-	"github.com/tzununbekov/go-idmatch/templates"
+	"github.com/maddevsio/go-idmatch/templates"
 )
 
 func MatchBlocks(blocks []block, template string) ([]byte, error) {
