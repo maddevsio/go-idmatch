@@ -9,7 +9,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/maddevsio/go-idmatch/utils"
 	"github.com/otiai10/gosseract"
 	"gocv.io/x/gocv"
 )
@@ -32,7 +31,7 @@ func TextRegions(img gocv.Mat) [][]image.Point {
 	gray := gocv.NewMat()
 	defer gray.Close()
 	gocv.CvtColor(original, gray, gocv.ColorBGRToGray)
-	utils.ShowImageInNamedWindow(gray, "text regions: gray")
+	// utils.ShowImageInNamedWindow(gray, "text regions: gray")
 
 	//WARNING!!!
 	//we need some document size and dpi based value!!!!!
@@ -45,19 +44,19 @@ func TextRegions(img gocv.Mat) [][]image.Point {
 
 	//try canny
 	gocv.MorphologyEx(gray, grad, gocv.MorphGradient, kernel)
-	utils.ShowImageInNamedWindow(grad, "text regions: gradient")
+	// utils.ShowImageInNamedWindow(grad, "text regions: gradient")
 	binarization := gocv.NewMat()
 	defer binarization.Close()
 
 	gocv.Threshold(grad, binarization, 0.0, 255.0, gocv.ThresholdBinary|gocv.ThresholdOtsu)
-	utils.ShowImageInNamedWindow(binarization, "text regions: binarization")
+	// utils.ShowImageInNamedWindow(binarization, "text regions: binarization")
 	//
 
 	opening := gocv.NewMat()
 	defer opening.Close()
 	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{sw / 2, sh * 2 / 3})
 	gocv.MorphologyEx(binarization, opening, gocv.MorphOpen, kernel)
-	utils.ShowImageInNamedWindow(opening, "text regions: opening")
+	// utils.ShowImageInNamedWindow(opening, "text regions: opening")
 
 	//AHTUNG!!!!! size is (height, width). not (width, height)
 	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{1, sw})
@@ -65,7 +64,7 @@ func TextRegions(img gocv.Mat) [][]image.Point {
 	defer connected.Close()
 
 	gocv.MorphologyEx(opening, connected, gocv.MorphClose, kernel)
-	utils.ShowImageInNamedWindow(connected, "text regions: connected")
+	// utils.ShowImageInNamedWindow(connected, "text regions: connected")
 
 	return gocv.FindContours(connected, gocv.RetrievalCComp, gocv.ChainApproxSimple)
 }
@@ -105,7 +104,7 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 		}
 
 		fmt.Println(text)
-		utils.ShowImageInNamedWindow(roix2, fmt.Sprintf("RecognizeRegions: %d %d", rect.Dx(), rect.Dy()))
+		// utils.ShowImageInNamedWindow(roix2, fmt.Sprintf("RecognizeRegions: %d %d", rect.Dx(), rect.Dy()))
 
 		result = append(result, block{
 			x:    float64(rect.Min.X) / float64(img.Cols()),
@@ -123,8 +122,8 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 		hash := md5.New()
 		hash.Write(img.ToBytes())
 		path = preview + "/" + hex.EncodeToString(hash.Sum(nil)) + ".jpeg"
-		// gocv.IMWrite(path, img)
-		utils.ShowImage(img)
+		gocv.IMWrite(path, img)
+		// utils.ShowImage(img)
 	}
 
 	return result, path
