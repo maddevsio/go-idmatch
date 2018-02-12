@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/maddevsio/go-idmatch/log"
 	"github.com/maddevsio/go-idmatch/ocr"
 	"github.com/maddevsio/go-idmatch/web"
 	"github.com/urfave/cli"
@@ -12,6 +13,24 @@ import (
 func main() {
 	app := cli.NewApp()
 	app.Name = "go-idmatch"
+	app.Version = "0.0.1"
+	app.Authors = []cli.Author{
+		cli.Author{
+			Name:  "Maddevsio",
+			Email: "rock@maddevs.io",
+		},
+	}
+	app.Flags = []cli.Flag{
+		cli.BoolFlag{Name: "debug, d"},
+	}
+
+	app.Before = func(c *cli.Context) error {
+		if c.Bool("d") {
+			log.SetLevel(log.DebugLevel)
+		}
+		return nil
+	}
+
 	app.Commands = []cli.Command{
 		{
 			Name: "service",

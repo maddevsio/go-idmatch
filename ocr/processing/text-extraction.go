@@ -3,12 +3,12 @@ package processing
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"fmt"
 	"image"
 	"image/color"
 	"os"
 	"strconv"
 
+	"github.com/maddevsio/go-idmatch/log"
 	"github.com/otiai10/gosseract"
 	"gocv.io/x/gocv"
 )
@@ -103,7 +103,7 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 			continue
 		}
 
-		fmt.Println(text)
+		log.Print(log.DebugLevel, text)
 		// utils.ShowImageInNamedWindow(roix2, fmt.Sprintf("RecognizeRegions: %d %d", rect.Dx(), rect.Dy()))
 
 		result = append(result, block{
