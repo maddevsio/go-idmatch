@@ -1,13 +1,12 @@
 package processing
 
 import (
-	"encoding/json"
 	"log"
 
 	"github.com/maddevsio/go-idmatch/templates"
 )
 
-func MatchBlocks(blocks []block, template string) ([]byte, error) {
+func MatchBlocks(blocks []block, template string) (map[string]interface{}, error) {
 	data := make(map[string]interface{})
 	t, err := templates.Load(template)
 	if err != nil {
@@ -23,5 +22,5 @@ func MatchBlocks(blocks []block, template string) ([]byte, error) {
 			}
 		}
 	}
-	return json.MarshalIndent(data, "", "	")
+	return data, nil
 }

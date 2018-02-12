@@ -2,13 +2,16 @@ package ocr
 
 import (
 	"log"
+	"os"
 
 	"github.com/maddevsio/go-idmatch/ocr/preprocessing"
 	"github.com/maddevsio/go-idmatch/ocr/processing"
 )
 
-func Recognize(file, template, preview string) (string, string) {
-	var output []byte
+func Recognize(file, template, preview string) (map[string]interface{}, string) {
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		log.Fatal(err)
+	}
 	roi := preprocessing.Contours(file)
 	regions := processing.TextRegions(roi)
 	blocks, path := processing.RecognizeRegions(roi, regions, preview)
@@ -16,5 +19,5 @@ func Recognize(file, template, preview string) (string, string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return string(output), path
+	return output, path
 }

@@ -206,7 +206,9 @@
                 </div>
                 <div class="code-snippet__content">
                     <code class="lines">
-                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="string">{{ .data }}</span>",<br>
+                      {{ range $key, $value := .data }}
+                        &nbsp;&nbsp;&nbsp;&nbsp;{{ $key }}: <span class="string">{{ $value }}</span><br>
+                      {{ end }}
                       </code>
                 </div>
               </div>
