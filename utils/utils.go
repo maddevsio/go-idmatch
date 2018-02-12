@@ -2,8 +2,8 @@ package utils
 
 import "gocv.io/x/gocv"
 
-func ShowImage(image gocv.Mat) {
-	window := gocv.NewWindow("Hello")
+func showImageInternal(image gocv.Mat, winName string) {
+	window := gocv.NewWindow(winName)
 	defer window.Close()
 	for {
 		window.ResizeWindow(800, 600)
@@ -12,4 +12,12 @@ func ShowImage(image gocv.Mat) {
 			break
 		}
 	}
+}
+
+func ShowImage(image gocv.Mat) {
+	showImageInternal(image, "Hello")
+}
+
+func ShowImageInNamedWindow(image gocv.Mat, winName string) {
+	showImageInternal(image, winName)
 }
