@@ -66,9 +66,9 @@ func vBorder(img gocv.Mat) (left, right int) {
 }
 
 func contour(img gocv.Mat) image.Rectangle {
-	hm1 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{1, 20})
+	hm1 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{1, 17})
 	hm2 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{1, img.Cols() * 2})
-	vm1 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{20, 1})
+	vm1 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{17, 1})
 	vm2 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{img.Rows() * 2, 1})
 	defer hm1.Close()
 	defer hm2.Close()
@@ -105,13 +105,11 @@ func Contours(file string) gocv.Mat {
 	gocv.ApplyColorMap(img, img, gocv.ColormapHot)
 	gocv.CvtColor(img, img, gocv.ColorRGBToGray)
 	gocv.GaussianBlur(img, img, image.Point{3, 3}, 7, 7, gocv.BorderDefault)
-	gocv.Canny(img, img, 20, 150)
+	gocv.Canny(img, img, 20, 170)
 
 	rotation := rotate(img)
 	gocv.WarpAffine(img, img, rotation, image.Point{img.Cols(), img.Rows()})
 	gocv.WarpAffine(original, original, rotation, image.Point{img.Cols(), img.Rows()})
-
-	// utils.ShowImage(original.Region(contour(img)))
 
 	return original.Region(contour(img))
 }

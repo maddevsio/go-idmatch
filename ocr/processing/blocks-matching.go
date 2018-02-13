@@ -1,17 +1,15 @@
 package processing
 
 import (
-	"encoding/json"
-	"log"
-
+	"github.com/maddevsio/go-idmatch/log"
 	"github.com/maddevsio/go-idmatch/templates"
 )
 
-func MatchBlocks(blocks []block, template string) ([]byte, error) {
+func MatchBlocks(blocks []block, template string) (map[string]interface{}, error) {
 	data := make(map[string]interface{})
 	t, err := templates.Load(template)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(log.ErrorLevel, err.Error())
 	}
 	// Need to revise this logic
 	for _, field := range t.Structure {
@@ -23,5 +21,5 @@ func MatchBlocks(blocks []block, template string) ([]byte, error) {
 			}
 		}
 	}
-	return json.MarshalIndent(data, "", "	")
+	return data, nil
 }
