@@ -94,30 +94,24 @@ func contour(img gocv.Mat) image.Rectangle {
 	left, right := vBorder(vertical)
 
 	// Ugly loop over all crossed lines with aspect ratio and area matching
+	bestRatio, bestArea := 1.0, 0.0
 	for _, i := range top {
 		for _, j := range bottom {
 			for _, k := range left {
 				for _, l := range right {
 					r := image.Rectangle{image.Point{k, i}, image.Point{l, j}}
 					ratio := float64(r.Dx()) / float64(r.Dy())
-					// Move aspect ratio and threshold to template and config
-					// Collect all ratios and use closest to actual ratio from pattern
-					if ratio < 1.55 || ratio > 1.59 {
-						break
+					area := float64(r.Dx() * r.Dy())
+					// Move aspect ratio to template
+					if math.Abs(1.58-ratio) < bestRatio && area > bestArea {
+						bestRatio = ratio
+						bestArea = area
+						rect = r
 					}
-					area := float64(r.Dx()*r.Dy()) / float64(img.Cols()*img.Rows())
-					// Move area threshold to config
-					if area < 0.3 || area > 0.95 {
-						break
-					}
-					rect = r
-					// Bad practice, need to get rid of it
-					goto end
 				}
 			}
 		}
 	}
-end:
 	return rect
 }
 
