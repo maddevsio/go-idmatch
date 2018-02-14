@@ -13,8 +13,10 @@ type TemplateFile struct {
 }
 
 type Card struct {
-	Type      string `json:"type"`
-	Structure []struct {
+	Type                string  `json:"type"`
+	AspectRatio         float64 `json:"aspectRatio"`
+	TextBlocksThreshold float64 `json:"textBlocksThreshold"`
+	Structure           []struct {
 		Field string  `json:"field"`
 		X     float64 `json:"x"`
 		Y     float64 `json:"y"`

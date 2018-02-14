@@ -7,6 +7,7 @@ import (
 
 	"github.com/maddevsio/go-idmatch/config"
 	"github.com/maddevsio/go-idmatch/log"
+	"github.com/maddevsio/go-idmatch/templates"
 	"github.com/maddevsio/go-idmatch/utils"
 	"gocv.io/x/gocv"
 )
@@ -55,7 +56,7 @@ func vBorder(img gocv.Mat) (v []int) {
 	return
 }
 
-func contour(img gocv.Mat) image.Rectangle {
+func contour(img gocv.Mat, aspectRatio float64) image.Rectangle {
 	var rect image.Rectangle
 	hm1 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{1, config.Preprocessing.ErodeLength})
 	hm2 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{config.Preprocessing.DilateThickness, img.Cols() * 2})
@@ -108,8 +109,7 @@ func contour(img gocv.Mat) image.Rectangle {
 					default:
 						matchRects++
 						ratio := float64(r.Dx()) / float64(r.Dy())
-						// Move aspect ratio to template
-						delta := math.Abs(1.58 - ratio)
+						delta := math.Abs(aspectRatio - ratio)
 						if delta < bestDelta && biggestArea < area {
 							biggestArea = area
 							bestDelta = delta
@@ -125,7 +125,7 @@ func contour(img gocv.Mat) image.Rectangle {
 }
 
 // Contours takes image file path and crops it by contour
-func Contours(file string) gocv.Mat {
+func Contours(file string, card templates.Card) gocv.Mat {
 	original := gocv.NewMat()
 	defer original.Close()
 
@@ -146,7 +146,7 @@ func Contours(file string) gocv.Mat {
 	gocv.WarpAffine(original, original, rotation, image.Point{original.Cols(), original.Rows()})
 
 	gocv.Canny(img, img, config.Preprocessing.CannyT1, config.Preprocessing.CannyT2)
-	roi := original.Region(contour(img))
+	roi := original.Region(contour(img, card.AspectRatio))
 
 	if log.IsDebug() {
 		utils.ShowImage(roi)
