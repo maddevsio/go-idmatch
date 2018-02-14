@@ -5,6 +5,7 @@ import (
 	"image"
 	"math"
 
+	"github.com/maddevsio/go-idmatch/config"
 	"github.com/maddevsio/go-idmatch/log"
 	"github.com/maddevsio/go-idmatch/utils"
 	"gocv.io/x/gocv"
@@ -15,7 +16,7 @@ func rotate(edged gocv.Mat) gocv.Mat {
 	lines := gocv.NewMat()
 	defer lines.Close()
 
-	gocv.HoughLinesP(edged, lines, 1, math.Pi/180, 200)
+	gocv.HoughLinesP(edged, lines, 1, math.Pi/180, config.Preprocessing.HoughThreshold)
 	for row := 0; row < lines.Rows(); row++ {
 		x1, y1, x2, y2 := lines.GetIntAt(row, 0), lines.GetIntAt(row, 1), lines.GetIntAt(row, 2), lines.GetIntAt(row, 3)
 		if distance := math.Sqrt(math.Pow(float64(x2-x1), 2) + math.Pow(float64(y2-y1), 2)); distance > maxDistance {
@@ -38,7 +39,7 @@ func hBorder(img gocv.Mat) (h []int) {
 	for i := 1; i < img.Rows(); i++ {
 		if img.GetUCharAt(i, 1) != 0 {
 			h = append(h, i)
-			i += 5
+			i += config.Preprocessing.BorderStep
 		}
 	}
 	return
@@ -48,7 +49,7 @@ func vBorder(img gocv.Mat) (v []int) {
 	for i := 1; i < img.Cols(); i++ {
 		if img.GetUCharAt(1, i) != 0 {
 			v = append(v, i)
-			i += 5
+			i += config.Preprocessing.BorderStep
 		}
 	}
 	return
@@ -56,10 +57,10 @@ func vBorder(img gocv.Mat) (v []int) {
 
 func contour(img gocv.Mat) image.Rectangle {
 	var rect image.Rectangle
-	hm1 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{1, 15})
-	hm2 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{2, img.Cols() * 2})
-	vm1 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{15, 1})
-	vm2 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{img.Rows() * 2, 2})
+	hm1 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{1, config.Preprocessing.ErodeLength})
+	hm2 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{config.Preprocessing.DilateThickness, img.Cols() * 2})
+	vm1 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{config.Preprocessing.ErodeLength, 1})
+	vm2 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{img.Rows() * 2, config.Preprocessing.DilateThickness})
 	defer hm1.Close()
 	defer hm2.Close()
 	defer vm1.Close()
@@ -88,7 +89,8 @@ func contour(img gocv.Mat) image.Rectangle {
 	y := hBorder(horizontal)
 
 	// Ugly loop over all crossed lines with aspect ratio and area matching
-	bestDelta, biggestArea, totalRects, matchRects := 0.1, 0.0, 0, 0
+	bestDelta := config.Preprocessing.MaxAspectDelta
+	biggestArea, totalRects, matchRects := 0.0, 0, 0
 	imageArea := float64(img.Cols() * img.Rows())
 	for top := 0; top < len(y)/2; top++ {
 		for bottom := len(y) - 1; bottom > len(y)/2; bottom-- {
@@ -99,9 +101,9 @@ func contour(img gocv.Mat) image.Rectangle {
 					area := float64(r.Dx() * r.Dy())
 					areaRatio := area / imageArea
 					switch {
-					case areaRatio < 0.33 && biggestArea > 0:
+					case areaRatio < config.Preprocessing.MinAreaRatio && biggestArea > 0:
 						break
-					case areaRatio > 0.97:
+					case areaRatio > config.Preprocessing.MaxAreaRatio:
 						continue
 					default:
 						matchRects++
@@ -133,15 +135,17 @@ func Contours(file string) gocv.Mat {
 	img := gocv.IMRead(file, gocv.IMReadColor)
 	img.CopyTo(original)
 	gocv.CvtColor(img, img, gocv.ColorRGBToGray)
-	gocv.GaussianBlur(img, cleanCanny, image.Point{7, 7}, 10, 10, gocv.BorderDefault)
-	gocv.Canny(cleanCanny, cleanCanny, 30, 170)
-	gocv.GaussianBlur(img, img, image.Point{3, 3}, 5, 5, gocv.BorderDefault)
+	gocv.GaussianBlur(img, cleanCanny, image.Point{config.Preprocessing.CleanCannyBlurSize, config.Preprocessing.CleanCannyBlurSize},
+		config.Preprocessing.CleanCannyBlurSigma, config.Preprocessing.CleanCannyBlurSigma, gocv.BorderDefault)
+	gocv.Canny(cleanCanny, cleanCanny, config.Preprocessing.CleanCannyT1, config.Preprocessing.CleanCannyT2)
+	gocv.GaussianBlur(img, img, image.Point{config.Preprocessing.CannyBlurSize, config.Preprocessing.CannyBlurSize},
+		config.Preprocessing.CannyBlurSigma, config.Preprocessing.CannyBlurSigma, gocv.BorderDefault)
 
 	rotation := rotate(cleanCanny)
 	gocv.WarpAffine(img, img, rotation, image.Point{img.Cols(), img.Rows()})
 	gocv.WarpAffine(original, original, rotation, image.Point{original.Cols(), original.Rows()})
 
-	gocv.Canny(img, img, 10, 50)
+	gocv.Canny(img, img, config.Preprocessing.CannyT1, config.Preprocessing.CannyT2)
 	roi := original.Region(contour(img))
 
 	if log.IsDebug() {
