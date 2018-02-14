@@ -1,6 +1,7 @@
 package preprocessing
 
 import (
+	"fmt"
 	"image"
 	"math"
 
@@ -33,29 +34,21 @@ func rotate(edged gocv.Mat) gocv.Mat {
 	return gocv.GetRotationMatrix2D(image.Point{edged.Cols() / 2, edged.Rows() / 2}, theta, 1)
 }
 
-func hBorder(img gocv.Mat) (top, bottom []int) {
-	for i := 1; i < img.Rows()/2; i++ {
+func hBorder(img gocv.Mat) (h []int) {
+	for i := 1; i < img.Rows(); i++ {
 		if img.GetUCharAt(i, 1) != 0 {
-			top = append(top, i)
-		}
-	}
-	for i := img.Rows() - 1; i > img.Rows()/2; i-- {
-		if img.GetUCharAt(i, 1) != 0 {
-			bottom = append(bottom, i)
+			h = append(h, i)
+			i += 5
 		}
 	}
 	return
 }
 
-func vBorder(img gocv.Mat) (left, right []int) {
-	for i := 1; i < img.Cols()/2; i++ {
+func vBorder(img gocv.Mat) (v []int) {
+	for i := 1; i < img.Cols(); i++ {
 		if img.GetUCharAt(1, i) != 0 {
-			left = append(left, i)
-		}
-	}
-	for i := img.Cols() - 1; i > img.Cols()/2; i-- {
-		if img.GetUCharAt(1, i) != 0 {
-			right = append(right, i)
+			v = append(v, i)
+			i += 5
 		}
 	}
 	return
@@ -63,10 +56,10 @@ func vBorder(img gocv.Mat) (left, right []int) {
 
 func contour(img gocv.Mat) image.Rectangle {
 	var rect image.Rectangle
-	hm1 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{1, 17})
-	hm2 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{1, img.Cols() * 2})
-	vm1 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{17, 1})
-	vm2 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{img.Rows() * 2, 1})
+	hm1 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{1, 15})
+	hm2 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{2, img.Cols() * 2})
+	vm1 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{15, 1})
+	vm2 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{img.Rows() * 2, 2})
 	defer hm1.Close()
 	defer hm2.Close()
 	defer vm1.Close()
@@ -84,34 +77,48 @@ func contour(img gocv.Mat) image.Rectangle {
 	gocv.Dilate(vertical, vertical, vm2)
 
 	if log.IsDebug() {
+		utils.ShowImage(img)
 		res := gocv.NewMat()
 		defer res.Close()
 		gocv.BitwiseOr(horizontal, vertical, res)
 		utils.ShowImage(res)
 	}
 
-	top, bottom := hBorder(horizontal)
-	left, right := vBorder(vertical)
+	x := vBorder(vertical)
+	y := hBorder(horizontal)
 
 	// Ugly loop over all crossed lines with aspect ratio and area matching
-	bestRatio, bestArea := 1.0, 0.0
-	for _, i := range top {
-		for _, j := range bottom {
-			for _, k := range left {
-				for _, l := range right {
-					r := image.Rectangle{image.Point{k, i}, image.Point{l, j}}
-					ratio := float64(r.Dx()) / float64(r.Dy())
+	bestDelta, biggestArea, totalRects, matchRects := 0.1, 0.0, 0, 0
+	imageArea := float64(img.Cols() * img.Rows())
+	for top := 0; top < len(y)/2; top++ {
+		for bottom := len(y) - 1; bottom > len(y)/2; bottom-- {
+			for left := 0; left < len(x)/2; left++ {
+				for right := len(x) - 1; right > len(x)/2; right-- {
+					totalRects++
+					r := image.Rectangle{image.Point{x[left], y[top]}, image.Point{x[right], y[bottom]}}
 					area := float64(r.Dx() * r.Dy())
-					// Move aspect ratio to template
-					if math.Abs(1.58-ratio) < bestRatio && area > bestArea {
-						bestRatio = ratio
-						bestArea = area
-						rect = r
+					areaRatio := area / imageArea
+					switch {
+					case areaRatio < 0.33 && biggestArea > 0:
+						break
+					case areaRatio > 0.97:
+						continue
+					default:
+						matchRects++
+						ratio := float64(r.Dx()) / float64(r.Dy())
+						// Move aspect ratio to template
+						delta := math.Abs(1.58 - ratio)
+						if delta < bestDelta && biggestArea < area {
+							biggestArea = area
+							bestDelta = delta
+							rect = r
+						}
 					}
 				}
 			}
 		}
 	}
+	log.Print(log.DebugLevel, fmt.Sprintf("%d rectangles out of %d are matched\n", matchRects, totalRects))
 	return rect
 }
 
@@ -119,22 +126,22 @@ func contour(img gocv.Mat) image.Rectangle {
 func Contours(file string) gocv.Mat {
 	original := gocv.NewMat()
 	defer original.Close()
+
 	cleanCanny := gocv.NewMat()
 	defer cleanCanny.Close()
 
 	img := gocv.IMRead(file, gocv.IMReadColor)
 	img.CopyTo(original)
-	gocv.ApplyColorMap(img, img, gocv.ColormapHot)
 	gocv.CvtColor(img, img, gocv.ColorRGBToGray)
-	// gocv.MedianBlur(img, img, 3)
-	gocv.GaussianBlur(img, img, image.Point{3, 3}, 7, 7, gocv.BorderDefault)
-	gocv.Canny(img, cleanCanny, 30, 170)
-	gocv.Canny(img, img, 10, 70)
+	gocv.GaussianBlur(img, cleanCanny, image.Point{7, 7}, 10, 10, gocv.BorderDefault)
+	gocv.Canny(cleanCanny, cleanCanny, 30, 170)
+	gocv.GaussianBlur(img, img, image.Point{3, 3}, 5, 5, gocv.BorderDefault)
 
 	rotation := rotate(cleanCanny)
 	gocv.WarpAffine(img, img, rotation, image.Point{img.Cols(), img.Rows()})
-	gocv.WarpAffine(original, original, rotation, image.Point{img.Cols(), img.Rows()})
+	gocv.WarpAffine(original, original, rotation, image.Point{original.Cols(), original.Rows()})
 
+	gocv.Canny(img, img, 10, 50)
 	roi := original.Region(contour(img))
 
 	if log.IsDebug() {
