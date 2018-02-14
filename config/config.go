@@ -1,6 +1,10 @@
 package config
 
 import (
+	"os"
+
+	"github.com/maddevsio/go-idmatch/log"
+
 	gcfg "gopkg.in/gcfg.v1"
 )
 
@@ -83,7 +87,11 @@ var (
 
 func init() {
 	if err := gcfg.ReadStringInto(&config, defaultConfig); err != nil {
-		panic(err.Error())
+		log.Print(log.ErrorLevel, err.Error())
+		os.Exit(1)
+	}
+	if err := gcfg.ReadFileInto(&config, "config.gcfg"); err != nil {
+		log.Print(log.DebugLevel, "Unable to read config.gcfg, loading default config")
 	}
 	Preprocessing = config.Preprocessing
 	Processing = config.Processing
