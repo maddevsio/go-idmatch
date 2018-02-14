@@ -20,15 +20,14 @@ type block struct {
 	text       string
 }
 
+var symbolHeightCoeff float64 = 38.0 / 737.0
+var symbolWidthCoeff float64 = 27.0 / 1170.0
+
+var strokeWidthCoeff float64 = 5.0 / 1170.0
+var strokeHeightCoeff float64 = 5.0 / 737.0
+
 func TextRegions(img gocv.Mat) [][]image.Point {
-
 	// We have to get these values from JSON or somehow from document
-	symbolHeightCoeff := 38.0 / 737.0
-	symbolWidthCoeff := 27.0 / 1170.0
-
-	strokeWidthCoeff := 5.0 / 1170.0
-	strokeHeightCoeff := 5.0 / 737.0
-
 	symbolWidth := int(float64(img.Cols()) * symbolWidthCoeff)
 	symbolHeight := int(float64(img.Rows()) * symbolHeightCoeff)
 
@@ -53,7 +52,6 @@ func TextRegions(img gocv.Mat) [][]image.Point {
 	grad := gocv.NewMat()
 	defer grad.Close()
 
-	//try canny
 	gocv.MorphologyEx(gray, grad, gocv.MorphGradient, kernel)
 	utils.ShowImageInNamedWindow(grad, "text regions: gradient")
 	binarization := gocv.NewMat()
@@ -61,7 +59,6 @@ func TextRegions(img gocv.Mat) [][]image.Point {
 
 	gocv.Threshold(grad, binarization, 0.0, 255.0, gocv.ThresholdBinary|gocv.ThresholdOtsu)
 	utils.ShowImageInNamedWindow(binarization, "text regions: binarization")
-	//
 
 	opening := gocv.NewMat()
 	defer opening.Close()
@@ -82,23 +79,28 @@ func TextRegions(img gocv.Mat) [][]image.Point {
 
 func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (result []block, path string) {
 	//We have to get these values from JSON or somehow from document
-	hc := 1.0 / 25.0
-	wc := 1.0 / 41.0
-	sw := int(float64(img.Cols()) * wc)
-	sh := int(float64(img.Rows()) * hc)
+
+	symbolWidth := int(float64(img.Cols()) * symbolWidthCoeff)
+	symbolHeight := int(float64(img.Rows()) * symbolHeightCoeff)
 
 	client := gosseract.NewClient()
 	defer client.Close()
 	client.SetLanguage("kir", "eng")
 
+	gray := gocv.NewMat()
+	defer gray.Close()
+
+	gocv.CvtColor(img, gray, gocv.ColorBGRToGray)
+
 	for k, v := range regions {
 		rect := gocv.BoundingRect(v)
 		// Replace absolute size with relative values
-		if rect.Dx() < sw || rect.Dy() < sh || rect.Dy() > sh*3 {
+		// roi := img.Region(rect)
+		roi := gray.Region(rect)
+		if rect.Dx() < symbolWidth || rect.Dy() < symbolHeight/2 || rect.Dy() > symbolHeight*3 {
 			continue
 		}
 
-		roi := img.Region(rect)
 		file := strconv.Itoa(k) + ".jpeg"
 
 		roix4 := gocv.NewMat()
@@ -133,6 +135,9 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 		hash.Write(img.ToBytes())
 		path = preview + "/" + hex.EncodeToString(hash.Sum(nil)) + ".jpeg"
 		gocv.IMWrite(path, img)
+	}
+
+	if log.IsDebug() {
 		utils.ShowImage(img)
 	}
 
