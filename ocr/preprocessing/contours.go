@@ -63,10 +63,10 @@ func vBorder(img gocv.Mat) (left, right []int) {
 
 func contour(img gocv.Mat) image.Rectangle {
 	var rect image.Rectangle
-	hm1 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{1, 17})
-	hm2 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{1, img.Cols() * 2})
-	vm1 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{17, 1})
-	vm2 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{img.Rows() * 2, 1})
+	hm1 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{17, 1})
+	hm2 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{img.Cols() * 2, 1})
+	vm1 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{1, 17})
+	vm2 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{1, img.Rows() * 2})
 	defer hm1.Close()
 	defer hm2.Close()
 	defer vm1.Close()

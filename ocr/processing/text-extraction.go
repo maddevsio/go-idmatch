@@ -47,7 +47,7 @@ func TextRegions(img gocv.Mat) [][]image.Point {
 	//We need to know maximum symbol width and hight in pixels
 	//and stroke's width
 	kernel := gocv.GetStructuringElement(gocv.MorphEllipse,
-		image.Point{symbolWidth / 2, symbolHeight / 2})
+		image.Point{symbolHeight / 2, symbolWidth / 2})
 	defer kernel.Close()
 	grad := gocv.NewMat()
 	defer grad.Close()
@@ -63,11 +63,11 @@ func TextRegions(img gocv.Mat) [][]image.Point {
 	opening := gocv.NewMat()
 	defer opening.Close()
 	kernel = gocv.GetStructuringElement(gocv.MorphRect,
-		image.Point{symbolWidth / 2, symbolHeight * 2 / 3})
+		image.Point{symbolHeight * 2 / 3, symbolWidth / 2})
 	gocv.MorphologyEx(binarization, opening, gocv.MorphOpen, kernel)
 	utils.ShowImageInNamedWindow(opening, "text regions: opening")
 
-	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{1, symbolWidth})
+	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{symbolWidth, 1})
 	connected := gocv.NewMat()
 	defer connected.Close()
 
