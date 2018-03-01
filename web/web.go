@@ -11,6 +11,7 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"github.com/maddevsio/go-idmatch/config"
 	"github.com/maddevsio/go-idmatch/ocr"
 )
 
@@ -38,7 +39,7 @@ func saveFile(file *multipart.FileHeader) error {
 		return errors.New("Unsupported file format")
 	}
 
-	dst, err := os.Create("web/uploads/" + file.Filename)
+	dst, err := os.Create(config.Web.Uploads + file.Filename)
 	if err != nil {
 		return err
 	}
@@ -65,7 +66,7 @@ func result(c echo.Context) error {
 	face, err := c.FormFile("face")
 	if face != nil && err == nil {
 		if err := saveFile(face); err == nil {
-			facePreview = "web/uploads/" + face.Filename
+			facePreview = config.Web.Uploads + face.Filename
 		}
 	}
 
@@ -77,7 +78,7 @@ func result(c echo.Context) error {
 		return err
 	}
 
-	data, idPreview := ocr.Recognize("web/uploads/"+id.Filename, "KG idcard old", "web/preview")
+	data, idPreview := ocr.Recognize(config.Web.Uploads+id.Filename, "KG idcard old", config.Web.Preview)
 
 	return c.Render(http.StatusOK, "landing", map[string]interface{}{
 		"data":         data,
@@ -87,19 +88,19 @@ func result(c echo.Context) error {
 }
 
 func Service() {
-	os.MkdirAll("web/uploads", os.ModePerm)
-	os.MkdirAll("web/preview", os.ModePerm)
+	os.MkdirAll(config.Web.Uploads, os.ModePerm)
+	os.MkdirAll(config.Web.Preview, os.ModePerm)
 
 	e := echo.New()
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	e.Static("/static", "web/static")
-	e.Static("web/uploads", "web/uploads")
-	e.Static("web/preview", "web/preview")
+	e.Static("/static", config.Web.Static)
+	e.Static("web/uploads", config.Web.Uploads)
+	e.Static("web/preview", config.Web.Preview)
 
 	t := &Template{
-		templates: template.Must(template.ParseGlob("web/templates/idmatch_landing.html")),
+		templates: template.Must(template.ParseGlob(config.Web.Templates + "/idmatch_landing.html")),
 	}
 	e.Renderer = t
 
