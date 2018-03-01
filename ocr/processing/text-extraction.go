@@ -137,9 +137,7 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 		gocv.IMWrite(path, img)
 	}
 
-	if log.IsDebug() {
-		utils.ShowImage(img)
-	}
+	utils.ShowImage(img)
 
 	return result, path
 }

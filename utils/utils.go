@@ -1,8 +1,14 @@
 package utils
 
-import "gocv.io/x/gocv"
+import (
+	"github.com/maddevsio/go-idmatch/log"
+	"gocv.io/x/gocv"
+)
 
 func showImageInternal(image gocv.Mat, winName string) {
+	if !log.IsDebug() {
+		return
+	}
 	window := gocv.NewWindow(winName)
 	defer window.Close()
 	for {
