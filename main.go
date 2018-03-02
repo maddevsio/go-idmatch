@@ -10,6 +10,10 @@ import (
 	"github.com/urfave/cli"
 )
 
+const flagNameCSFolderPath = "folder"
+const flagNameTemplate = "template"
+const flagOldKgId = "KG idcard old"
+
 func main() {
 	app := cli.NewApp()
 	app.Name = "go-idmatch"
@@ -46,7 +50,7 @@ func main() {
 					Name:  "image",
 					Usage: "send the image to ocr recognition",
 					Flags: []cli.Flag{
-						cli.StringFlag{Name: "template", Value: "KG idcard old", Usage: "document template to use"},
+						cli.StringFlag{Name: "template", Value: flagOldKgId, Usage: "document template to use"},
 						cli.StringFlag{Name: "preview", Usage: "path to export preview image"}},
 					Action: func(c *cli.Context) error {
 						result, path := ocr.Recognize(c.Args().Get(0), c.String("template"), c.String("preview"))
@@ -57,6 +61,21 @@ func main() {
 						return nil
 					},
 				},
+			},
+		},
+		{
+			Name:  "check_solution",
+			Usage: "Send folder with images and related json files to ocr recognition with match percentage calculating",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name: flagNameCSFolderPath, Usage: "Path to data folder",
+				},
+				cli.StringFlag{
+					Name: flagNameTemplate, Value: flagOldKgId, Usage: "document template to use",
+				},
+			},
+			Action: func(c *cli.Context) error {
+				return ocr.CheckSolution(c.String(flagNameCSFolderPath), c.String(flagNameTemplate))
 			},
 		},
 	}
