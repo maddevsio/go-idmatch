@@ -150,8 +150,6 @@ func Contours(file string, card templates.Card) gocv.Mat {
 	gocv.Canny(img, img, config.Preprocessing.CannyT1, config.Preprocessing.CannyT2)
 	roi := original.Region(contour(img, card.AspectRatio))
 
-	if log.IsDebug() {
-		utils.ShowImage(roi)
-	}
+	utils.ShowImage(roi)
 	return roi
 }

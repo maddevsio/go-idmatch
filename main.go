@@ -75,7 +75,12 @@ func main() {
 				},
 			},
 			Action: func(c *cli.Context) error {
-				return ocr.CheckSolution(c.String(flagNameCSFolderPath), c.String(flagNameTemplate))
+				dir := c.String(flagNameCSFolderPath)
+				if len(dir) == 0 {
+					fmt.Println("Provide \"--folder\" flag please")
+					return nil
+				}
+				return ocr.CheckSolution(dir, c.String(flagNameTemplate))
 			},
 		},
 	}
