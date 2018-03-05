@@ -64,24 +64,28 @@ func result(c echo.Context) error {
 	var facePreview string
 
 	face, err := c.FormFile("face")
-	if face != nil && err == nil {
-		if err := saveFile(face); err == nil {
-			facePreview = config.Web.Uploads + face.Filename
+	if face.Size != 0 {
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
+		if err := saveFile(face); err != nil {
+			return echo.NewHTTPError(http.StatusUnsupportedMediaType, err.Error())
+		}
+		facePreview = config.Web.Uploads + face.Filename
 	}
 
 	id, err := c.FormFile("id")
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	if err := saveFile(id); err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusUnsupportedMediaType, err.Error())
 	}
 
 	data, idPreview := ocr.Recognize(config.Web.Uploads+id.Filename, "KG idcard old", config.Web.Preview)
 
-	if data == nil {
-		data = map[string]interface{}{"error": "Document contour not found"}
+	if data == nil || len(data) == 0 {
+		data = map[string]interface{}{"error": "Could not recognize document"}
 		idPreview = "static/images/empty-contour.png"
 	}
 
@@ -99,6 +103,7 @@ func Service() {
 	e := echo.New()
 
 	e.Use(middleware.Logger())
+	e.Use(middleware.BodyLimit(config.Web.UploadLimit))
 	e.Use(middleware.Recover())
 	e.Static("/static", config.Web.Static)
 	e.Static("web/uploads", config.Web.Uploads)

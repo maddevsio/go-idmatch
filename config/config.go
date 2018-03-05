@@ -34,10 +34,11 @@ type template struct {
 }
 
 type web struct {
-	Uploads   string
-	Preview   string
-	Static    string
-	Templates string
+	UploadLimit string
+	Uploads     string
+	Preview     string
+	Static      string
+	Templates   string
 }
 
 type configFile struct {
@@ -71,6 +72,7 @@ const defaultConfig = `
 	path = "templates/json/"
 	
 	[web]
+	uploadLimit = "10M"
 	static = "web/static/"
 	uploads = "web/uploads/"
 	preview = "web/preview/"
