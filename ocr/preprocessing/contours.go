@@ -109,10 +109,10 @@ func contour(img gocv.Mat, aspectRatio float64) image.Rectangle {
 					case areaRatio > config.Preprocessing.MaxAreaRatio:
 						continue
 					default:
-						matchRects++
 						ratio := float64(r.Dx()) / float64(r.Dy())
 						delta := math.Abs(aspectRatio - ratio)
 						if delta < bestDelta && biggestArea < area {
+							matchRects++
 							biggestArea = area
 							bestDelta = delta
 							rect = r
@@ -128,14 +128,16 @@ func contour(img gocv.Mat, aspectRatio float64) image.Rectangle {
 
 // Contours takes image file path and crops it by contour
 func Contours(file string, card templates.Card) gocv.Mat {
-	original := gocv.NewMat()
-	defer original.Close()
+	img := gocv.NewMat()
+	defer img.Close()
 
 	cleanCanny := gocv.NewMat()
 	defer cleanCanny.Close()
 
-	img := gocv.IMRead(file, gocv.IMReadColor)
-	img.CopyTo(original)
+	original := gocv.IMRead(file, gocv.IMReadColor)
+	original.CopyTo(img)
+	k := float64(560) / float64(img.Rows())
+	gocv.Resize(img, img, image.Point{0, 0}, k, k, gocv.InterpolationCubic)
 	gocv.CvtColor(img, img, gocv.ColorRGBToGray)
 	gocv.GaussianBlur(img, cleanCanny, image.Point{config.Preprocessing.CleanCannyBlurSize, config.Preprocessing.CleanCannyBlurSize},
 		config.Preprocessing.CleanCannyBlurSigma, config.Preprocessing.CleanCannyBlurSigma, gocv.BorderDefault)
@@ -148,7 +150,11 @@ func Contours(file string, card templates.Card) gocv.Mat {
 	gocv.WarpAffine(original, original, rotation, image.Point{original.Cols(), original.Rows()})
 
 	gocv.Canny(img, img, config.Preprocessing.CannyT1, config.Preprocessing.CannyT2)
-	roi := original.Region(contour(img, card.AspectRatio))
+	rect := contour(img, card.AspectRatio)
+	x1, y1, x2, y2 := float64(rect.Min.X)/k, float64(rect.Min.Y)/k, float64(rect.Max.X)/k, float64(rect.Max.Y)/k
+	p1 := image.Point{int(x1), int(y1)}
+	p2 := image.Point{int(x2), int(y2)}
+	roi := original.Region(image.Rectangle{p1, p2})
 
 	utils.ShowImage(roi)
 	return roi
