@@ -71,10 +71,10 @@ const defaultConfig = `
 	path = "templates/json/"
 	
 	[web]
-	static = "web/static"
-	uploads = "web/uploads"
-	preview = "web/preview"
-	templates = "web/templates"
+	static = "web/static/"
+	uploads = "web/uploads/"
+	preview = "web/preview/"
+	templates = "web/templates/"
 `
 
 var (
