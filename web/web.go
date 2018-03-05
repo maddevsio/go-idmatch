@@ -80,6 +80,11 @@ func result(c echo.Context) error {
 
 	data, idPreview := ocr.Recognize(config.Web.Uploads+id.Filename, "KG idcard old", config.Web.Preview)
 
+	if data == nil {
+		data = map[string]interface{}{"error": "Document contour not found"}
+		idPreview = "static/images/empty-contour.png"
+	}
+
 	return c.Render(http.StatusOK, "landing", map[string]interface{}{
 		"data":         data,
 		"id_preview":   idPreview,
