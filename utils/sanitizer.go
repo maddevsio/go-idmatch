@@ -8,6 +8,8 @@ import (
 	"github.com/maddevsio/go-idmatch/templates"
 )
 
+const ErrorMessage = "(recognition failed)"
+
 func gender(gender string) string {
 	if strings.ContainsAny(gender, "m M э Э м М 3") {
 		return "Э"
@@ -28,11 +30,11 @@ func Sanitize(documentMap map[string]interface{}, card templates.Card) {
 
 		switch v.Type {
 		case "cyrillic":
-			regex = "[^а-яА-Я]+"
+			regex = "[^а-яА-Я ]+"
 		case "latin":
-			regex = "[^a-zA-Z]+"
+			regex = "[^a-zA-Z ]+"
 		case "number":
-			regex = "[^0-9]+"
+			regex = "[^0-9 ]+"
 		case "gender":
 			text = gender(text)
 			regex = "[^а-яА-Я]+"
@@ -44,7 +46,7 @@ func Sanitize(documentMap map[string]interface{}, card templates.Card) {
 		}
 		clearText := reg.ReplaceAllString(text, "")
 		if len(clearText) == 0 {
-			clearText = "(recognition failed)"
+			clearText = ErrorMessage
 		} else if text != clearText {
 			clearText += " (?)"
 		}
