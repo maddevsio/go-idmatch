@@ -7,6 +7,7 @@ import (
 	"github.com/maddevsio/go-idmatch/ocr/preprocessing"
 	"github.com/maddevsio/go-idmatch/ocr/processing"
 	"github.com/maddevsio/go-idmatch/templates"
+	"github.com/maddevsio/go-idmatch/utils"
 )
 
 func Recognize(file, template, preview string) (map[string]interface{}, string) {
@@ -38,5 +39,7 @@ func Recognize(file, template, preview string) (map[string]interface{}, string) 
 		log.Print(log.ErrorLevel, err.Error())
 		return nil, ""
 	}
+
+	utils.Sanitize(output, card)
 	return output, path
 }

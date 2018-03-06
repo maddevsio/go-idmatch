@@ -20,6 +20,7 @@ type Card struct {
 		Field string  `json:"field"`
 		X     float64 `json:"x"`
 		Y     float64 `json:"y"`
+		Type  string  `json:"type"`
 	} `json:"structure"`
 }
 
