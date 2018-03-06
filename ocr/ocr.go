@@ -20,6 +20,10 @@ func Recognize(file, template, preview string) (map[string]interface{}, string) 
 		os.Exit(1)
 	}
 	roi := preprocessing.Contours(file, card)
+	if roi.Empty() {
+		log.Print(log.ErrorLevel, "Document contour not found")
+		return nil, ""
+	}
 	regions := processing.TextRegions(roi)
 	blocks, path := processing.RecognizeRegions(roi, regions, preview)
 	output, err := processing.MatchBlocks(blocks, card)
