@@ -3,6 +3,8 @@ package processing
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"errors"
+	"fmt"
 	"image"
 	"image/color"
 	"os"
@@ -22,19 +24,23 @@ type block struct {
 var symbolHeightCoeff float64 = 38.0 / 737.0
 var symbolWidthCoeff float64 = 27.0 / 1170.0
 
-func TextRegions(img gocv.Mat) [][]image.Point {
+func TextRegions(img gocv.Mat) ([][]image.Point, error) {
 	// We have to get these values from JSON or somehow from document
 	symbolWidth := int(float64(img.Cols()) * symbolWidthCoeff)
 	symbolHeight := int(float64(img.Rows()) * symbolHeightCoeff)
 
-	original := img.Clone()
+	if symbolWidth < 2 || symbolHeight < 2 {
+		return nil, errors.New("Symbol's size too small. Something wrong with region at all")
+	}
 
+	original := img.Clone()
 	gray := gocv.NewMat()
 	defer gray.Close()
 
 	gocv.CvtColor(original, gray, gocv.ColorBGRToGray)
 	utils.ShowImageInNamedWindow(gray, "text regions: gray")
 
+	log.Print(log.DebugLevel, fmt.Sprintf("%d %d", symbolWidth, symbolHeight))
 	kernel := gocv.GetStructuringElement(gocv.MorphEllipse,
 		image.Point{symbolHeight / 2, symbolWidth / 2})
 	defer kernel.Close()
@@ -63,7 +69,7 @@ func TextRegions(img gocv.Mat) [][]image.Point {
 	gocv.MorphologyEx(opening, connected, gocv.MorphClose, kernel)
 	utils.ShowImageInNamedWindow(connected, "text regions: connected")
 
-	return gocv.FindContours(connected, gocv.RetrievalCComp, gocv.ChainApproxSimple)
+	return gocv.FindContours(connected, gocv.RetrievalCComp, gocv.ChainApproxSimple), nil
 }
 
 func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (result []block, path string) {
@@ -74,6 +80,7 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 
 	client := gosseract.NewClient()
 	defer client.Close()
+
 	client.SetLanguage("kir", "eng")
 
 	gray := gocv.NewMat()
