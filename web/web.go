@@ -64,7 +64,7 @@ func result(c echo.Context) error {
 	var facePreview string
 
 	face, err := c.FormFile("face")
-	if face.Size != 0 {
+	if face != nil && face.Size != 0 {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
