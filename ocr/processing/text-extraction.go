@@ -3,7 +3,6 @@ package processing
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"fmt"
 	"image"
 	"image/color"
 	"os"
@@ -23,29 +22,19 @@ type block struct {
 var symbolHeightCoeff float64 = 38.0 / 737.0
 var symbolWidthCoeff float64 = 27.0 / 1170.0
 
-var strokeWidthCoeff float64 = 5.0 / 1170.0
-var strokeHeightCoeff float64 = 5.0 / 737.0
-
 func TextRegions(img gocv.Mat) [][]image.Point {
 	// We have to get these values from JSON or somehow from document
 	symbolWidth := int(float64(img.Cols()) * symbolWidthCoeff)
 	symbolHeight := int(float64(img.Rows()) * symbolHeightCoeff)
 
-	strokeWidth := int(float64(img.Cols()) * strokeWidthCoeff)
-	strokeHeight := int(float64(img.Rows()) * strokeHeightCoeff)
-
-	fmt.Println(symbolWidth, symbolHeight, strokeWidth, strokeHeight)
 	original := img.Clone()
 
 	gray := gocv.NewMat()
 	defer gray.Close()
+
 	gocv.CvtColor(original, gray, gocv.ColorBGRToGray)
 	utils.ShowImageInNamedWindow(gray, "text regions: gray")
 
-	//WARNING!!!
-	//we need some document size and dpi based value!!!!!
-	//We need to know maximum symbol width and hight in pixels
-	//and stroke's width
 	kernel := gocv.GetStructuringElement(gocv.MorphEllipse,
 		image.Point{symbolHeight / 2, symbolWidth / 2})
 	defer kernel.Close()
