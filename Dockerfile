@@ -2,7 +2,7 @@ FROM ubuntu:16.04
 
 LABEL maintainer="rock@maddevs.io"
 
-ARG GO_VERSION="1.9.3"
+ARG GO_VERSION="1.10"
 
 ENV GOPATH="/go"
 ENV PATH=$PATH:/usr/local/go/bin:/go/bin
