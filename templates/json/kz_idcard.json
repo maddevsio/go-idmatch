@@ -2,6 +2,8 @@
     [
         {
         "type": "KZ idcard",
+        "aspectRatio": 1.58,
+        "textBlocksThreshold": 0.05,
         "structure": 
             [
                {"field": "serial", "x": 1, "y": 1},
