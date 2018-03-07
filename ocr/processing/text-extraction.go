@@ -81,7 +81,7 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 	client := gosseract.NewClient()
 	defer client.Close()
 
-	client.SetLanguage("kir", "eng")
+	client.SetLanguage("rus")
 
 	gray := gocv.NewMat()
 	defer gray.Close()
