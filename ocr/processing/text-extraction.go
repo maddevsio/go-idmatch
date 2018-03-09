@@ -41,34 +41,45 @@ func TextRegions(img gocv.Mat) ([][]image.Point, error) {
 	utils.ShowImageInNamedWindow(gray, "text regions: gray")
 
 	log.Print(log.DebugLevel, fmt.Sprintf("%d %d", symbolWidth, symbolHeight))
+
 	kernel := gocv.GetStructuringElement(gocv.MorphEllipse,
-		image.Point{symbolWidth / 4, symbolHeight / 4})
+		image.Point{10, 10})
 	defer kernel.Close()
 
 	grad := gocv.NewMat()
 	defer grad.Close()
-
-	gocv.MorphologyEx(gray, grad, gocv.MorphGradient, kernel)
-	utils.ShowImageInNamedWindow(grad, "text regions: gradient")
 	binarization := gocv.NewMat()
 	defer binarization.Close()
-
-	gocv.Threshold(grad, binarization, 0.0, 255.0, gocv.ThresholdBinary|gocv.ThresholdOtsu)
-	utils.ShowImageInNamedWindow(binarization, "text regions: binarization")
-
 	opening := gocv.NewMat()
 	defer opening.Close()
-	kernel = gocv.GetStructuringElement(gocv.MorphRect,
-		image.Point{symbolWidth / 5, symbolHeight / 5})
-	gocv.MorphologyEx(binarization, opening, gocv.MorphOpen, kernel)
-	utils.ShowImageInNamedWindow(opening, "text regions: opening")
-
-	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{symbolWidth, 1})
 	connected := gocv.NewMat()
 	defer connected.Close()
 
-	gocv.MorphologyEx(opening, connected, gocv.MorphClose, kernel)
-	utils.ShowImageInNamedWindow(connected, "text regions: connected")
+	for w := 10; w >= 2; w-- {
+		for h := 10; h >= 2; h-- {
+			kernel = gocv.GetStructuringElement(gocv.MorphEllipse, image.Point{w, h})
+			gocv.MorphologyEx(gray, grad, gocv.MorphGradient, kernel)
+			// utils.ShowImageInNamedWindow(grad, fmt.Sprintf("text regions: gradient. w : %d, h : %d", w, h))
+
+			gocv.Threshold(grad, binarization, 0.0, 255.0, gocv.ThresholdBinary|gocv.ThresholdOtsu)
+			// utils.ShowImageInNamedWindow(binarization, fmt.Sprintf("text regions: binarization. w : %d, h : %d", w, h))
+
+			for w2 := 10; w2 >= 2; w2-- {
+				for h2 := 10; h2 >= 2; h2-- {
+					kernel = gocv.GetStructuringElement(gocv.MorphRect,
+						image.Point{3, 3})
+					gocv.MorphologyEx(binarization, opening, gocv.MorphOpen, kernel)
+					// utils.ShowImageInNamedWindow(opening, fmt.Sprintf("text regions: opening. w : %d, h : %d", w2, h2))
+
+					kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{symbolWidth, 1})
+
+					gocv.MorphologyEx(opening, connected, gocv.MorphClose, kernel)
+					utils.ShowImageInNamedWindow(connected,
+						fmt.Sprintf("text regions: connected. w1 : %d, h1 : %d, w2 : %d, h2 : %d", w, h, w2, h2))
+				}
+			}
+		}
+	}
 
 	return gocv.FindContours(connected, gocv.RetrievalCComp, gocv.ChainApproxSimple), nil
 }
