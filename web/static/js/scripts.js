@@ -76,6 +76,10 @@ $(function () {
         }
         dock_label.html(fileName);
     });
+    $("#template").change(function () {
+        var option = $('option:selected', this).attr('value');
+        $('#template').val(option);
+    });
     $('label').click(function (e) {
         var photo_val = $('#face').val();
         var id_val = $('#id').val();
