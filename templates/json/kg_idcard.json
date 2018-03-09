@@ -20,15 +20,15 @@
         {
         "type": "KG idcard new",
         "aspectRatio": 1.58,
-        "textBlocksThreshold": 0.05,
+        "textBlocksThreshold": 0.03,
         "structure": 
             [
                {"field": "serial", "x": 1, "y": 1},
-               {"field": "firstname", "x": 2, "y": 2},
+               {"field": "firstname", "type": "cyrillic", "x": 0.39, "y": 0.40},
                {"field": "middlename", "x": 3, "y": 3},
-               {"field": "surname", "x": 4, "y": 4},
+               {"field": "surname", "type": "cyrillic", "x": 0.39, "y": 0.28},
                {"field": "inn", "x": 5, "y": 5},
-               {"field": "birthday", "x": 6, "y": 6},
+               {"field": "birthday", "type": "number", "x": 0.39, "y": 0.8},
                {"field": "gender", "x": 7, "y": 7}
             ]
         }

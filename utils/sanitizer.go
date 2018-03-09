@@ -34,12 +34,15 @@ func Sanitize(documentMap map[string]interface{}, card templates.Card) {
 		case "latin":
 			regex = "[^a-zA-Z ]+"
 		case "number":
-			regex = "[^0-9 ]+"
+			regex = "[^0-9]+"
 		case "gender":
 			text = gender(text)
 			regex = "[^а-яА-Я]+"
 		}
 
+		if n := strings.Index(text, "\n"); n > 0 {
+			text = text[:n]
+		}
 		reg, err := regexp.Compile(regex)
 		if err != nil {
 			log.Print(log.ErrorLevel, err.Error())
@@ -47,7 +50,7 @@ func Sanitize(documentMap map[string]interface{}, card templates.Card) {
 		clearText := reg.ReplaceAllString(text, "")
 		if len(clearText) == 0 {
 			clearText = ErrorMessage
-		} 
+		}
 		// else if text != clearText {
 		// 	clearText += " (?)"
 		// }
