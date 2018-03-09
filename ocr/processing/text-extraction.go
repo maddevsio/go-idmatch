@@ -42,8 +42,9 @@ func TextRegions(img gocv.Mat) ([][]image.Point, error) {
 
 	log.Print(log.DebugLevel, fmt.Sprintf("%d %d", symbolWidth, symbolHeight))
 	kernel := gocv.GetStructuringElement(gocv.MorphEllipse,
-		image.Point{symbolHeight / 2, symbolWidth / 2})
+		image.Point{symbolWidth / 4, symbolHeight / 4})
 	defer kernel.Close()
+
 	grad := gocv.NewMat()
 	defer grad.Close()
 
@@ -58,7 +59,7 @@ func TextRegions(img gocv.Mat) ([][]image.Point, error) {
 	opening := gocv.NewMat()
 	defer opening.Close()
 	kernel = gocv.GetStructuringElement(gocv.MorphRect,
-		image.Point{symbolHeight * 2 / 3, symbolWidth / 2})
+		image.Point{symbolWidth / 5, symbolHeight / 5})
 	gocv.MorphologyEx(binarization, opening, gocv.MorphOpen, kernel)
 	utils.ShowImageInNamedWindow(opening, "text regions: opening")
 
@@ -106,10 +107,11 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 		gocv.IMWrite(file, roix4)
 		client.SetImage(file)
 
-		text, err := client.Text()
-		if err != nil {
-			continue
-		}
+		text := "hoho"
+		// text, err := client.Text()
+		// if err != nil {
+		// 	continue
+		// }
 
 		log.Print(log.DebugLevel, text)
 		// utils.ShowImageInNamedWindow(roix4, fmt.Sprintf("RecognizeRegions: %d %d", rect.Dx(), rect.Dy()))
