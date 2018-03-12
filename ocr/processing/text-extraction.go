@@ -66,7 +66,7 @@ func compareRects(x00, y00, x01, y01, x10, y10, x11, y11 int, devX, devY float64
 		math.Abs(float64(y11-y01)) > devY)
 }
 
-func checkRegionsNewID2(regions [][]image.Point) bool {
+func checkRegionsNewID(regions [][]image.Point) bool {
 	const devX = 4.0
 	const devY = 3.0
 	count := 0
@@ -380,7 +380,7 @@ var newIdFloatCoeffArr []extractTextRegionFloatCoeff = []extractTextRegionFloatC
 	{0.003200, 0.002541, 0.002400, 0.003812},
 }
 
-func tryToFindCoeffForNewId(img gocv.Mat) {
+func tryToFindCoeffForNewID(img gocv.Mat) {
 	//takes 15 min
 	maxW := 19
 	maxH := 19
@@ -398,7 +398,7 @@ func tryToFindCoeffForNewId(img gocv.Mat) {
 						continue
 					}
 
-					if !checkRegionsNewID2(regions) {
+					if !checkRegionsNewID(regions) {
 						continue
 					}
 
@@ -425,14 +425,24 @@ func tryToFindCoeffForNewId(img gocv.Mat) {
 	fmt.Println(diff)
 }
 
-func testCoefficientsForNewId(img gocv.Mat) {
-	for ix, fc := range newIdCoeffArr {
-		w1c := float64(fc.w1) / float64(img.Cols())
-		h1c := float64(fc.h1) / float64(img.Rows())
-		w2c := float64(fc.w2) / float64(img.Cols())
-		h2c := float64(fc.h2) / float64(img.Rows())
+func testCoefficientsForID(img gocv.Mat) {
+	ixArr := []int{185, 186, 233, 247, 252, 275, 276, 281, 282,
+		283, 284, 285, 286, 287, 288, 289, 290, 291, 292, 293, 294, 295, 296,
+		313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326,
+		327, 328, 329, 330, 331, 332, 333, 352, 353, 354, 355, 356, 357, 358,
+		359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 381, 382, 383, 384,
+		385, 386, 387, 388, 389, 390, 391}
 
-		regions, err := textRegionsInternal(img, fc)
+	// for ix, fc := range newIdFloatCoeffArr {
+	for _, ix := range ixArr {
+		fc := newIdFloatCoeffArr[ix]
+		w1c := float64(img.Cols()) * fc.w1
+		h1c := float64(img.Rows()) * fc.h1
+		w2c := float64(img.Cols()) * fc.w2
+		h2c := float64(img.Rows()) * fc.h2
+
+		regions, err := textRegionsInternal(img, extractTextRegionIntCoeff{
+			int(w1c), int(h1c), int(w2c), int(h2c)})
 		if err != nil {
 			return
 		}
@@ -443,11 +453,7 @@ func testCoefficientsForNewId(img gocv.Mat) {
 			gocv.Rectangle(original2, rect, color.RGBA{255, 0, 0, 255}, 1)
 		}
 
-		fmt.Printf("{%f, %f, %f, %f}, ", w1c, h1c, w2c, h2c)
-		if ix%2 == 0 {
-			fmt.Printf("\n")
-		}
-		// utils.ShowImageInNamedWindow(original2, fmt.Sprintf("text regions: connected."))
+		utils.ShowImageInNamedWindow(original2, fmt.Sprintf("text regions: connected. %d", ix))
 		original2.Close()
 	}
 }
@@ -494,9 +500,15 @@ func textRegionsInternal(img gocv.Mat, fc extractTextRegionIntCoeff) ([][]image.
 //TextRegions returns text regions on image
 func TextRegions(img gocv.Mat) ([][]image.Point, error) {
 	// We have to get these values from JSON or somehow from document
-	// tryToFindCoeffForNewId(img)
-	testCoefficientsForNewId(img)
-	return textRegionsInternal(img, extractTextRegionIntCoeff{7, 3, 5, 4})
+	const superTestIndexThatWeNeedToFind = 383
+	fc := newIdFloatCoeffArr[superTestIndexThatWeNeedToFind]
+	w1c := float64(img.Cols()) * fc.w1
+	h1c := float64(img.Rows()) * fc.h1
+	w2c := float64(img.Cols()) * fc.w2
+	h2c := float64(img.Rows()) * fc.h2
+	testCoefficientsForID(img)
+	return textRegionsInternal(img, extractTextRegionIntCoeff{
+		int(w1c), int(h1c), int(w2c), int(h2c)})
 }
 
 //RecognizeRegions sends found regions to tesseract ocr
