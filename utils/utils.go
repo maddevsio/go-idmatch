@@ -1,13 +1,12 @@
 package utils
 
 import (
-	"fmt"
 	"github.com/maddevsio/go-idmatch/log"
 	"gocv.io/x/gocv"
 )
 
 func showImageInternal(image gocv.Mat, winName string) {
-	!log.IsDebug() {
+	if !log.IsDebug() {
 		return
 	}
 
