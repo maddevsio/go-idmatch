@@ -58,20 +58,20 @@ func textRegionsInternal(img gocv.Mat, fc extractTextRegionIntCoeff) ([][]image.
 	defer kernel.Close()
 
 	gocv.CvtColor(original, gray, gocv.ColorBGRToGray)
-	// utils.ShowImageInNamedWindow(gray, "gray")
+	utils.ShowImageInNamedWindow(gray, "gray")
 	gocv.MorphologyEx(gray, grad, gocv.MorphGradient, kernel)
-	// utils.ShowImageInNamedWindow(grad, "gradient")
+	utils.ShowImageInNamedWindow(grad, "gradient")
 
 	gocv.Threshold(grad, binarization, 0.0, 255.0, gocv.ThresholdBinary|gocv.ThresholdOtsu)
-	// utils.ShowImageInNamedWindow(binarization, "binarized")
+	utils.ShowImageInNamedWindow(binarization, "binarized")
 
 	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{fc.w2, fc.h2})
 	gocv.MorphologyEx(binarization, opening, gocv.MorphOpen, kernel)
-	// utils.ShowImageInNamedWindow(opening, "opening")
+	utils.ShowImageInNamedWindow(opening, "opening")
 
 	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{symbolWidth, 1})
 	gocv.MorphologyEx(opening, connected, gocv.MorphClose, kernel)
-	// utils.ShowImageInNamedWindow(connected, "connected")
+	utils.ShowImageInNamedWindow(connected, "connected")
 
 	regions := gocv.FindContours(connected, gocv.RetrievalCComp, gocv.ChainApproxSimple)
 	return regions, nil
@@ -82,7 +82,7 @@ func TextRegions(img gocv.Mat) ([][]image.Point, error) {
 	// We have to get these values from JSON or somehow from document
 	// tryToFindCoeffForNewID(img)
 	// testCoefficientsForID(img)
-	fc := newIDFloatCoeffArrLQ[20] //todo find best one
+	fc := newIDFloatCoeffArrLQ[0] //todo find best one
 	w1c := float64(img.Cols()) * fc.w1
 	h1c := float64(img.Rows()) * fc.h1
 	w2c := float64(img.Cols()) * fc.w2
@@ -109,6 +109,7 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 	gocv.CvtColor(img, gray, gocv.ColorBGRToGray)
 
 	for k, v := range regions {
+
 		rect := gocv.BoundingRect(v)
 		// Replace absolute size with relative values
 		// roi := img.Region(rect)
@@ -118,7 +119,6 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 		}
 
 		file := strconv.Itoa(k) + ".jpeg"
-
 		roix4 := gocv.NewMat()
 		defer roix4.Close()
 

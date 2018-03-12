@@ -7,6 +7,7 @@ import (
 	"math"
 	"time"
 
+	"github.com/maddevsio/go-idmatch/log"
 	"github.com/maddevsio/go-idmatch/utils"
 	"gocv.io/x/gocv"
 )
@@ -569,12 +570,11 @@ func compareRects(x00, y00, x01, y01, x10, y10, x11, y11 int, devX, devY float64
 }
 
 func checkRegionsNewID(regions [][]image.Point, rects []frect) bool {
-	const devX = 4.0
-	const devY = 3.0
+	const devX = 10.0
+	const devY = 10.0
 	count := 0
 	for _, regIn := range regions {
 		rect := gocv.BoundingRect(regIn)
-
 		for _, regEt := range rects {
 			if compareRects(rect.Min.X, rect.Min.Y, rect.Max.X, rect.Max.Y,
 				regEt.x0, regEt.y0, regEt.x1, regEt.y1, devX, devY) {
@@ -582,7 +582,7 @@ func checkRegionsNewID(regions [][]image.Point, rects []frect) bool {
 			}
 		}
 	}
-	return count == len(rects)
+	return math.Abs(float64(count-len(rects))) < 3.0
 }
 
 func tryToFindCoeffForNewID(img gocv.Mat) {
@@ -635,16 +635,9 @@ func tryToFindCoeffForNewID(img gocv.Mat) {
 }
 
 func testCoefficientsForID(img gocv.Mat) {
-	// ixArr := []int{185, 186, 233, 247, 252, 275, 276, 281, 282,
-	// 	283, 284, 285, 286, 287, 288, 289, 290, 291, 292, 293, 294, 295, 296,
-	// 	313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326,
-	// 	327, 328, 329, 330, 331, 332, 333, 352, 353, 354, 355, 356, 357, 358,
-	// 	359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 381, 382, 383, 384,
-	// 	385, 386, 387, 388, 389, 390, 391}
 
 	for ix, fc := range newIDFloatCoeffArrLQ {
-		// for _, ix := range ixArr {
-		// fc := newIdFloatCoeffArr[ix]
+		log.Print(log.DebugLevel, fmt.Sprintf("%d\n", ix))
 		w1c := float64(img.Cols()) * fc.w1
 		h1c := float64(img.Rows()) * fc.h1
 		w2c := float64(img.Cols()) * fc.w2
@@ -652,6 +645,7 @@ func testCoefficientsForID(img gocv.Mat) {
 
 		regions, err := textRegionsInternal(img, extractTextRegionIntCoeff{
 			int(w1c), int(h1c), int(w2c), int(h2c)})
+
 		if err != nil {
 			return
 		}
