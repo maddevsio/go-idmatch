@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"image"
 	"image/color"
 	"os"
@@ -132,16 +133,19 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 			continue
 		}
 
-		log.Print(log.DebugLevel, text)
-		// utils.ShowImageInNamedWindow(roix4, fmt.Sprintf("RecognizeRegions: %d %d", rect.Dx(), rect.Dy()))
-
-		result = append(result, block{
+		b := block{
 			x:    float64(rect.Min.X) / float64(img.Cols()),
 			y:    float64(rect.Min.Y) / float64(img.Rows()),
 			w:    float64(rect.Dx()) / float64(img.Cols()),
 			h:    float64(rect.Dy()) / float64(img.Rows()),
-			text: text,
-		})
+			text: text}
+
+		if log.IsDebug() {
+			fmt.Println(b)
+		}
+		// utils.ShowImageInNamedWindow(roix4, fmt.Sprintf("RecognizeRegions: %d %d", rect.Dx(), rect.Dy()))
+
+		result = append(result, b)
 
 		os.Remove(file)
 		gocv.Rectangle(img, gocv.BoundingRect(v), color.RGBA{255, 0, 0, 255}, 2)
