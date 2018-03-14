@@ -4,7 +4,6 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"image"
 	"image/color"
 	"os"
@@ -59,20 +58,20 @@ func textRegionsInternal(img gocv.Mat, fc extractTextRegionIntCoeff) ([][]image.
 	defer kernel.Close()
 
 	gocv.CvtColor(original, gray, gocv.ColorBGRToGray)
-	utils.ShowImageInNamedWindow(gray, "gray")
+	// utils.ShowImageInNamedWindow(gray, "gray")
 	gocv.MorphologyEx(gray, grad, gocv.MorphGradient, kernel)
-	utils.ShowImageInNamedWindow(grad, "gradient")
+	// utils.ShowImageInNamedWindow(grad, "gradient")
 
 	gocv.Threshold(grad, binarization, 0.0, 255.0, gocv.ThresholdBinary|gocv.ThresholdOtsu)
-	utils.ShowImageInNamedWindow(binarization, "binarized")
+	// utils.ShowImageInNamedWindow(binarization, "binarized")
 
 	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{fc.w2, fc.h2})
 	gocv.MorphologyEx(binarization, opening, gocv.MorphOpen, kernel)
-	utils.ShowImageInNamedWindow(opening, "opening")
+	// utils.ShowImageInNamedWindow(opening, "opening")
 
 	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{symbolWidth, 1})
 	gocv.MorphologyEx(opening, connected, gocv.MorphClose, kernel)
-	utils.ShowImageInNamedWindow(connected, "connected")
+	// utils.ShowImageInNamedWindow(connected, "connected")
 
 	regions := gocv.FindContours(connected, gocv.RetrievalCComp, gocv.ChainApproxSimple)
 	return regions, nil
@@ -80,14 +79,17 @@ func textRegionsInternal(img gocv.Mat, fc extractTextRegionIntCoeff) ([][]image.
 
 //TextRegions returns text regions on image
 func TextRegions(img gocv.Mat) ([][]image.Point, error) {
-	// We have to get these values from JSON or somehow from document
 	// tryToFindCoeffForNewID(img)
-	// testCoefficientsForID(img)
-	fc := newIDFloatCoeffArrLQ[0] //todo find best one
-	w1c := float64(img.Cols()) * fc.w1
-	h1c := float64(img.Rows()) * fc.h1
-	w2c := float64(img.Cols()) * fc.w2
-	h2c := float64(img.Rows()) * fc.h2
+	// showExampleRectangles(img)
+
+	testCoefficientsForID(img)
+	// symbolHeight := symbolHeightCoeff * float64(img.Rows())
+	// symbolWidth := symbolWidthCoeff * float64(img.Cols())
+	fc := newIDLowQFloatCoeffArr[6] //todo find best one
+	w1c := fc.w1 * float64(img.Cols())
+	h1c := fc.h1 * float64(img.Rows())
+	w2c := fc.w2 * float64(img.Cols())
+	h2c := fc.h2 * float64(img.Rows())
 	return textRegionsInternal(img, extractTextRegionIntCoeff{
 		int(w1c), int(h1c), int(w2c), int(h2c)})
 }
@@ -132,6 +134,7 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 		if err != nil {
 			continue
 		}
+		log.Print(log.DebugLevel, text)
 
 		b := block{
 			x:    float64(rect.Min.X) / float64(img.Cols()),
@@ -140,11 +143,7 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 			h:    float64(rect.Dy()) / float64(img.Rows()),
 			text: text}
 
-		if log.IsDebug() {
-			fmt.Println(b)
-		}
 		// utils.ShowImageInNamedWindow(roix4, fmt.Sprintf("RecognizeRegions: %d %d", rect.Dx(), rect.Dy()))
-
 		result = append(result, b)
 
 		os.Remove(file)
