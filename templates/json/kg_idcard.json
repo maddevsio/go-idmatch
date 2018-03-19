@@ -3,31 +3,33 @@
         {
         "type": "KG idcard old",
         "aspectRatio": 1.58,
-        "textBlocksThreshold": 0.05,
+        "textBlocksThreshold": 0.07,
         "structure": 
             [
                {"field": "serial", "x": 0.127, "y": 0.83},
-               {"field": "birthday", "type": "number", "x": 6, "y": 6},
+               {"field": "birthday", "type": "number", "x": 0.36, "y": 0.65},
                {"field": "inn", "type": "number", "x": 0.63, "y": 0.91},
+               {"field": "pob", "type": "cyrillic", "x": 0.36, "y": 0.78},
                {"field": "gender", "type": "gender", "x": 0.71, "y": 0.65},
                {"field": "surname", "type": "cyrillic", "x": 0.36, "y": 0.38},
                {"field": "firstname", "type": "cyrillic", "x": 0.36, "y": 0.48},
-               {"field": "middlename", "type": "cyrillic", "x": 0.36, "y": 0.58}
+               {"field": "middlename", "type": "cyrillic", "x": 0.36, "y": 0.58},
+               {"field": "nationality", "type": "cyrillic", "x": 0.36, "y": 0.88}
             ]
         },
         {
         "type": "KG idcard new",
         "aspectRatio": 1.58,
-        "textBlocksThreshold": 0.05,
+        "textBlocksThreshold": 0.025,
         "structure": 
             [
-               {"field": "serial", "x": 1, "y": 1},
-               {"field": "firstname", "x": 2, "y": 2},
-               {"field": "middlename", "x": 3, "y": 3},
-               {"field": "surname", "x": 4, "y": 4},
-               {"field": "inn", "x": 5, "y": 5},
-               {"field": "birthday", "x": 6, "y": 6},
-               {"field": "gender", "x": 7, "y": 7}
+               {"field": "serial", "x": 0.693644, "y": 0.788507},
+               {"field": "middlename", "type": "cyrillic", "x": 0.397281, "y": 0.504762},
+               {"field": "firstname", "type": "cyrillic", "x": 0.397281, "y": 0.388095},
+               {"field": "surname", "type": "cyrillic", "x": 0.397281, "y": 0.264286},
+               {"field": "pob", "type": "cyrillic", "x": 0.397281, "y": 0.675137},
+               {"field": "birthday", "type": "number", "x": 0.395770, "y": 0.754762},
+               {"field": "gender", "type": "gender", "x": 0.397281, "y": 0.585714}
             ]
         }
     ]

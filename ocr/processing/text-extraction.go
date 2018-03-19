@@ -21,11 +21,19 @@ type block struct {
 	text       string
 }
 
-var symbolHeightCoeff float64 = 38.0 / 737.0
-var symbolWidthCoeff float64 = 27.0 / 1170.0
+const maxQualitySymWidth = 34.1
+const maxQualityWidth = 1239.0
+const maxQualitySymHeight = 37.0
+const maxQualityHeight = 781.0
+const symbolHeightCoeff = maxQualitySymHeight / maxQualityHeight
+const symbolWidthCoeff = maxQualitySymWidth / maxQualityWidth
 
-func TextRegions(img gocv.Mat) ([][]image.Point, error) {
-	// We have to get these values from JSON or somehow from document
+//
+func textRegionsInternal(img gocv.Mat, fc extractTextRegionIntCoeff) ([][]image.Point, error) {
+	if fc.w1 == 0 || fc.w2 == 0 || fc.h1 == 0 || fc.h2 == 0 {
+		return nil, errors.New("Couldn't find coefficients")
+	}
+
 	symbolWidth := int(float64(img.Cols()) * symbolWidthCoeff)
 	symbolHeight := int(float64(img.Rows()) * symbolHeightCoeff)
 
@@ -34,44 +42,56 @@ func TextRegions(img gocv.Mat) ([][]image.Point, error) {
 	}
 
 	original := img.Clone()
+	defer original.Close()
 	gray := gocv.NewMat()
 	defer gray.Close()
-
-	gocv.CvtColor(original, gray, gocv.ColorBGRToGray)
-	utils.ShowImageInNamedWindow(gray, "text regions: gray")
-
-	log.Print(log.DebugLevel, fmt.Sprintf("%d %d", symbolWidth, symbolHeight))
-	kernel := gocv.GetStructuringElement(gocv.MorphEllipse,
-		image.Point{symbolHeight / 2, symbolWidth / 2})
-	defer kernel.Close()
 	grad := gocv.NewMat()
 	defer grad.Close()
-
-	gocv.MorphologyEx(gray, grad, gocv.MorphGradient, kernel)
-	utils.ShowImageInNamedWindow(grad, "text regions: gradient")
 	binarization := gocv.NewMat()
 	defer binarization.Close()
-
-	gocv.Threshold(grad, binarization, 0.0, 255.0, gocv.ThresholdBinary|gocv.ThresholdOtsu)
-	utils.ShowImageInNamedWindow(binarization, "text regions: binarization")
-
 	opening := gocv.NewMat()
 	defer opening.Close()
-	kernel = gocv.GetStructuringElement(gocv.MorphRect,
-		image.Point{symbolHeight * 2 / 3, symbolWidth / 2})
-	gocv.MorphologyEx(binarization, opening, gocv.MorphOpen, kernel)
-	utils.ShowImageInNamedWindow(opening, "text regions: opening")
-
-	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{symbolWidth, 1})
 	connected := gocv.NewMat()
 	defer connected.Close()
+	kernel := gocv.GetStructuringElement(gocv.MorphEllipse, image.Point{fc.w1, fc.h1})
+	defer kernel.Close()
 
+	gocv.CvtColor(original, gray, gocv.ColorBGRToGray)
+	// utils.ShowImageInNamedWindow(gray, "gray")
+	gocv.MorphologyEx(gray, grad, gocv.MorphGradient, kernel)
+	// utils.ShowImageInNamedWindow(grad, "gradient")
+
+	gocv.Threshold(grad, binarization, 0.0, 255.0, gocv.ThresholdBinary|gocv.ThresholdOtsu)
+	// utils.ShowImageInNamedWindow(binarization, "binarized")
+
+	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{fc.w2, fc.h2})
+	gocv.MorphologyEx(binarization, opening, gocv.MorphOpen, kernel)
+	// utils.ShowImageInNamedWindow(opening, "opening")
+
+	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{symbolWidth, 1})
 	gocv.MorphologyEx(opening, connected, gocv.MorphClose, kernel)
-	utils.ShowImageInNamedWindow(connected, "text regions: connected")
+	// utils.ShowImageInNamedWindow(connected, "connected")
 
-	return gocv.FindContours(connected, gocv.RetrievalCComp, gocv.ChainApproxSimple), nil
+	regions := gocv.FindContours(connected, gocv.RetrievalCComp, gocv.ChainApproxSimple)
+	return regions, nil
 }
 
+//TextRegions returns text regions on image
+func TextRegions(img gocv.Mat) ([][]image.Point, error) {
+	// showExampleRectangles(img)
+	// tryToFindCoeffForNewID(img)
+	// buildFloatCoeffs(img)
+	// testCoefficientsForID(img)
+	fc := newIDLowQFloatCoeffArr[0]
+	w1c := fc.w1 * float64(img.Cols())
+	h1c := fc.h1 * float64(img.Rows())
+	w2c := fc.w2 * float64(img.Cols())
+	h2c := fc.h2 * float64(img.Rows())
+	return textRegionsInternal(img, extractTextRegionIntCoeff{
+		int(w1c), int(h1c), int(w2c), int(h2c)})
+}
+
+//RecognizeRegions sends found regions to tesseract ocr
 func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (result []block, path string) {
 	//We have to get these values from JSON or somehow from document
 
@@ -81,7 +101,7 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 	client := gosseract.NewClient()
 	defer client.Close()
 
-	client.SetLanguage("kir", "eng")
+	client.SetLanguage("rus", "eng")
 
 	gray := gocv.NewMat()
 	defer gray.Close()
@@ -89,6 +109,7 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 	gocv.CvtColor(img, gray, gocv.ColorBGRToGray)
 
 	for k, v := range regions {
+
 		rect := gocv.BoundingRect(v)
 		// Replace absolute size with relative values
 		// roi := img.Region(rect)
@@ -98,7 +119,6 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 		}
 
 		file := strconv.Itoa(k) + ".jpeg"
-
 		roix4 := gocv.NewMat()
 		defer roix4.Close()
 
@@ -106,21 +126,23 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 		gocv.IMWrite(file, roix4)
 		client.SetImage(file)
 
+		// text := "hoho"
 		text, err := client.Text()
 		if err != nil {
 			continue
 		}
-
 		log.Print(log.DebugLevel, text)
-		// utils.ShowImageInNamedWindow(roix4, fmt.Sprintf("RecognizeRegions: %d %d", rect.Dx(), rect.Dy()))
+		log.Print(log.DebugLevel, fmt.Sprintln(rect))
 
-		result = append(result, block{
+		b := block{
 			x:    float64(rect.Min.X) / float64(img.Cols()),
 			y:    float64(rect.Min.Y) / float64(img.Rows()),
 			w:    float64(rect.Dx()) / float64(img.Cols()),
 			h:    float64(rect.Dy()) / float64(img.Rows()),
-			text: text,
-		})
+			text: text}
+
+		// utils.ShowImageInNamedWindow(roix4, fmt.Sprintf("RecognizeRegions: %d %d", rect.Dx(), rect.Dy()))
+		result = append(result, b)
 
 		os.Remove(file)
 		gocv.Rectangle(img, gocv.BoundingRect(v), color.RGBA{255, 0, 0, 255}, 2)

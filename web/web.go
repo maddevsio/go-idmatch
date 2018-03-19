@@ -63,6 +63,11 @@ func landing(c echo.Context) error {
 func result(c echo.Context) error {
 	var facePreview string
 
+	template := c.FormValue("template")
+	if len(template) == 0 {
+		template = "KG idcard old"
+	}
+
 	face, err := c.FormFile("face")
 	if face != nil && face.Size != 0 {
 		if err != nil {
@@ -82,7 +87,7 @@ func result(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnsupportedMediaType, err.Error())
 	}
 
-	data, idPreview := ocr.Recognize(config.Web.Uploads+id.Filename, "KG idcard old", config.Web.Preview)
+	data, idPreview := ocr.Recognize(config.Web.Uploads+id.Filename, template, config.Web.Preview)
 
 	if data == nil || len(data) == 0 {
 		data = map[string]interface{}{"error": "Could not recognize document"}
