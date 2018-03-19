@@ -23,10 +23,17 @@ var newIDHQRects []frect = []frect{
 }
 
 var newIDLowQRects []frect = []frect{
-	{458, 374, 565, 391}, {458, 327, 571, 345}, {262, 319, 370, 336},
-	{264, 282, 531, 300}, {264, 248, 322, 264}, {264, 214, 377, 232},
-	{263, 184, 334, 200}, {263, 164, 340, 180}, {264, 133, 416, 151},
-	{264, 113, 411, 131},
+	{457, 372, 561, 391}, {457, 326, 567, 345}, {262, 317, 366, 336},
+	{263, 280, 527, 300}, {263, 246, 318, 264}, {263, 212, 373, 232},
+	{263, 182, 330, 200}, {263, 163, 337, 180}, {263, 131, 413, 151},
+	{263, 111, 408, 131},
+}
+
+var newIDLowQRects2 []frect = []frect{
+	{184, 219, 261, 232}, {184, 192, 376, 206}, {184, 144, 316, 157},
+	{184, 168, 222, 180},
+	{184, 123, 243, 135}, {184, 109, 242, 121}, {184, 87, 291, 100},
+	{184, 73, 283, 86},
 }
 
 type extractTextRegionIntCoeff struct {
@@ -37,43 +44,12 @@ type extractTextRegionFloatCoeff struct {
 	w1, h1, w2, h2 float64
 }
 
-var newIDLowQFloatCoeffArr []extractTextRegionFloatCoeff = []extractTextRegionFloatCoeff{
-	{0.016616, 0.007143, 0.037764, 0.011905}, {0.016616, 0.004762, 0.037764, 0.011905}, {0.016616, 0.004762, 0.037764, 0.009524}, {0.016616, 0.004762, 0.037764, 0.007143},
-	{0.016616, 0.004762, 0.037764, 0.004762}, {0.016616, 0.004762, 0.036254, 0.011905}, {0.015106, 0.007143, 0.036254, 0.009524}, {0.015106, 0.007143, 0.036254, 0.007143},
-	{0.015106, 0.007143, 0.036254, 0.004762}, {0.015106, 0.004762, 0.036254, 0.009524}, {0.015106, 0.004762, 0.036254, 0.007143}, {0.015106, 0.004762, 0.036254, 0.004762},
-	{0.015106, 0.004762, 0.034743, 0.009524}, {0.015106, 0.004762, 0.034743, 0.007143}, {0.015106, 0.004762, 0.034743, 0.004762}, {0.015106, 0.004762, 0.033233, 0.009524},
-	{0.015106, 0.004762, 0.033233, 0.007143}, {0.015106, 0.004762, 0.033233, 0.004762}, {0.015106, 0.004762, 0.031722, 0.009524}, {0.015106, 0.004762, 0.031722, 0.007143},
-	{0.015106, 0.004762, 0.030211, 0.009524}, {0.015106, 0.004762, 0.030211, 0.007143}, {0.013595, 0.004762, 0.030211, 0.004762}, {0.013595, 0.004762, 0.028701, 0.009524},
-	{0.013595, 0.004762, 0.028701, 0.007143}, {0.013595, 0.004762, 0.028701, 0.004762},
+var newIDLowQFloatCoeffArr = []extractTextRegionFloatCoeff{
+	{0.008511, 0.006689, 0.010638, 0.006689}, {0.006383, 0.006689, 0.008511, 0.006689},
 }
 
-var newIDLowQIntCoeffArr []extractTextRegionIntCoeff = []extractTextRegionIntCoeff{
-	{14, 3, 24, 2}, {14, 3, 22, 2}, {14, 3, 20, 2}, {14, 3, 18, 2},
-	{14, 3, 16, 2}, {14, 2, 24, 2}, {14, 2, 22, 2}, {14, 2, 20, 2},
-	{14, 2, 18, 2}, {14, 2, 16, 2}, {13, 3, 24, 2}, {13, 3, 22, 2},
-	{13, 3, 20, 2}, {13, 3, 18, 2}, {13, 3, 16, 2}, {13, 3, 14, 2},
-	{13, 2, 24, 2}, {13, 2, 22, 2}, {13, 2, 20, 2}, {13, 2, 18, 2},
-	{13, 2, 16, 2}, {13, 2, 14, 2}, {12, 3, 25, 2}, {12, 3, 24, 2},
-	{12, 3, 23, 2}, {12, 3, 22, 2}, {12, 3, 21, 2}, {12, 3, 20, 2},
-	{12, 3, 19, 2}, {12, 3, 18, 2}, {12, 3, 17, 2}, {12, 3, 16, 2},
-	{12, 3, 15, 2}, {12, 3, 14, 2}, {12, 3, 13, 3}, {12, 3, 11, 3},
-	{12, 3, 9, 3}, {12, 3, 7, 3}, {12, 2, 25, 2}, {12, 2, 24, 2},
-	{12, 2, 23, 2}, {12, 2, 22, 2}, {12, 2, 21, 2}, {12, 2, 20, 2},
-	{12, 2, 19, 2}, {12, 2, 18, 2}, {12, 2, 17, 2}, {12, 2, 16, 2},
-	{12, 2, 15, 2}, {12, 2, 14, 2}, {12, 2, 13, 2}, {12, 2, 12, 2},
-	{12, 2, 11, 2}, {12, 2, 10, 2}, {12, 2, 9, 2}, {12, 2, 8, 2},
-	{12, 2, 7, 2}, {12, 2, 6, 2}, {11, 3, 11, 2}, {11, 3, 10, 2},
-	{11, 3, 9, 2}, {11, 3, 8, 2}, {11, 3, 7, 3}, {11, 3, 7, 2},
-	{11, 3, 6, 2}, {11, 2, 11, 2}, {11, 2, 10, 2}, {11, 2, 9, 2},
-	{11, 2, 8, 2}, {11, 2, 7, 2}, {11, 2, 6, 2}, {10, 3, 10, 2},
-	{10, 3, 9, 2}, {10, 3, 8, 2}, {10, 3, 7, 2}, {10, 3, 6, 2},
-	{10, 2, 10, 2}, {10, 2, 9, 2}, {10, 2, 8, 2}, {10, 2, 7, 2},
-	{10, 2, 6, 2}, {9, 5, 20, 2}, {9, 5, 18, 4}, {9, 5, 18, 3},
-	{9, 5, 18, 2}, {9, 5, 16, 4}, {9, 4, 20, 2}, {9, 4, 18, 4},
-	{9, 4, 18, 3}, {9, 4, 18, 2}, {9, 4, 16, 4}, {9, 4, 16, 3},
-	{9, 3, 9, 2}, {9, 3, 8, 2}, {9, 3, 7, 2}, {9, 3, 6, 2},
-	{9, 2, 8, 2}, {9, 2, 7, 2}, {9, 2, 6, 2}, {8, 3, 8, 2},
-	{8, 3, 6, 2}, {8, 2, 8, 2}, {8, 2, 7, 2}, {7, 3, 8, 2},
+var newIDLowQIntCoeffArr = []extractTextRegionIntCoeff{
+	{4, 2, 5, 2}, {3, 2, 4, 2},
 }
 
 func compareRects(x00, y00, x01, y01, x10, y10, x11, y11 int, devX, devY float64) bool {
@@ -99,7 +75,7 @@ func checkRegionsNewID(regions [][]image.Point, rects []frect, devX, devY float6
 
 func tryToFindCoeffForNewID(img gocv.Mat) {
 	//takes much time
-	const max = 25
+	const max = 20
 	maxW := max
 	maxH := max
 	maxW2 := max
@@ -117,7 +93,7 @@ func tryToFindCoeffForNewID(img gocv.Mat) {
 						continue
 					}
 
-					if !checkRegionsNewID(regions, newIDLowQRects, 5.0, 5.0) {
+					if !checkRegionsNewID(regions, newIDLowQRects2, 3.0, 3.0) {
 						continue
 					}
 
@@ -125,14 +101,11 @@ func tryToFindCoeffForNewID(img gocv.Mat) {
 					for _, v := range regions {
 						rect := gocv.BoundingRect(v)
 						gocv.Rectangle(original2, rect, color.RGBA{0, 255, 0, 255}, 1)
-						// fmt.Printf("{%d, %d, %d, %d}, \n", rect.Min.X, rect.Min.Y, rect.Max.X, rect.Max.Y)
-						// utils.ShowImageInNamedWindow(original2, fmt.Sprintf("{%d, %d, %d, %d}", rect.Min.X, rect.Min.Y, rect.Max.X, rect.Max.Y))
+						// utils.ShowImageInNamedWindow(original2, "tototo")
+						// fmt.Printf("{%d, %d, %d, %d}, ", rect.Min.X, rect.Min.Y, rect.Max.X, rect.Max.Y)
 					}
-					if index%10 == 0 {
-						fmt.Printf("\n")
-					}
+					// utils.ShowImageInNamedWindow(original2, "tototo")
 					fmt.Printf("{%d, %d, %d, %d}, ", w, h, w2, h2)
-					// utils.ShowImageInNamedWindow(original2, fmt.Sprintf("{%d, %d, %d, %d}", w, h, w2, h2))
 					index++
 					if index == 5 {
 						fmt.Printf("\n")
@@ -151,13 +124,11 @@ func tryToFindCoeffForNewID(img gocv.Mat) {
 }
 
 func buildFloatCoeffs(img gocv.Mat) {
-	symbolHeight := symbolHeightCoeff * float64(img.Rows())
-	symbolWidth := symbolWidthCoeff * float64(img.Cols())
 	for ix, fc := range newIDLowQIntCoeffArr {
-		w1c := float64(fc.w1) / symbolHeight
-		h1c := float64(fc.h1) / symbolWidth
-		w2c := float64(fc.w2) / symbolHeight
-		h2c := float64(fc.h2) / symbolWidth
+		w1c := float64(fc.w1) / float64(img.Cols())
+		h1c := float64(fc.h1) / float64(img.Rows())
+		w2c := float64(fc.w2) / float64(img.Cols())
+		h2c := float64(fc.h2) / float64(img.Rows())
 
 		if ix%10 == 0 {
 			fmt.Printf("\n")
@@ -167,51 +138,67 @@ func buildFloatCoeffs(img gocv.Mat) {
 }
 
 func showExampleRectangles(img gocv.Mat) {
-	// original2 := img.Clone()
-	// defer original2.Close()
+	original2 := img.Clone()
+	defer original2.Close()
 
-	// for ix, r := range newIDLowQRects {
-	// 	rect := image.Rectangle{image.Point{r.x0, r.y0}, image.Point{r.x1, r.y1}}
-	// 	gocv.Rectangle(original2, rect, color.RGBA{0, 255, 0, 255}, 1)
-	// 	fmt.Printf("{%d, %d, %d, %d}, ", r.x0, r.y0, r.x1, r.y1)
-	// 	utils.ShowImageInNamedWindow(original2, fmt.Sprintf("%d", ix))
-	// }
-
-	// symbolHeight := symbolHeightCoeff * float64(img.Rows())
-	// symbolWidth := symbolWidthCoeff * float64(img.Cols())
-	for ix, fc := range newIDLowQIntCoeffArr {
-		if ix%10 == 0 {
-			fmt.Printf("\n")
-		}
-		w1c := float64(fc.w1) / float64(img.Cols())
-		h1c := float64(fc.h1) / float64(img.Rows())
-
-		w2c := float64(fc.w2) / float64(img.Cols())
-		h2c := float64(fc.h2) / float64(img.Rows())
-
-		fmt.Printf("{%f, %f, %f, %f}, ", w1c, h1c, w2c, h2c)
+	for ix, r := range newIDHQRects {
+		rect := image.Rectangle{image.Point{r.x0, r.y0}, image.Point{r.x1, r.y1}}
+		gocv.Rectangle(original2, rect, color.RGBA{0, 255, 0, 255}, 1)
+		// fmt.Printf("{%d, %d, %d, %d}, ", r.x0, r.y0, r.x1, r.y1)
+		w1 := float64(rect.Min.X) / float64(img.Cols())
+		h1 := float64(rect.Min.Y) / float64(img.Rows())
+		fmt.Printf("%f, %f\n", w1, h1)
+		utils.ShowImageInNamedWindow(original2, fmt.Sprintf("%d", ix))
 	}
 }
 
 func testCoefficientsForID(img gocv.Mat) {
+	arr := make([]int, 0)
+
 	for ix, fc := range newIDLowQFloatCoeffArr {
 		w1c := fc.w1 * float64(img.Cols())
 		h1c := fc.h1 * float64(img.Rows())
 		w2c := fc.w2 * float64(img.Cols())
 		h2c := fc.h2 * float64(img.Rows())
+
 		regions, err := textRegionsInternal(img, extractTextRegionIntCoeff{
 			int(w1c), int(h1c), int(w2c), int(h2c)})
 
 		if err != nil {
+			fmt.Println(err)
 			continue
 		}
+
+		// if !checkRegionsNewID(regions, newIDHQRects, 50.0, 50.0) {
+		// 	continue
+		// }
 
 		original2 := img.Clone()
 		for _, v := range regions {
 			rect := gocv.BoundingRect(v)
 			gocv.Rectangle(original2, rect, color.RGBA{0, 255, 0, 255}, 2)
 		}
+		arr = append(arr, ix)
 		utils.ShowImageInNamedWindow(original2, fmt.Sprintf("%d", ix))
 		original2.Close()
 	}
+
+	fmt.Println("******************************")
+	for ix, it := range arr {
+		if ix%4 == 0 {
+			fmt.Printf("\n")
+		}
+		fc := newIDLowQIntCoeffArr[it]
+		fmt.Printf("{%d, %d, %d, %d}, ", fc.w1, fc.h1, fc.w2, fc.h2)
+	}
+
+	fmt.Println("******************************")
+	for ix, it := range arr {
+		if ix%4 == 0 {
+			fmt.Printf("\n")
+		}
+		fc := newIDLowQFloatCoeffArr[it]
+		fmt.Printf("{%f, %f, %f, %f}, ", fc.w1, fc.h1, fc.w2, fc.h2)
+	}
+	fmt.Println("******************************")
 }

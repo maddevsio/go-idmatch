@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"image"
 	"image/color"
 	"os"
@@ -29,8 +30,6 @@ const symbolWidthCoeff = maxQualitySymWidth / maxQualityWidth
 
 //
 func textRegionsInternal(img gocv.Mat, fc extractTextRegionIntCoeff) ([][]image.Point, error) {
-	// We have to get these values from JSON or somehow from document
-
 	if fc.w1 == 0 || fc.w2 == 0 || fc.h1 == 0 || fc.h2 == 0 {
 		return nil, errors.New("Couldn't find coefficients")
 	}
@@ -79,13 +78,11 @@ func textRegionsInternal(img gocv.Mat, fc extractTextRegionIntCoeff) ([][]image.
 
 //TextRegions returns text regions on image
 func TextRegions(img gocv.Mat) ([][]image.Point, error) {
-	// tryToFindCoeffForNewID(img)
 	// showExampleRectangles(img)
-
-	testCoefficientsForID(img)
-	// symbolHeight := symbolHeightCoeff * float64(img.Rows())
-	// symbolWidth := symbolWidthCoeff * float64(img.Cols())
-	fc := newIDLowQFloatCoeffArr[6] //todo find best one
+	// tryToFindCoeffForNewID(img)
+	// buildFloatCoeffs(img)
+	// testCoefficientsForID(img)
+	fc := newIDLowQFloatCoeffArr[0]
 	w1c := fc.w1 * float64(img.Cols())
 	h1c := fc.h1 * float64(img.Rows())
 	w2c := fc.w2 * float64(img.Cols())
@@ -135,6 +132,7 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 			continue
 		}
 		log.Print(log.DebugLevel, text)
+		log.Print(log.DebugLevel, fmt.Sprintln(rect))
 
 		b := block{
 			x:    float64(rect.Min.X) / float64(img.Cols()),
