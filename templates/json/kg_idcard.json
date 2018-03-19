@@ -23,13 +23,13 @@
         "textBlocksThreshold": 0.025,
         "structure": 
             [
-               {"field": "serial", "x": 0.68, "y": 0.81},
-               {"field": "middlename", "type": "cyrillic", "x": 0.39, "y": 0.54},
-               {"field": "firstname", "type": "cyrillic", "x": 0.39, "y": 0.4},
-               {"field": "surname", "type": "cyrillic", "x": 0.39, "y": 0.28},
-               {"field": "pob", "type": "cyrillic", "x": 0.39, "y": 0.7},
-               {"field": "birthday", "type": "number", "x": 0.39, "y": 0.79},
-               {"field": "gender", "type": "gender", "x": 0.39, "y": 0.59}
+               {"field": "serial", "x": 0.693644, "y": 0.788507},
+               {"field": "middlename", "type": "cyrillic", "x": 0.397281, "y": 0.504762},
+               {"field": "firstname", "type": "cyrillic", "x": 0.397281, "y": 0.388095},
+               {"field": "surname", "type": "cyrillic", "x": 0.397281, "y": 0.264286},
+               {"field": "pob", "type": "cyrillic", "x": 0.397281, "y": 0.675137},
+               {"field": "birthday", "type": "number", "x": 0.395770, "y": 0.754762},
+               {"field": "gender", "type": "gender", "x": 0.397281, "y": 0.585714}
             ]
         }
     ]

@@ -30,8 +30,6 @@ const symbolWidthCoeff = maxQualitySymWidth / maxQualityWidth
 
 //
 func textRegionsInternal(img gocv.Mat, fc extractTextRegionIntCoeff) ([][]image.Point, error) {
-	// We have to get these values from JSON or somehow from document
-
 	if fc.w1 == 0 || fc.w2 == 0 || fc.h1 == 0 || fc.h2 == 0 {
 		return nil, errors.New("Couldn't find coefficients")
 	}
@@ -80,14 +78,15 @@ func textRegionsInternal(img gocv.Mat, fc extractTextRegionIntCoeff) ([][]image.
 
 //TextRegions returns text regions on image
 func TextRegions(img gocv.Mat) ([][]image.Point, error) {
-	// We have to get these values from JSON or somehow from document
+	// showExampleRectangles(img)
 	// tryToFindCoeffForNewID(img)
+	// buildFloatCoeffs(img)
 	// testCoefficientsForID(img)
-	fc := newIDFloatCoeffArrLQ[20] //todo find best one
-	w1c := float64(img.Cols()) * fc.w1
-	h1c := float64(img.Rows()) * fc.h1
-	w2c := float64(img.Cols()) * fc.w2
-	h2c := float64(img.Rows()) * fc.h2
+	fc := newIDLowQFloatCoeffArr[0]
+	w1c := fc.w1 * float64(img.Cols())
+	h1c := fc.h1 * float64(img.Rows())
+	w2c := fc.w2 * float64(img.Cols())
+	h2c := fc.h2 * float64(img.Rows())
 	return textRegionsInternal(img, extractTextRegionIntCoeff{
 		int(w1c), int(h1c), int(w2c), int(h2c)})
 }
@@ -110,6 +109,7 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 	gocv.CvtColor(img, gray, gocv.ColorBGRToGray)
 
 	for k, v := range regions {
+
 		rect := gocv.BoundingRect(v)
 		// Replace absolute size with relative values
 		// roi := img.Region(rect)
@@ -119,7 +119,6 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 		}
 
 		file := strconv.Itoa(k) + ".jpeg"
-
 		roix4 := gocv.NewMat()
 		defer roix4.Close()
 
@@ -132,6 +131,8 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 		if err != nil {
 			continue
 		}
+		log.Print(log.DebugLevel, text)
+		log.Print(log.DebugLevel, fmt.Sprintln(rect))
 
 		b := block{
 			x:    float64(rect.Min.X) / float64(img.Cols()),
@@ -140,11 +141,7 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 			h:    float64(rect.Dy()) / float64(img.Rows()),
 			text: text}
 
-		if log.IsDebug() {
-			fmt.Println(b)
-		}
 		// utils.ShowImageInNamedWindow(roix4, fmt.Sprintf("RecognizeRegions: %d %d", rect.Dx(), rect.Dy()))
-
 		result = append(result, b)
 
 		os.Remove(file)
