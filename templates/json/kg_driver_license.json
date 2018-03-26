@@ -1,0 +1,20 @@
+{"card":
+    [
+        {
+        "type": "KG driver license",
+        "aspectRatio": 1.58,
+        "textBlocksThreshold": 0.07,
+        "structure": 
+            [
+               {"field": "name1", "x": 0.392893, "y": 0.242038},
+               {"field": "name2", "type": "cyrillic", "x": 0.362437, "y": 0.300955},
+               {"field": "name3", "type": "cyrillic", "x": 0.393909, "y": 0.372611}, 
+               {"field": "birthday", "type": "cyrillic", "x": 0.361421, "y": 0.428344},
+               {"field": "inn", "type": "number", "x": 0.359391, "y": 0.544586},
+               {"field": "address1", "type": "cyrillic", "x": 0.359391, "y": 0.608280},
+               {"field": "address2", "type": "cyrillic", "x": 0.390863, "y": 0.659236},
+               {"field": "blood", "type": "cyrillic", "x": 0.360406, "y": 0.719745}
+            ]
+        }
+    ]
+}

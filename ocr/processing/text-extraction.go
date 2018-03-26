@@ -87,8 +87,9 @@ func TextRegions(img gocv.Mat) ([][]image.Point, error) {
 	h1c := fc.h1 * float64(img.Rows())
 	w2c := fc.w2 * float64(img.Cols())
 	h2c := fc.h2 * float64(img.Rows())
-	return textRegionsInternal(img, extractTextRegionIntCoeff{
+	regions, err := textRegionsInternal(img, extractTextRegionIntCoeff{
 		int(w1c), int(h1c), int(w2c), int(h2c)})
+	return regions, err
 }
 
 //RecognizeRegions sends found regions to tesseract ocr
