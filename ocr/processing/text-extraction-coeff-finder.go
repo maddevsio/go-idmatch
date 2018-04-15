@@ -100,7 +100,7 @@ func tryToFindCoeffForNewID(img gocv.Mat) {
 					original2 := img.Clone()
 					for _, v := range regions {
 						rect := gocv.BoundingRect(v)
-						gocv.Rectangle(original2, rect, color.RGBA{0, 255, 0, 255}, 1)
+						gocv.Rectangle(&original2, rect, color.RGBA{0, 255, 0, 255}, 1)
 						// utils.ShowImageInNamedWindow(original2, "tototo")
 						// fmt.Printf("{%d, %d, %d, %d}, ", rect.Min.X, rect.Min.Y, rect.Max.X, rect.Max.Y)
 					}
@@ -143,7 +143,7 @@ func showExampleRectangles(img gocv.Mat) {
 
 	for ix, r := range newIDHQRects {
 		rect := image.Rectangle{image.Point{r.x0, r.y0}, image.Point{r.x1, r.y1}}
-		gocv.Rectangle(original2, rect, color.RGBA{0, 255, 0, 255}, 1)
+		gocv.Rectangle(&original2, rect, color.RGBA{0, 255, 0, 255}, 1)
 		// fmt.Printf("{%d, %d, %d, %d}, ", r.x0, r.y0, r.x1, r.y1)
 		w1 := float64(rect.Min.X) / float64(img.Cols())
 		h1 := float64(rect.Min.Y) / float64(img.Rows())
@@ -176,7 +176,7 @@ func testCoefficientsForID(img gocv.Mat) {
 		original2 := img.Clone()
 		for _, v := range regions {
 			rect := gocv.BoundingRect(v)
-			gocv.Rectangle(original2, rect, color.RGBA{0, 255, 0, 255}, 2)
+			gocv.Rectangle(&original2, rect, color.RGBA{0, 255, 0, 255}, 2)
 		}
 		arr = append(arr, ix)
 		utils.ShowImageInNamedWindow(original2, fmt.Sprintf("%d", ix))

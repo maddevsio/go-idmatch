@@ -9,21 +9,6 @@ import (
 )
 
 type preprocessing struct {
-	HoughThreshold      int
-	BorderStep          int
-	ErodeLength         int
-	DilateThickness     int
-	MinAreaRatio        float64
-	MaxAreaRatio        float64
-	MaxAspectDelta      float64
-	CleanCannyT1        float32
-	CleanCannyT2        float32
-	CleanCannyBlurSize  int
-	CleanCannyBlurSigma float64
-	CannyT1             float32
-	CannyT2             float32
-	CannyBlurSize       int
-	CannyBlurSigma      float64
 }
 
 type processing struct {
@@ -50,21 +35,6 @@ type configFile struct {
 
 const defaultConfig = `
 	[preprocessing]
-	houghThreshold = 200
-	borderStep = 5
-	erodeLength = 15
-	dilateThickness = 2
-	minAreaRatio = 0.33
-	maxAreaRatio = 0.97
-	maxAspectDelta = 0.1
-	cleanCannyT1 = 30
-	cleanCannyT2 = 170
-	cleanCannyBlurSize = 7
-	cleanCannyBlurSigma = 10
-	cannyT1 = 10
-	cannyT2 = 50
-	cannyBlurSize = 3
-	cannyBlurSigma = 5
 
 	[processing]
 

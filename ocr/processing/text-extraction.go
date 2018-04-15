@@ -56,20 +56,20 @@ func textRegionsInternal(img gocv.Mat, fc extractTextRegionIntCoeff) ([][]image.
 	kernel := gocv.GetStructuringElement(gocv.MorphEllipse, image.Point{fc.w1, fc.h1})
 	defer kernel.Close()
 
-	gocv.CvtColor(original, gray, gocv.ColorBGRToGray)
+	gocv.CvtColor(original, &gray, gocv.ColorBGRToGray)
 	// utils.ShowImageInNamedWindow(gray, "gray")
-	gocv.MorphologyEx(gray, grad, gocv.MorphGradient, kernel)
+	gocv.MorphologyEx(gray, &grad, gocv.MorphGradient, kernel)
 	// utils.ShowImageInNamedWindow(grad, "gradient")
 
-	gocv.Threshold(grad, binarization, 0.0, 255.0, gocv.ThresholdBinary|gocv.ThresholdOtsu)
+	gocv.Threshold(grad, &binarization, 0.0, 255.0, gocv.ThresholdBinary|gocv.ThresholdOtsu)
 	// utils.ShowImageInNamedWindow(binarization, "binarized")
 
 	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{fc.w2, fc.h2})
-	gocv.MorphologyEx(binarization, opening, gocv.MorphOpen, kernel)
+	gocv.MorphologyEx(binarization, &opening, gocv.MorphOpen, kernel)
 	// utils.ShowImageInNamedWindow(opening, "opening")
 
 	kernel = gocv.GetStructuringElement(gocv.MorphRect, image.Point{symbolWidth, 1})
-	gocv.MorphologyEx(opening, connected, gocv.MorphClose, kernel)
+	gocv.MorphologyEx(opening, &connected, gocv.MorphClose, kernel)
 	// utils.ShowImageInNamedWindow(connected, "connected")
 
 	regions := gocv.FindContours(connected, gocv.RetrievalCComp, gocv.ChainApproxSimple)
@@ -106,7 +106,7 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 	gray := gocv.NewMat()
 	defer gray.Close()
 
-	gocv.CvtColor(img, gray, gocv.ColorBGRToGray)
+	gocv.CvtColor(img, &gray, gocv.ColorBGRToGray)
 
 	for k, v := range regions {
 
@@ -122,7 +122,7 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 		roix4 := gocv.NewMat()
 		defer roix4.Close()
 
-		gocv.Resize(roi, roix4, image.Point{0, 0}, 4, 4, gocv.InterpolationCubic)
+		gocv.Resize(roi, &roix4, image.Point{0, 0}, 4, 4, gocv.InterpolationCubic)
 		gocv.IMWrite(file, roix4)
 		client.SetImage(file)
 
@@ -145,7 +145,7 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 		result = append(result, b)
 
 		os.Remove(file)
-		gocv.Rectangle(img, gocv.BoundingRect(v), color.RGBA{255, 0, 0, 255}, 2)
+		gocv.Rectangle(&img, gocv.BoundingRect(v), color.RGBA{255, 0, 0, 255}, 2)
 	}
 
 	if len(preview) != 0 {

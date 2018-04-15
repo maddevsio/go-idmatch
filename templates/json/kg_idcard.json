@@ -4,6 +4,7 @@
         "type": "KG idcard old",
         "aspectRatio": 1.58,
         "textBlocksThreshold": 0.07,
+        "sample": "templates/sample/kg_idcard.png",
         "structure": 
             [
                {"field": "serial", "x": 0.127, "y": 0.83},
@@ -21,6 +22,7 @@
         "type": "KG idcard new",
         "aspectRatio": 1.58,
         "textBlocksThreshold": 0.025,
+        "sample": "templates/sample/kg_idcard_new.png",
         "structure": 
             [
                {"field": "serial", "x": 0.693644, "y": 0.788507},
