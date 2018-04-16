@@ -101,7 +101,7 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 	client := gosseract.NewClient()
 	defer client.Close()
 
-	client.SetLanguage("rus", "eng")
+	client.SetLanguage("rus")
 
 	gray := gocv.NewMat()
 	defer gray.Close()
@@ -131,8 +131,6 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 		if err != nil {
 			continue
 		}
-		log.Print(log.DebugLevel, text)
-		log.Print(log.DebugLevel, fmt.Sprintln(rect))
 
 		b := block{
 			x:    float64(rect.Min.X) / float64(img.Cols()),
@@ -140,6 +138,10 @@ func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (re
 			w:    float64(rect.Dx()) / float64(img.Cols()),
 			h:    float64(rect.Dy()) / float64(img.Rows()),
 			text: text}
+
+		log.Print(log.DebugLevel, text)
+		log.Print(log.DebugLevel, fmt.Sprint(b.x, b.y))
+		log.Print(log.DebugLevel, fmt.Sprintln(rect))
 
 		// utils.ShowImageInNamedWindow(roix4, fmt.Sprintf("RecognizeRegions: %d %d", rect.Dx(), rect.Dy()))
 		result = append(result, b)
