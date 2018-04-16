@@ -16,6 +16,7 @@ type Card struct {
 	Type                string  `json:"type"`
 	AspectRatio         float64 `json:"aspectRatio"`
 	TextBlocksThreshold float64 `json:"textBlocksThreshold"`
+	Sample              string  `json:"sample"`
 	Structure           []struct {
 		Field string  `json:"field"`
 		X     float64 `json:"x"`

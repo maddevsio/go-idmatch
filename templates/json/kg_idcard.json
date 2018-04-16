@@ -4,32 +4,33 @@
         "type": "KG idcard old",
         "aspectRatio": 1.58,
         "textBlocksThreshold": 0.07,
+        "sample": "templates/sample/kg_idcard.png",
         "structure": 
             [
-               {"field": "serial", "x": 0.127, "y": 0.83},
-               {"field": "birthday", "type": "number", "x": 0.36, "y": 0.65},
-               {"field": "inn", "type": "number", "x": 0.63, "y": 0.91},
-               {"field": "pob", "type": "cyrillic", "x": 0.36, "y": 0.78},
-               {"field": "gender", "type": "gender", "x": 0.71, "y": 0.65},
-               {"field": "surname", "type": "cyrillic", "x": 0.36, "y": 0.38},
-               {"field": "firstname", "type": "cyrillic", "x": 0.36, "y": 0.48},
-               {"field": "middlename", "type": "cyrillic", "x": 0.36, "y": 0.58},
-               {"field": "nationality", "type": "cyrillic", "x": 0.36, "y": 0.88}
+                {"field": "inn", "type": "number", "x": 0.63, "y": 0.91},
+                {"field": "pob", "type": "cyrillic", "x": 0.36, "y": 0.81},
+                {"field": "gender", "type": "gender", "x": 0.71, "y": 0.65},
+                {"field": "birthday", "type": "number", "x": 0.36, "y": 0.68},
+                {"field": "surname", "type": "cyrillic", "x": 0.36, "y": 0.38},
+                {"field": "serial", "type": "kg_old_serial", "x": 0.127, "y": 0.83},
+                {"field": "firstname", "type": "cyrillic", "x": 0.36, "y": 0.48},
+                {"field": "middlename", "type": "cyrillic", "x": 0.36, "y": 0.58}
             ]
         },
         {
         "type": "KG idcard new",
         "aspectRatio": 1.58,
         "textBlocksThreshold": 0.025,
+        "sample": "templates/sample/kg_idcard_new.png",
         "structure": 
             [
-               {"field": "serial", "x": 0.693644, "y": 0.788507},
-               {"field": "middlename", "type": "cyrillic", "x": 0.397281, "y": 0.504762},
-               {"field": "firstname", "type": "cyrillic", "x": 0.397281, "y": 0.388095},
-               {"field": "surname", "type": "cyrillic", "x": 0.397281, "y": 0.264286},
-               {"field": "pob", "type": "cyrillic", "x": 0.397281, "y": 0.675137},
-               {"field": "birthday", "type": "number", "x": 0.395770, "y": 0.754762},
-               {"field": "gender", "type": "gender", "x": 0.397281, "y": 0.585714}
+                {"field": "gender", "type": "gender", "x": 0.39, "y": 0.61},
+                {"field": "birthday", "type": "number", "x": 0.39, "y": 0.82},
+                {"field": "surname", "type": "cyrillic", "x": 0.38, "y": 0.27},
+                {"field": "firstname", "type": "cyrillic", "x": 0.39, "y": 0.40},
+                {"field": "middlename", "type": "cyrillic", "x": 0.38, "y": 0.54},
+                {"field": "nationality", "type": "cyrillic", "x": 0.38, "y": 0.72},
+                {"field": "serial", "type": "kg_new_serial", "x": 0.72, "y": 0.84}
             ]
         }
     ]
