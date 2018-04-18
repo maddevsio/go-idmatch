@@ -21,13 +21,9 @@
                 },
             "structure": 
                 [
-                    {"field": "gender", "type": "gender", "x": 0.39, "y": 0.61},
-                    {"field": "birthday", "type": "number", "x": 0.39, "y": 0.82},
-                    {"field": "surname", "type": "cyrillic", "x": 0.38, "y": 0.27},
-                    {"field": "firstname", "type": "cyrillic", "x": 0.39, "y": 0.40},
-                    {"field": "middlename", "type": "cyrillic", "x": 0.38, "y": 0.54},
-                    {"field": "nationality", "type": "cyrillic", "x": 0.38, "y": 0.72},
-                    {"field": "serial", "type": "kg_new_serial", "x": 0.72, "y": 0.84}
+                    {"field": "surname", "type": "cyrillic", "x": 0.3547400611620795, "y": 0.19516129032258064},
+                    {"field": "firstname", "type": "cyrillic", "x": 0.3506625891946993, "y": 0.25806451612903225},
+                    {"field": "middlename", "type": "cyrillic", "x": 0.3873598369011213, "y": 0.32741935483870965}
                 ]
         }
     ]
