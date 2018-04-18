@@ -1,0 +1,30 @@
+{"card":
+    [
+        {
+            "type": "KG driver license new",
+            "aspectRatio": 1.58,
+            "textBlocksThreshold": 0.025,
+            "sample": "templates/sample/kg_driver_license_new.png",
+            "textRegionFilterCoefficients": 
+                {
+                    "w1": 0.008511,
+                    "h1": 0.006689,
+                    "w2": 0.010638, 
+                    "h2": 0.006689
+                },
+            "maxQualitySizes":
+                {
+                    "maxQualitySymWidth": 20.1,
+                    "maxQualityWidth": 970.0,
+                    "maxQualitySymHeight": 26.0,
+                    "maxQualityHeight": 613.0
+                },
+            "structure": 
+                [
+                    {"field": "surname", "type": "cyrillic", "x": 0.3547400611620795, "y": 0.19516129032258064},
+                    {"field": "firstname", "type": "cyrillic", "x": 0.3506625891946993, "y": 0.25806451612903225},
+                    {"field": "middlename", "type": "cyrillic", "x": 0.3873598369011213, "y": 0.32741935483870965}
+                ]
+        }
+    ]
+}

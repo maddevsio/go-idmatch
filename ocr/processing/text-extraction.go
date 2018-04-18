@@ -10,6 +10,8 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/maddevsio/go-idmatch/templates"
+
 	"github.com/maddevsio/go-idmatch/log"
 	"github.com/maddevsio/go-idmatch/utils"
 	"github.com/otiai10/gosseract"
@@ -21,15 +23,12 @@ type block struct {
 	text       string
 }
 
-const maxQualitySymWidth = 34.1
-const maxQualityWidth = 1239.0
-const maxQualitySymHeight = 37.0
-const maxQualityHeight = 781.0
-const symbolHeightCoeff = maxQualitySymHeight / maxQualityHeight
-const symbolWidthCoeff = maxQualitySymWidth / maxQualityWidth
-
 //
-func textRegionsInternal(img gocv.Mat, fc extractTextRegionIntCoeff) ([][]image.Point, error) {
+func textRegionsInternal(img gocv.Mat, card templates.Card, fc extractTextRegionIntCoeff) ([][]image.Point, error) {
+
+	symbolHeightCoeff := card.MaxQualitySizes.MaxQualitySymHeight / card.MaxQualitySizes.MaxQualityHeight
+	symbolWidthCoeff := card.MaxQualitySizes.MaxQualitySymWidth / card.MaxQualitySizes.MaxQualityWidth
+
 	if fc.w1 == 0 || fc.w2 == 0 || fc.h1 == 0 || fc.h2 == 0 {
 		return nil, errors.New("Couldn't find coefficients")
 	}
@@ -77,23 +76,25 @@ func textRegionsInternal(img gocv.Mat, fc extractTextRegionIntCoeff) ([][]image.
 }
 
 //TextRegions returns text regions on image
-func TextRegions(img gocv.Mat) ([][]image.Point, error) {
+func TextRegions(img gocv.Mat, card templates.Card) ([][]image.Point, error) {
 	// showExampleRectangles(img)
 	// tryToFindCoeffForNewID(img)
 	// buildFloatCoeffs(img)
 	// testCoefficientsForID(img)
-	fc := newIDLowQFloatCoeffArr[0]
-	w1c := fc.w1 * float64(img.Cols())
-	h1c := fc.h1 * float64(img.Rows())
-	w2c := fc.w2 * float64(img.Cols())
-	h2c := fc.h2 * float64(img.Rows())
-	return textRegionsInternal(img, extractTextRegionIntCoeff{
+	w1c := card.TextRegionFilterCoefficients.W1 * float64(img.Cols())
+	h1c := card.TextRegionFilterCoefficients.H1 * float64(img.Rows())
+	w2c := card.TextRegionFilterCoefficients.W2 * float64(img.Cols())
+	h2c := card.TextRegionFilterCoefficients.H2 * float64(img.Rows())
+	return textRegionsInternal(img, card, extractTextRegionIntCoeff{
 		int(w1c), int(h1c), int(w2c), int(h2c)})
 }
 
 //RecognizeRegions sends found regions to tesseract ocr
-func RecognizeRegions(img gocv.Mat, regions [][]image.Point, preview string) (result []block, path string) {
+func RecognizeRegions(img gocv.Mat, card templates.Card, regions [][]image.Point, preview string) (result []block, path string) {
 	//We have to get these values from JSON or somehow from document
+
+	symbolHeightCoeff := card.MaxQualitySizes.MaxQualitySymHeight / card.MaxQualitySizes.MaxQualityHeight
+	symbolWidthCoeff := card.MaxQualitySizes.MaxQualitySymWidth / card.MaxQualitySizes.MaxQualityWidth
 
 	symbolWidth := int(float64(img.Cols()) * symbolWidthCoeff)
 	symbolHeight := int(float64(img.Rows()) * symbolHeightCoeff)

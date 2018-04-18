@@ -4,6 +4,13 @@
         "type": "KZ idcard",
         "aspectRatio": 1.58,
         "textBlocksThreshold": 0.05,
+        "maxQualitySizes":
+            {
+                "maxQualitySymWidth": 34.1,
+                "maxQualityWidth": 1239.0,
+                "maxQualitySymHeight": 37.0,
+                "maxQualityHeight": 781.0
+            },
         "structure": 
             [
                {"field": "serial", "x": 1, "y": 1},
