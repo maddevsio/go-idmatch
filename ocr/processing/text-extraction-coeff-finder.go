@@ -37,6 +37,13 @@ var newIDLowQRects2 []frect = []frect{
 	{184, 73, 283, 86},
 }
 
+var kgDriverLicenseRects []frect = []frect{
+	{355, 452, 502, 480}, {385, 414, 841, 447}, {354, 382, 749, 414},
+	{354, 342, 640, 369}, {781, 310, 877, 336}, {355, 306, 709, 333},
+	{356, 269, 913, 304}, {388, 234, 547, 256}, {357, 189, 637, 225},
+	{387, 152, 847, 188},
+}
+
 type extractTextRegionIntCoeff struct {
 	w1, h1, w2, h2 int
 }
@@ -105,7 +112,6 @@ func tryToFindCoeffForNewID(img gocv.Mat, card templates.Card) {
 						// utils.ShowImageInNamedWindow(original2, "tototo")
 						// fmt.Printf("{%d, %d, %d, %d}, ", rect.Min.X, rect.Min.Y, rect.Max.X, rect.Max.Y)
 					}
-					// utils.ShowImageInNamedWindow(original2, "tototo")
 					fmt.Printf("{%d, %d, %d, %d}, ", w, h, w2, h2)
 					index++
 					if index == 5 {
@@ -142,7 +148,7 @@ func showExampleRectangles(img gocv.Mat) {
 	original2 := img.Clone()
 	defer original2.Close()
 
-	for ix, r := range newIDHQRects {
+	for ix, r := range kgDriverLicenseRects {
 		rect := image.Rectangle{image.Point{r.x0, r.y0}, image.Point{r.x1, r.y1}}
 		gocv.Rectangle(&original2, rect, color.RGBA{0, 255, 0, 255}, 1)
 		// fmt.Printf("{%d, %d, %d, %d}, ", r.x0, r.y0, r.x1, r.y1)
