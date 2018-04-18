@@ -5,6 +5,20 @@
         "aspectRatio": 1.58,
         "textBlocksThreshold": 0.07,
         "sample": "templates/sample/kg_idcard.png",
+        "textRegionFilterCoefficients": 
+            {
+                "w1": 0.008511,
+                "h1": 0.006689,
+                "w2": 0.010638, 
+                "h2": 0.006689
+            },
+        "maxQualitySizes":
+            {
+                "maxQualitySymWidth": 34.1,
+                "maxQualityWidth": 1239.0,
+                "maxQualitySymHeight": 37.0,
+                "maxQualityHeight": 781.0
+            },
         "structure": 
             [
                 {"field": "inn", "type": "number", "x": 0.63, "y": 0.91},
@@ -22,6 +36,20 @@
         "aspectRatio": 1.58,
         "textBlocksThreshold": 0.025,
         "sample": "templates/sample/kg_idcard_new.png",
+        "textRegionFilterCoefficients": 
+            {
+                "w1": 0.008511,
+                "h1": 0.006689,
+                "w2": 0.010638, 
+                "h2": 0.006689
+            },
+        "maxQualitySizes":
+            {
+                "maxQualitySymWidth": 34.1,
+                "maxQualityWidth": 1239.0,
+                "maxQualitySymHeight": 37.0,
+                "maxQualityHeight": 781.0
+            },
         "structure": 
             [
                 {"field": "gender", "type": "gender", "x": 0.39, "y": 0.61},

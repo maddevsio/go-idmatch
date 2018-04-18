@@ -42,13 +42,13 @@ func Recognize(file, template, preview string) (map[string]interface{}, string) 
 		return nil, ""
 	}
 
-	regions, err := processing.TextRegions(img)
+	regions, err := processing.TextRegions(img, card)
 	if err != nil {
 		log.Print(log.ErrorLevel, "Failed to find text regions")
 		return nil, ""
 	}
 
-	blocks, path := processing.RecognizeRegions(img, regions, preview)
+	blocks, path := processing.RecognizeRegions(img, card, regions, preview)
 	output, err := processing.MatchBlocks(blocks, card)
 	if err != nil {
 		log.Print(log.ErrorLevel, err.Error())

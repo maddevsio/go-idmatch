@@ -1,0 +1,34 @@
+{"card":
+    [
+        {
+            "type": "KG driver license new",
+            "aspectRatio": 1.58,
+            "textBlocksThreshold": 0.025,
+            "sample": "templates/sample/kg_driver_license_new.png",
+            "textRegionFilterCoefficients": 
+                {
+                    "w1": 0.008511,
+                    "h1": 0.006689,
+                    "w2": 0.010638, 
+                    "h2": 0.006689
+                },
+            "maxQualitySizes":
+                {
+                    "maxQualitySymWidth": 20.1,
+                    "maxQualityWidth": 970.0,
+                    "maxQualitySymHeight": 26.0,
+                    "maxQualityHeight": 613.0
+                },
+            "structure": 
+                [
+                    {"field": "gender", "type": "gender", "x": 0.39, "y": 0.61},
+                    {"field": "birthday", "type": "number", "x": 0.39, "y": 0.82},
+                    {"field": "surname", "type": "cyrillic", "x": 0.38, "y": 0.27},
+                    {"field": "firstname", "type": "cyrillic", "x": 0.39, "y": 0.40},
+                    {"field": "middlename", "type": "cyrillic", "x": 0.38, "y": 0.54},
+                    {"field": "nationality", "type": "cyrillic", "x": 0.38, "y": 0.72},
+                    {"field": "serial", "type": "kg_new_serial", "x": 0.72, "y": 0.84}
+                ]
+        }
+    ]
+}

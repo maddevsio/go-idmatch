@@ -7,6 +7,7 @@ import (
 	"math"
 	"time"
 
+	"github.com/maddevsio/go-idmatch/templates"
 	"github.com/maddevsio/go-idmatch/utils"
 	"gocv.io/x/gocv"
 )
@@ -73,7 +74,7 @@ func checkRegionsNewID(regions [][]image.Point, rects []frect, devX, devY float6
 	return count >= len(rects) //warning!
 }
 
-func tryToFindCoeffForNewID(img gocv.Mat) {
+func tryToFindCoeffForNewID(img gocv.Mat, card templates.Card) {
 	//takes much time
 	const max = 20
 	maxW := max
@@ -88,7 +89,7 @@ func tryToFindCoeffForNewID(img gocv.Mat) {
 		for h := maxH; h >= 2; h-- {
 			for w2 := maxW2; w2 >= 2; w2-- {
 				for h2 := maxH2; h2 >= 2; h2-- {
-					regions, err := textRegionsInternal(img, extractTextRegionIntCoeff{w, h, w2, h2})
+					regions, err := textRegionsInternal(img, card, extractTextRegionIntCoeff{w, h, w2, h2})
 					if err != nil {
 						continue
 					}
@@ -152,7 +153,7 @@ func showExampleRectangles(img gocv.Mat) {
 	}
 }
 
-func testCoefficientsForID(img gocv.Mat) {
+func testCoefficientsForID(img gocv.Mat, card templates.Card) {
 	arr := make([]int, 0)
 
 	for ix, fc := range newIDLowQFloatCoeffArr {
@@ -161,7 +162,7 @@ func testCoefficientsForID(img gocv.Mat) {
 		w2c := fc.w2 * float64(img.Cols())
 		h2c := fc.h2 * float64(img.Rows())
 
-		regions, err := textRegionsInternal(img, extractTextRegionIntCoeff{
+		regions, err := textRegionsInternal(img, card, extractTextRegionIntCoeff{
 			int(w1c), int(h1c), int(w2c), int(h2c)})
 
 		if err != nil {
