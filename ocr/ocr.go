@@ -33,10 +33,9 @@ func Recognize(file, template, preview string) (map[string]interface{}, string) 
 		os.Exit(1)
 	}
 
-	sample := gocv.IMRead(card.Sample, gocv.IMReadColor)
 	img := gocv.IMRead(file, gocv.IMReadColor)
 
-	img, err = preprocessing.Contour(sample, img, card.AspectRatio)
+	img, err = preprocessing.Contour(img, card.Sample, card.AspectRatio)
 	if err != nil {
 		log.Print(log.ErrorLevel, err.Error())
 		return nil, ""

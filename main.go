@@ -6,6 +6,7 @@ import (
 
 	"github.com/maddevsio/go-idmatch/log"
 	"github.com/maddevsio/go-idmatch/ocr"
+	"github.com/maddevsio/go-idmatch/ocr/preprocessing"
 	"github.com/maddevsio/go-idmatch/web"
 	"github.com/urfave/cli"
 )
@@ -39,6 +40,7 @@ func main() {
 		{
 			Name: "service",
 			Action: func(c *cli.Context) error {
+				preprocessing.InitCache()
 				web.Service()
 				return nil
 			},
