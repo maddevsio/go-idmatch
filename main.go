@@ -52,7 +52,7 @@ func main() {
 					Name:  "image",
 					Usage: "send the image to ocr recognition",
 					Flags: []cli.Flag{
-						cli.StringFlag{Name: "template", Value: flagOldKgId, Usage: "document template to use"},
+						cli.StringFlag{Name: "template", Usage: "document template to use"},
 						cli.StringFlag{Name: "preview", Usage: "path to export preview image"}},
 					Action: func(c *cli.Context) error {
 						result, path := ocr.Recognize(c.Args().Get(0), c.String("template"), c.String("preview"))

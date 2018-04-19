@@ -1,13 +1,14 @@
 package preprocessing
 
 import (
+	"crypto/md5"
+	"errors"
 	"fmt"
 	"image"
 	"math"
 	"math/rand"
 	"sync"
 
-	"github.com/juju/errors"
 	"gocv.io/x/gocv"
 	"gocv.io/x/gocv/contrib"
 )
@@ -17,7 +18,7 @@ type point struct {
 	keypoint   gocv.KeyPoint
 }
 
-type matchPoint struct {
+type MatchPoint struct {
 	a        point
 	b        point
 	distance float64
@@ -35,13 +36,13 @@ func InitCache() {
 }
 
 func descriptorArr(gray gocv.Mat) (p []point) {
-	brisk := contrib.NewSIFT()
-	defer brisk.Close()
+	sift := contrib.NewSIFT()
+	defer sift.Close()
 
 	mask := gocv.NewMat()
 	defer mask.Close()
 
-	k, d := brisk.DetectAndCompute(gray, mask)
+	k, d := sift.DetectAndCompute(gray, mask)
 
 	for i, v := range k {
 		var tmp []float64
@@ -78,31 +79,47 @@ func anglesByVertex(p1, p2, p3 image.Point) (float64, float64, float64) {
 	return triangleAngles(pointDistance(p1, p2), pointDistance(p2, p3), pointDistance(p3, p1))
 }
 
-func matchDescriptors(a, b []point) []matchPoint {
+func matchDescriptors(a, b []point) []MatchPoint {
+	if len(a) == 0 || len(b) == 0 {
+		return nil
+	}
 	mask := make([]bool, len(b))
-	var match []matchPoint
-	for k, aa := range a {
-		mp := matchPoint{distance: 10000}
+	var match []MatchPoint
+	for _, aa := range a {
+		mp := MatchPoint{distance: 10000}
 		index := 0
 		for i, bb := range b {
 			if mask[i] {
 				continue
 			}
 			if d := arrayDistance(aa.descriptor, bb.descriptor); d < mp.distance {
-				mp = matchPoint{a: aa, b: bb, distance: d}
+				mp = MatchPoint{a: aa, b: bb, distance: d}
 			}
 		}
-		fmt.Printf("matching descriptors: %d/%d\r", len(a), k)
+		// fmt.Printf("matching descriptors: %d/%d\r", len(a), k)
 		match = append(match, mp)
 		mask[index] = true
 	}
-
 	return match
 }
 
-func matchTriangles(goodMatch []matchPoint, threshold int) []matchPoint {
+func filterGoodMatch(match []MatchPoint) []MatchPoint {
+	var goodMatch []MatchPoint
+	for _, v := range match {
+		if v.distance > 200 {
+			continue
+		}
+		goodMatch = append(goodMatch, v)
+	}
+	return goodMatch
+}
+
+func matchTriangles(goodMatch []MatchPoint, threshold int) []MatchPoint {
+	if len(goodMatch) == 0 {
+		return nil
+	}
 	var counter int
-	var equals []matchPoint
+	var equals []MatchPoint
 	for i := 0; i < 100000 && counter < threshold; i++ {
 		// Getting set of three random descriptors to form a triangle
 		rand1 := rand.Intn(len(goodMatch))
@@ -148,55 +165,28 @@ func set(key string, value *[]point) {
 	}
 }
 
-func Contour(img gocv.Mat, samplePath string, ratio float64) (gocv.Mat, error) {
-	// pwd, _ := os.Getwd()
-	// // if err != nil {
-	// // 	return nil, ""
-	// // }
+func Match(img, sample gocv.Mat) []MatchPoint {
+	hash := fmt.Sprintf("%x", md5.Sum(sample.ToBytes()))
 
-	// fileName := fmt.Sprintf("%s/%s.prof", pwd, "cpu")
-	// f, _ := os.Create(fileName)
-	// // if err != nil {
-	// // 	return nil, ""
-	// // }
-
-	// pprof.StartCPUProfile(f)
-
-	// Need to add original size restore
-	k := 1000.0 / float64(img.Rows())
-	gocv.Resize(img, &img, image.Point{0, 0}, k, k, gocv.InterpolationCubic)
-
-	sample := gocv.IMRead(samplePath, gocv.IMReadColor)
-	gocv.CvtColor(sample, &sample, gocv.ColorBGRToGray)
-	defer sample.Close()
+	a, hit := get(hash)
+	if !hit {
+		aa := descriptorArr(sample)
+		a = &aa
+		set(hash, a)
+	}
 
 	gray := gocv.NewMat()
 	defer gray.Close()
 
-	a, hit := get(samplePath)
-	if !hit {
-		aa := descriptorArr(sample)
-		a = &aa
-		set(samplePath, a)
-	}
-
 	gocv.CvtColor(img, &gray, gocv.ColorBGRToGray)
 	b := descriptorArr(gray)
 
-	match := matchDescriptors(*a, b)
+	return filterGoodMatch(matchDescriptors(*a, b))
+}
 
-	var goodMatch []matchPoint
-	for _, v := range match {
-		if v.distance > 200 {
-			continue
-		}
-		goodMatch = append(goodMatch, v)
-	}
-
-	fmt.Printf("matches above threshold: %d\n", len(goodMatch))
-
+func Contour(img gocv.Mat, goodMatch []MatchPoint, ratio, sampleWidth float64) (gocv.Mat, error) {
 	// Two steps matching: finding similar triangles and matching their position
-	var equals []matchPoint
+	var equals []MatchPoint
 	miss := true
 	for set := 0; set < 5 && miss; set++ {
 		// Getting 3 similar triangles out of most equal descriptors
@@ -234,15 +224,6 @@ func Contour(img gocv.Mat, samplePath string, ratio float64) (gocv.Mat, error) {
 		return img, errors.New("Cannot find equaly located similar triangles")
 	}
 
-	// gocv.Circle(&sample, p1, 3, color.RGBA{255, 0, 0, 255}, 2)
-	// gocv.Circle(&sample, p2, 3, color.RGBA{255, 0, 0, 255}, 2)
-	// gocv.Circle(&sample, p3, 3, color.RGBA{255, 0, 0, 255}, 2)
-	// gocv.Circle(&img, pp1, 3, color.RGBA{255, 0, 0, 255}, 2)
-	// gocv.Circle(&img, pp2, 3, color.RGBA{255, 0, 0, 255}, 2)
-	// gocv.Circle(&img, pp3, 3, color.RGBA{255, 0, 0, 255}, 2)
-	// utils.ShowImage(img)
-	// utils.ShowImage(sample)
-
 	theta1 := math.Atan2(equals[1].a.keypoint.Y-equals[0].a.keypoint.Y, equals[1].a.keypoint.X-equals[0].a.keypoint.X)
 	theta2 := math.Atan2(equals[1].b.keypoint.Y-equals[0].b.keypoint.Y, equals[1].b.keypoint.X-equals[0].b.keypoint.X)
 	theta := (theta2 - theta1) * 180 / math.Pi
@@ -260,7 +241,7 @@ func Contour(img gocv.Mat, samplePath string, ratio float64) (gocv.Mat, error) {
 	fmt.Printf("scale rate: %v\n", scale)
 
 	left := equals[1].b.keypoint.X - equals[1].a.keypoint.X*scale
-	right := equals[1].b.keypoint.X + (float64(sample.Cols())-equals[1].a.keypoint.X)*scale
+	right := equals[1].b.keypoint.X + (sampleWidth-equals[1].a.keypoint.X)*scale
 	top := equals[1].b.keypoint.Y - equals[1].a.keypoint.Y*scale
 	bottom := top + (right-left)/ratio
 
@@ -277,17 +258,16 @@ func Contour(img gocv.Mat, samplePath string, ratio float64) (gocv.Mat, error) {
 		bottom = float64(img.Rows())
 	}
 
+	// if log.IsDebug() {
 	// gocv.Circle(&img, image.Point{int(equals[1].b.keypoint.X), int(equals[1].b.keypoint.Y)}, 5, color.RGBA{0, 255, 0, 255}, 3)
 	// gocv.Line(&img, image.Point{int(left), int(top)}, image.Point{int(right), int(top)}, color.RGBA{255, 0, 0, 255}, 2)
 	// gocv.Line(&img, image.Point{int(right), int(top)}, image.Point{int(right), int(bottom)}, color.RGBA{255, 0, 0, 255}, 2)
 	// gocv.Line(&img, image.Point{int(right), int(bottom)}, image.Point{int(left), int(bottom)}, color.RGBA{255, 0, 0, 255}, 2)
 	// gocv.Line(&img, image.Point{int(left), int(bottom)}, image.Point{int(left), int(top)}, color.RGBA{255, 0, 0, 255}, 2)
-
 	// utils.ShowImage(img)
+	// }
 
 	img = img.Region(image.Rect(int(left), int(top), int(right), int(bottom)))
-	// utils.ShowImage(img)
-	// pprof.StopCPUProfile()
 
 	return img, nil
 }

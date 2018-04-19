@@ -43,30 +43,33 @@ type Card struct {
 	} `json:"structure"`
 }
 
-func Load(name string) (template Card, err error) {
+func Load(name string) (list []Card, err error) {
 	var f TemplateFile
 	// Need to add config package with paths
 	dir, err := ioutil.ReadDir(config.Template.Path)
 	if err != nil {
-		return template, err
+		return list, err
 	}
 
 	for _, file := range dir {
 		jsonFile, err := ioutil.ReadFile(config.Template.Path + file.Name())
 		if err != nil {
 			fmt.Println(err.Error())
-			return template, err
+			return list, err
 		}
 		err = json.Unmarshal(jsonFile, &f)
 		if err != nil {
-			return template, err
+			return list, err
 		}
-		// JSON file may contain multiple templates. Needs to be reviewed.
+
 		for _, template := range f.Template {
-			if template.Type == name {
-				return template, nil
+			if template.Type == name || len(name) == 0 {
+				list = append(list, template)
 			}
 		}
 	}
-	return template, errors.New("Template \"" + name + "\" not found")
+	if len(list) == 0 {
+		return list, errors.New("Template \"" + name + "\" not found")
+	}
+	return list, nil
 }
