@@ -11,7 +11,7 @@ import (
 const ErrorMessage = "(recognition failed)"
 
 func gender(gender string) string {
-	if strings.ContainsAny(gender, "m M э Э м М 3") {
+	if strings.ContainsAny(gender, "m M э Э м М 3 9") {
 		return "Э"
 	} else if strings.ContainsAny(gender, "f F а А ж Ж") {
 		return "А"
@@ -38,6 +38,19 @@ func Sanitize(documentMap map[string]interface{}, card templates.Card) {
 		case "gender":
 			text = gender(text)
 			regex = "[^а-яА-Я]+"
+		// Need to find a better way to handle following cases
+		case "kg_old_serial":
+			if len(text) < 4 {
+				continue
+			}
+			text = "AN" + text[4:]
+			regex = "[^AN0-9]+"
+		case "kg_new_serial":
+			if len(text) < 2 {
+				continue
+			}
+			text = "ID" + text[2:]
+			regex = "[^ID0-9]+"
 		}
 
 		if n := strings.Index(text, "\n"); n > 0 {
@@ -54,6 +67,6 @@ func Sanitize(documentMap map[string]interface{}, card templates.Card) {
 		// else if text != clearText {
 		// 	clearText += " (?)"
 		// }
-		documentMap[v.Field] = clearText
+		documentMap[v.Field] = strings.ToUpper(clearText)
 	}
 }

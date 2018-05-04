@@ -64,9 +64,6 @@ func result(c echo.Context) error {
 	var facePreview string
 
 	template := c.FormValue("template")
-	if len(template) == 0 {
-		template = "KG idcard old"
-	}
 
 	face, err := c.FormFile("face")
 	if face != nil && face.Size != 0 {

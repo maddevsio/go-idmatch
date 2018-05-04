@@ -7,6 +7,7 @@ import (
 	"math"
 	"time"
 
+	"github.com/maddevsio/go-idmatch/templates"
 	"github.com/maddevsio/go-idmatch/utils"
 	"gocv.io/x/gocv"
 )
@@ -34,6 +35,13 @@ var newIDLowQRects2 []frect = []frect{
 	{184, 168, 222, 180},
 	{184, 123, 243, 135}, {184, 109, 242, 121}, {184, 87, 291, 100},
 	{184, 73, 283, 86},
+}
+
+var kgDriverLicenseRects []frect = []frect{
+	{355, 452, 502, 480}, {385, 414, 841, 447}, {354, 382, 749, 414},
+	{354, 342, 640, 369}, {781, 310, 877, 336}, {355, 306, 709, 333},
+	{356, 269, 913, 304}, {388, 234, 547, 256}, {357, 189, 637, 225},
+	{387, 152, 847, 188},
 }
 
 type extractTextRegionIntCoeff struct {
@@ -73,7 +81,7 @@ func checkRegionsNewID(regions [][]image.Point, rects []frect, devX, devY float6
 	return count >= len(rects) //warning!
 }
 
-func tryToFindCoeffForNewID(img gocv.Mat) {
+func tryToFindCoeffForNewID(img gocv.Mat, card templates.Card) {
 	//takes much time
 	const max = 20
 	maxW := max
@@ -88,7 +96,7 @@ func tryToFindCoeffForNewID(img gocv.Mat) {
 		for h := maxH; h >= 2; h-- {
 			for w2 := maxW2; w2 >= 2; w2-- {
 				for h2 := maxH2; h2 >= 2; h2-- {
-					regions, err := textRegionsInternal(img, extractTextRegionIntCoeff{w, h, w2, h2})
+					regions, err := textRegionsInternal(img, card, extractTextRegionIntCoeff{w, h, w2, h2})
 					if err != nil {
 						continue
 					}
@@ -100,11 +108,10 @@ func tryToFindCoeffForNewID(img gocv.Mat) {
 					original2 := img.Clone()
 					for _, v := range regions {
 						rect := gocv.BoundingRect(v)
-						gocv.Rectangle(original2, rect, color.RGBA{0, 255, 0, 255}, 1)
+						gocv.Rectangle(&original2, rect, color.RGBA{0, 255, 0, 255}, 1)
 						// utils.ShowImageInNamedWindow(original2, "tototo")
 						// fmt.Printf("{%d, %d, %d, %d}, ", rect.Min.X, rect.Min.Y, rect.Max.X, rect.Max.Y)
 					}
-					// utils.ShowImageInNamedWindow(original2, "tototo")
 					fmt.Printf("{%d, %d, %d, %d}, ", w, h, w2, h2)
 					index++
 					if index == 5 {
@@ -141,9 +148,9 @@ func showExampleRectangles(img gocv.Mat) {
 	original2 := img.Clone()
 	defer original2.Close()
 
-	for ix, r := range newIDHQRects {
+	for ix, r := range kgDriverLicenseRects {
 		rect := image.Rectangle{image.Point{r.x0, r.y0}, image.Point{r.x1, r.y1}}
-		gocv.Rectangle(original2, rect, color.RGBA{0, 255, 0, 255}, 1)
+		gocv.Rectangle(&original2, rect, color.RGBA{0, 255, 0, 255}, 1)
 		// fmt.Printf("{%d, %d, %d, %d}, ", r.x0, r.y0, r.x1, r.y1)
 		w1 := float64(rect.Min.X) / float64(img.Cols())
 		h1 := float64(rect.Min.Y) / float64(img.Rows())
@@ -152,7 +159,7 @@ func showExampleRectangles(img gocv.Mat) {
 	}
 }
 
-func testCoefficientsForID(img gocv.Mat) {
+func testCoefficientsForID(img gocv.Mat, card templates.Card) {
 	arr := make([]int, 0)
 
 	for ix, fc := range newIDLowQFloatCoeffArr {
@@ -161,7 +168,7 @@ func testCoefficientsForID(img gocv.Mat) {
 		w2c := fc.w2 * float64(img.Cols())
 		h2c := fc.h2 * float64(img.Rows())
 
-		regions, err := textRegionsInternal(img, extractTextRegionIntCoeff{
+		regions, err := textRegionsInternal(img, card, extractTextRegionIntCoeff{
 			int(w1c), int(h1c), int(w2c), int(h2c)})
 
 		if err != nil {
@@ -176,7 +183,7 @@ func testCoefficientsForID(img gocv.Mat) {
 		original2 := img.Clone()
 		for _, v := range regions {
 			rect := gocv.BoundingRect(v)
-			gocv.Rectangle(original2, rect, color.RGBA{0, 255, 0, 255}, 2)
+			gocv.Rectangle(&original2, rect, color.RGBA{0, 255, 0, 255}, 2)
 		}
 		arr = append(arr, ix)
 		utils.ShowImageInNamedWindow(original2, fmt.Sprintf("%d", ix))

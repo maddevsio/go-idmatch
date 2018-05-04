@@ -1,161 +1,284 @@
 package preprocessing
 
 import (
+	"crypto/md5"
+	"errors"
 	"fmt"
 	"image"
 	"math"
+	"math/rand"
+	"sync"
 
-	"github.com/maddevsio/go-idmatch/config"
-	"github.com/maddevsio/go-idmatch/log"
-	"github.com/maddevsio/go-idmatch/templates"
-	"github.com/maddevsio/go-idmatch/utils"
 	"gocv.io/x/gocv"
+	"gocv.io/x/gocv/contrib"
 )
 
-func rotate(edged gocv.Mat) gocv.Mat {
-	var theta, maxTheta, maxDistance float64
-	lines := gocv.NewMat()
-	defer lines.Close()
+type point struct {
+	descriptor []float64
+	keypoint   gocv.KeyPoint
+}
 
-	gocv.HoughLinesP(edged, lines, 1, math.Pi/180, config.Preprocessing.HoughThreshold)
-	for row := 0; row < lines.Rows(); row++ {
-		x1, y1, x2, y2 := lines.GetIntAt(row, 0), lines.GetIntAt(row, 1), lines.GetIntAt(row, 2), lines.GetIntAt(row, 3)
-		if distance := math.Sqrt(math.Pow(float64(x2-x1), 2) + math.Pow(float64(y2-y1), 2)); distance > maxDistance {
-			theta = math.Atan2(float64(y2-y1), float64(x2-x1))
-			if math.Abs(theta) == math.Pi/2 {
+type MatchPoint struct {
+	a        point
+	b        point
+	distance float64
+}
+
+type Cache map[string]*[]point
+
+var (
+	cache Cache
+	lock  sync.Mutex
+)
+
+func InitCache() {
+	cache = make(map[string]*[]point)
+}
+
+func descriptorArr(gray gocv.Mat) (p []point) {
+	sift := contrib.NewSIFT()
+	defer sift.Close()
+
+	mask := gocv.NewMat()
+	defer mask.Close()
+
+	k, d := sift.DetectAndCompute(gray, mask)
+
+	for i, v := range k {
+		var tmp []float64
+		for j := 0; j < d.Cols(); j++ {
+			tmp = append(tmp, float64(d.GetFloatAt(i, j)))
+		}
+		p = append(p, point{keypoint: v, descriptor: tmp})
+	}
+
+	return
+}
+
+func arrayDistance(a, b []float64) float64 {
+	var d float64
+	for i := range a {
+		d += (b[i] - a[i]) * (b[i] - a[i])
+	}
+	return math.Sqrt(d)
+}
+
+func pointDistance(a, b image.Point) float64 {
+	return math.Sqrt(float64((b.X-a.X)*(b.X-a.X)) + float64((b.Y-a.Y)*(b.Y-a.Y)))
+}
+
+func triangleAngles(a, b, c float64) (float64, float64, float64) {
+	cc := (math.Pow(b, 2) + math.Pow(c, 2) - math.Pow(a, 2)) / (2 * b * c)
+	aa := (math.Pow(c, 2) + math.Pow(a, 2) - math.Pow(b, 2)) / (2 * c * a)
+	bb := (math.Pow(a, 2) + math.Pow(b, 2) - math.Pow(c, 2)) / (2 * a * b)
+
+	return aa, bb, cc
+}
+
+func anglesByVertex(p1, p2, p3 image.Point) (float64, float64, float64) {
+	return triangleAngles(pointDistance(p1, p2), pointDistance(p2, p3), pointDistance(p3, p1))
+}
+
+func matchDescriptors(a, b []point) []MatchPoint {
+	if len(a) == 0 || len(b) == 0 {
+		return nil
+	}
+	mask := make([]bool, len(b))
+	var match []MatchPoint
+	for _, aa := range a {
+		mp := MatchPoint{distance: 10000}
+		index := 0
+		for i, bb := range b {
+			if mask[i] {
 				continue
 			}
-			maxDistance = distance
-			maxTheta = theta
-		}
-	}
-	theta = maxTheta * 180 / math.Pi
-	if theta > 45 {
-		theta -= 90
-	}
-	return gocv.GetRotationMatrix2D(image.Point{edged.Cols() / 2, edged.Rows() / 2}, theta, 1)
-}
-
-func hBorder(img gocv.Mat) (h []int) {
-	for i := 1; i < img.Rows(); i++ {
-		if img.GetUCharAt(i, 1) != 0 {
-			h = append(h, i)
-			i += config.Preprocessing.BorderStep
-		}
-	}
-	return
-}
-
-func vBorder(img gocv.Mat) (v []int) {
-	for i := 1; i < img.Cols(); i++ {
-		if img.GetUCharAt(1, i) != 0 {
-			v = append(v, i)
-			i += config.Preprocessing.BorderStep
-		}
-	}
-	return
-}
-
-func contour(img gocv.Mat, aspectRatio float64) image.Rectangle {
-	var rect image.Rectangle
-
-	hm1 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{config.Preprocessing.ErodeLength, 1})
-	hm2 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{img.Cols() * 2, config.Preprocessing.DilateThickness})
-	vm1 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{1, config.Preprocessing.ErodeLength})
-	vm2 := gocv.GetStructuringElement(gocv.MorphRect, image.Point{config.Preprocessing.DilateThickness, img.Rows() * 2})
-
-	defer hm1.Close()
-	defer hm2.Close()
-	defer vm1.Close()
-	defer vm2.Close()
-
-	horizontal := gocv.NewMat()
-	vertical := gocv.NewMat()
-	defer horizontal.Close()
-	defer vertical.Close()
-
-	gocv.Erode(img, horizontal, hm1)
-	gocv.Dilate(horizontal, horizontal, hm2)
-
-	gocv.Erode(img, vertical, vm1)
-	gocv.Dilate(vertical, vertical, vm2)
-
-	if log.IsDebug() {
-		utils.ShowImage(img)
-		res := gocv.NewMat()
-		defer res.Close()
-		gocv.BitwiseOr(horizontal, vertical, res)
-		utils.ShowImage(res)
-	}
-
-	x := vBorder(vertical)
-	y := hBorder(horizontal)
-
-	// Ugly loop over all crossed lines with aspect ratio and area matching
-	bestDelta := config.Preprocessing.MaxAspectDelta
-	biggestArea, totalRects, matchRects := 0.0, 0, 0
-	imageArea := float64(img.Cols() * img.Rows())
-	for top := 0; top < len(y)/2; top++ {
-		for bottom := len(y) - 1; bottom > len(y)/2; bottom-- {
-			for left := 0; left < len(x)/2; left++ {
-				for right := len(x) - 1; right > len(x)/2; right-- {
-					totalRects++
-					r := image.Rectangle{image.Point{x[left], y[top]}, image.Point{x[right], y[bottom]}}
-					area := float64(r.Dx() * r.Dy())
-					areaRatio := area / imageArea
-					switch {
-					case areaRatio < config.Preprocessing.MinAreaRatio && biggestArea > 0:
-						break
-					case areaRatio > config.Preprocessing.MaxAreaRatio:
-						continue
-					default:
-						ratio := float64(r.Dx()) / float64(r.Dy())
-						delta := math.Abs(aspectRatio - ratio)
-						if delta < bestDelta && biggestArea < area {
-							matchRects++
-							biggestArea = area
-							bestDelta = delta
-							rect = r
-						}
-					}
-				}
+			if d := arrayDistance(aa.descriptor, bb.descriptor); d < mp.distance {
+				mp = MatchPoint{a: aa, b: bb, distance: d}
 			}
 		}
+		// fmt.Printf("matching descriptors: %d/%d\r", len(a), k)
+		match = append(match, mp)
+		mask[index] = true
 	}
-	log.Print(log.DebugLevel, fmt.Sprintf("%d rectangles out of %d are matched\n", matchRects, totalRects))
-	return rect
+	return match
 }
 
-// Contours takes image file path and crops it by contour
-func Contours(file string, card templates.Card) gocv.Mat {
-	img := gocv.NewMat()
-	defer img.Close()
+func filterGoodMatch(match []MatchPoint) []MatchPoint {
+	var goodMatch []MatchPoint
+	for _, v := range match {
+		if v.distance > 200 {
+			continue
+		}
+		goodMatch = append(goodMatch, v)
+	}
+	return goodMatch
+}
 
-	cleanCanny := gocv.NewMat()
-	defer cleanCanny.Close()
+func matchTriangles(goodMatch []MatchPoint, threshold int) []MatchPoint {
+	if len(goodMatch) == 0 {
+		return nil
+	}
+	var counter int
+	var equals []MatchPoint
+	for i := 0; i < 100000 && counter < threshold; i++ {
+		// Getting set of three random descriptors to form a triangle
+		rand1 := rand.Intn(len(goodMatch))
+		rand2 := rand.Intn(len(goodMatch))
+		rand3 := rand.Intn(len(goodMatch))
+		// Need to use triangle struc
+		p1 := image.Point{int(goodMatch[rand1].a.keypoint.X), int(goodMatch[rand1].a.keypoint.Y)}
+		p2 := image.Point{int(goodMatch[rand2].a.keypoint.X), int(goodMatch[rand2].a.keypoint.Y)}
+		p3 := image.Point{int(goodMatch[rand3].a.keypoint.X), int(goodMatch[rand3].a.keypoint.Y)}
+		pp1 := image.Point{int(goodMatch[rand1].b.keypoint.X), int(goodMatch[rand1].b.keypoint.Y)}
+		pp2 := image.Point{int(goodMatch[rand2].b.keypoint.X), int(goodMatch[rand2].b.keypoint.Y)}
+		pp3 := image.Point{int(goodMatch[rand3].b.keypoint.X), int(goodMatch[rand3].b.keypoint.Y)}
+		a, b, c := anglesByVertex(p1, p2, p3)
+		aa, bb, cc := anglesByVertex(pp1, pp2, pp3)
 
-	original := gocv.IMRead(file, gocv.IMReadColor)
-	original.CopyTo(img)
-	k := float64(560) / float64(img.Rows())
-	gocv.Resize(img, img, image.Point{0, 0}, k, k, gocv.InterpolationCubic)
-	gocv.CvtColor(img, img, gocv.ColorRGBToGray)
-	gocv.GaussianBlur(img, cleanCanny, image.Point{config.Preprocessing.CleanCannyBlurSize, config.Preprocessing.CleanCannyBlurSize},
-		config.Preprocessing.CleanCannyBlurSigma, config.Preprocessing.CleanCannyBlurSigma, gocv.BorderDefault)
-	gocv.Canny(cleanCanny, cleanCanny, config.Preprocessing.CleanCannyT1, config.Preprocessing.CleanCannyT2)
-	gocv.GaussianBlur(img, img, image.Point{config.Preprocessing.CannyBlurSize, config.Preprocessing.CannyBlurSize},
-		config.Preprocessing.CannyBlurSigma, config.Preprocessing.CannyBlurSigma, gocv.BorderDefault)
+		// "Line shaped triangles" gives too much false match
+		if math.Abs(a) > 0.9999 || math.Abs(b) > 0.9999 || math.Abs(c) > 0.9999 {
+			continue
+		}
 
-	rotation := rotate(cleanCanny)
-	gocv.WarpAffine(img, img, rotation, image.Point{img.Cols(), img.Rows()})
-	gocv.WarpAffine(original, original, rotation, image.Point{original.Cols(), original.Rows()})
+		// Allowed rate of similarity
+		if math.Abs(a-aa) < 0.0001 && math.Abs(b-bb) < 0.0001 && math.Abs(c-cc) < 0.0001 {
+			equals = append(equals, goodMatch[rand1])
+			equals = append(equals, goodMatch[rand2])
+			equals = append(equals, goodMatch[rand3])
+			counter++
+		}
+	}
+	return equals
+}
 
-	gocv.Canny(img, img, config.Preprocessing.CannyT1, config.Preprocessing.CannyT2)
-	rect := contour(img, card.AspectRatio)
-	x1, y1, x2, y2 := float64(rect.Min.X)/k, float64(rect.Min.Y)/k, float64(rect.Max.X)/k, float64(rect.Max.Y)/k
-	p1 := image.Point{int(x1), int(y1)}
-	p2 := image.Point{int(x2), int(y2)}
-	roi := original.Region(image.Rectangle{p1, p2})
+func get(key string) (*[]point, bool) {
+	value, ok := cache[key]
+	return value, ok
+}
 
-	utils.ShowImage(roi)
-	return roi
+func set(key string, value *[]point) {
+	if cache != nil {
+		lock.Lock()
+		defer lock.Unlock()
+		cache[key] = value
+	}
+}
+
+func Match(img, sample gocv.Mat) []MatchPoint {
+	hash := fmt.Sprintf("%x", md5.Sum(sample.ToBytes()))
+
+	a, hit := get(hash)
+	if !hit {
+		aa := descriptorArr(sample)
+		a = &aa
+		set(hash, a)
+	}
+
+	gray := gocv.NewMat()
+	defer gray.Close()
+
+	gocv.CvtColor(img, &gray, gocv.ColorBGRToGray)
+	b := descriptorArr(gray)
+
+	return filterGoodMatch(matchDescriptors(*a, b))
+}
+
+func Contour(img gocv.Mat, goodMatch []MatchPoint, ratio, sampleWidth float64) (gocv.Mat, error) {
+	// Two steps matching: finding similar triangles and matching their position
+	var equals []MatchPoint
+	miss := true
+	for set := 0; set < 5 && miss; set++ {
+		// Getting 3 similar triangles out of most equal descriptors
+		equals = matchTriangles(goodMatch, 3)
+
+		if len(equals)/3 < 3 {
+			fmt.Printf("Not enough similar triangles in set %d (need 3, got %d)\n", set, len(equals)/3)
+			continue
+		}
+
+		// Matching trianlges positions
+		fmt.Printf("testing %d set of triangles\n", set+1)
+		for i := 0; i < len(equals)/3; i++ {
+			// Need to use triangle struct
+			p1 := image.Point{X: int(equals[i].a.keypoint.X), Y: int(equals[i].a.keypoint.Y)}
+			p2 := image.Point{X: int(equals[i+3].a.keypoint.X), Y: int(equals[i+3].a.keypoint.Y)}
+			p3 := image.Point{X: int(equals[i+6].a.keypoint.X), Y: int(equals[i+6].a.keypoint.Y)}
+			pp1 := image.Point{X: int(equals[i].b.keypoint.X), Y: int(equals[i].b.keypoint.Y)}
+			pp2 := image.Point{X: int(equals[i+3].b.keypoint.X), Y: int(equals[i+3].b.keypoint.Y)}
+			pp3 := image.Point{X: int(equals[i+6].b.keypoint.X), Y: int(equals[i+6].b.keypoint.Y)}
+			a, b, c := anglesByVertex(p1, p2, p3)
+			aa, bb, cc := anglesByVertex(pp1, pp2, pp3)
+			miss = false
+			if math.Abs(a-aa) > 0.1 || math.Abs(b-bb) > 0.1 || math.Abs(c-cc) > 0.1 {
+				miss = true
+				break
+			}
+		}
+		if !miss {
+			break
+		}
+	}
+
+	if miss {
+		return img, errors.New("Cannot find equaly located similar triangles")
+	}
+
+	// var l, n []gocv.KeyPoint
+	// for _, v := range goodMatch {
+	// 	gocv.Circle(&img, image.Point{int(v.a.keypoint.X), int(v.a.keypoint.Y)}, 3, color.RGBA{0, 255, 0, 255}, 4)
+	// 	gocv.Circle(&img, image.Point{int(v.b.keypoint.X), int(v.b.keypoint.Y)}, 3, color.RGBA{0, 0, 255, 255}, 4)
+	// 	l = append(l, v.a.keypoint)
+	// 	n = append(n, v.b.keypoint)
+	// }
+
+	// m := gocv.GetHomographyWithKeyPoints(n, l, gocv.RA_RANSAC)
+	// gocv.WarpPerspective(img, &img, m, image.Point{img.Cols(), img.Rows()})
+	// utils.ShowImage(img)
+
+	theta1 := math.Atan2(equals[1].a.keypoint.Y-equals[0].a.keypoint.Y, equals[1].a.keypoint.X-equals[0].a.keypoint.X)
+	theta2 := math.Atan2(equals[1].b.keypoint.Y-equals[0].b.keypoint.Y, equals[1].b.keypoint.X-equals[0].b.keypoint.X)
+	theta := (theta2 - theta1) * 180 / math.Pi
+
+	fmt.Printf("rotation angle: %v\n", theta)
+
+	// Need to fix this ugly "*2" workaround with proper bounding rotation not to cut off edges
+	rotation := gocv.GetRotationMatrix2D(image.Point{int(equals[1].b.keypoint.X), int(equals[1].b.keypoint.Y)}, theta, 1)
+	gocv.WarpAffine(img, &img, rotation, image.Point{img.Cols() * 2, img.Rows() * 2})
+
+	d1 := math.Sqrt(math.Pow(equals[1].a.keypoint.X-equals[0].a.keypoint.X, 2) + math.Pow(equals[1].a.keypoint.Y-equals[0].a.keypoint.Y, 2))
+	d2 := math.Sqrt(math.Pow(equals[1].b.keypoint.X-equals[0].b.keypoint.X, 2) + math.Pow(equals[1].b.keypoint.Y-equals[0].b.keypoint.Y, 2))
+	scale := d2 / d1
+
+	fmt.Printf("scale rate: %v\n", scale)
+
+	left := equals[1].b.keypoint.X - equals[1].a.keypoint.X*scale
+	right := equals[1].b.keypoint.X + (sampleWidth-equals[1].a.keypoint.X)*scale
+	top := equals[1].b.keypoint.Y - equals[1].a.keypoint.Y*scale
+	bottom := top + (right-left)/ratio
+
+	if left < 0 {
+		left = 0
+	}
+	if top < 0 {
+		top = 0
+	}
+	if right > float64(img.Cols()) {
+		right = float64(img.Cols())
+	}
+	if bottom > float64(img.Rows()) {
+		bottom = float64(img.Rows())
+	}
+
+	// if log.IsDebug() {
+	// gocv.Circle(&img, image.Point{int(equals[1].b.keypoint.X), int(equals[1].b.keypoint.Y)}, 5, color.RGBA{0, 255, 0, 255}, 3)
+	// gocv.Line(&img, image.Point{int(left), int(top)}, image.Point{int(right), int(top)}, color.RGBA{255, 0, 0, 255}, 2)
+	// gocv.Line(&img, image.Point{int(right), int(top)}, image.Point{int(right), int(bottom)}, color.RGBA{255, 0, 0, 255}, 2)
+	// gocv.Line(&img, image.Point{int(right), int(bottom)}, image.Point{int(left), int(bottom)}, color.RGBA{255, 0, 0, 255}, 2)
+	// gocv.Line(&img, image.Point{int(left), int(bottom)}, image.Point{int(left), int(top)}, color.RGBA{255, 0, 0, 255}, 2)
+	// utils.ShowImage(img)
+	// }
+
+	img = img.Region(image.Rect(int(left), int(top), int(right), int(bottom)))
+
+	return img, nil
 }
