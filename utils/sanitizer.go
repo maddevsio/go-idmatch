@@ -11,7 +11,7 @@ import (
 const ErrorMessage = "(recognition failed)"
 
 func gender(gender string) string {
-	if strings.ContainsAny(gender, "m M э Э м М 3") {
+	if strings.ContainsAny(gender, "m M э Э м М 3 9") {
 		return "Э"
 	} else if strings.ContainsAny(gender, "f F а А ж Ж") {
 		return "А"

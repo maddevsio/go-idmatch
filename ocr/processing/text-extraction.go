@@ -9,6 +9,7 @@ import (
 	"image/color"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/maddevsio/go-idmatch/templates"
 
@@ -133,6 +134,11 @@ func RecognizeRegions(img gocv.Mat, card templates.Card, regions [][]image.Point
 			continue
 		}
 
+		// Handle only upper case text. Remove this block if lower case needed
+		if text != strings.ToUpper(text) {
+			continue
+		}
+
 		b := block{
 			x:    float64(rect.Min.X) / float64(img.Cols()),
 			y:    float64(rect.Min.Y) / float64(img.Rows()),
@@ -150,6 +156,10 @@ func RecognizeRegions(img gocv.Mat, card templates.Card, regions [][]image.Point
 		os.Remove(file)
 		gocv.Rectangle(&img, gocv.BoundingRect(v), color.RGBA{255, 0, 0, 255}, 2)
 	}
+
+	// for _, v := range card.Structure {
+	// gocv.Circle(&img, image.Point{int(v.X * float64(img.Cols())), int(v.Y * float64(img.Rows()))}, 10, color.RGBA{255, 0, 0, 255}, 1)
+	// }
 
 	if len(preview) != 0 {
 		hash := md5.New()

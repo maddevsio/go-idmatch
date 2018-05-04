@@ -1,20 +1,20 @@
 package processing
 
 import (
+	"math"
+
 	"github.com/maddevsio/go-idmatch/templates"
 )
 
 func MatchBlocks(blocks []block, t templates.Card) (map[string]interface{}, error) {
 	data := make(map[string]interface{})
-	heightThreshold := 1 - t.TextBlocksThreshold
-	widthThreshold := 1 + t.TextBlocksThreshold
-	// Need to revise this logic
 	for _, field := range t.Structure {
+		min := 100.0
 		for _, item := range blocks {
-			if field.X >= item.x*heightThreshold && field.X <= (item.x+item.w)*widthThreshold {
-				if field.Y >= item.y*heightThreshold && field.Y <= (item.y+item.h)*widthThreshold {
-					data[field.Field] = item.text
-				}
+			if d := math.Sqrt(float64((item.x-field.X)*(item.x-field.X)) + float64((item.y-field.Y)*(item.y-field.Y))); d < min && d < 0.05 {
+				min = d
+				data[field.Field] = item.text
+				// fmt.Println(field.Field, item.text, min)
 			}
 		}
 	}

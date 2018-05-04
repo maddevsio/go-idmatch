@@ -145,7 +145,6 @@ func matchTriangles(goodMatch []MatchPoint, threshold int) []MatchPoint {
 			equals = append(equals, goodMatch[rand1])
 			equals = append(equals, goodMatch[rand2])
 			equals = append(equals, goodMatch[rand3])
-
 			counter++
 		}
 	}
@@ -223,6 +222,18 @@ func Contour(img gocv.Mat, goodMatch []MatchPoint, ratio, sampleWidth float64) (
 	if miss {
 		return img, errors.New("Cannot find equaly located similar triangles")
 	}
+
+	// var l, n []gocv.KeyPoint
+	// for _, v := range goodMatch {
+	// 	gocv.Circle(&img, image.Point{int(v.a.keypoint.X), int(v.a.keypoint.Y)}, 3, color.RGBA{0, 255, 0, 255}, 4)
+	// 	gocv.Circle(&img, image.Point{int(v.b.keypoint.X), int(v.b.keypoint.Y)}, 3, color.RGBA{0, 0, 255, 255}, 4)
+	// 	l = append(l, v.a.keypoint)
+	// 	n = append(n, v.b.keypoint)
+	// }
+
+	// m := gocv.GetHomographyWithKeyPoints(n, l, gocv.RA_RANSAC)
+	// gocv.WarpPerspective(img, &img, m, image.Point{img.Cols(), img.Rows()})
+	// utils.ShowImage(img)
 
 	theta1 := math.Atan2(equals[1].a.keypoint.Y-equals[0].a.keypoint.Y, equals[1].a.keypoint.X-equals[0].a.keypoint.X)
 	theta2 := math.Atan2(equals[1].b.keypoint.Y-equals[0].b.keypoint.Y, equals[1].b.keypoint.X-equals[0].b.keypoint.X)
