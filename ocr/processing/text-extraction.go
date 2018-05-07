@@ -104,7 +104,7 @@ func RecognizeRegions(img gocv.Mat, card templates.Card, regions [][]image.Point
 
 	gocv.CvtColor(img, &gray, gocv.ColorBGRToGray)
 
-	messages := make(chan block, 15)
+	blocks := make(chan block, 15)
 	var wg sync.WaitGroup
 
 	for _, v := range regions {
@@ -149,15 +149,15 @@ func RecognizeRegions(img gocv.Mat, card templates.Card, regions [][]image.Point
 			gocv.Rectangle(&img, gocv.BoundingRect(v), color.RGBA{255, 0, 0, 255}, 2)
 			log.Print(log.DebugLevel, fmt.Sprint(b))
 
-			messages <- b
+			blocks <- b
 		}(buf, v)
 		// utils.ShowImageInNamedWindow(roix4, fmt.Sprintf("RecognizeRegions: %d %d", rect.Dx(), rect.Dy()))
 	}
 
 	wg.Wait()
-	close(messages)
+	close(blocks)
 
-	for b := range messages {
+	for b := range blocks {
 		result = append(result, b)
 	}
 

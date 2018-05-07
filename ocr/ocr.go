@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"os"
+	"sync"
 
 	"github.com/maddevsio/go-idmatch/log"
 	"github.com/maddevsio/go-idmatch/ocr/preprocessing"
@@ -12,6 +13,12 @@ import (
 	"github.com/maddevsio/go-idmatch/utils"
 	"gocv.io/x/gocv"
 )
+
+type t struct {
+	matchpoint []preprocessing.MatchPoint
+	card       templates.Card
+	cols       int
+}
 
 func Recognize(file, template, preview string) (map[string]interface{}, string) {
 	if _, err := os.Stat(file); os.IsNotExist(err) {
@@ -28,51 +35,57 @@ func Recognize(file, template, preview string) (map[string]interface{}, string) 
 	k := 1000.0 / float64(img.Rows())
 	gocv.Resize(img, &img, image.Point{0, 0}, k, k, gocv.InterpolationCubic)
 
-	var max int
-	var card templates.Card
-	var match []preprocessing.MatchPoint
-	sample := gocv.NewMat()
-	defer sample.Close()
+	var wg sync.WaitGroup
+	result := make(chan t, 5)
+
 	for _, v := range cards {
-		// Need to change template usage approach
-		if len(v.Sample) == 0 {
-			log.Print(log.ErrorLevel, "Required \"Sample\" path is missing in template json")
-			continue
-		}
-		if _, err := os.Stat(v.Sample); os.IsNotExist(err) {
-			log.Print(log.ErrorLevel, "Document sample file is missing")
-			continue
-		}
-		s := gocv.IMRead(v.Sample, gocv.IMReadGrayScale)
-		m := preprocessing.Match(img, s)
-		fmt.Printf("%s: %d\n", v.Type, len(m))
-		if len(m) > max {
-			max = len(m)
-			card = v
-			sample = s
-			match = m
+		wg.Add(1)
+		go func(v templates.Card) {
+			defer wg.Done()
+			if len(v.Sample) == 0 {
+				log.Print(log.ErrorLevel, "Required \"Sample\" path is missing in template json")
+				return
+			}
+			if _, err = os.Stat(v.Sample); os.IsNotExist(err) {
+				log.Print(log.ErrorLevel, "Document sample file is missing")
+				return
+			}
+			s := gocv.IMRead(v.Sample, gocv.IMReadGrayScale)
+			m := preprocessing.Match(img, s)
+			fmt.Printf("%s: %d\n", v.Type, len(m))
+
+			result <- t{card: v, cols: s.Cols(), matchpoint: m}
+		}(v)
+	}
+	wg.Wait()
+	close(result)
+
+	var match t
+	for v := range result {
+		if len(v.matchpoint) > len(match.matchpoint) {
+			match = v
 		}
 	}
 
-	img, err = preprocessing.Contour(img, match, card.AspectRatio, float64(sample.Cols()))
+	img, err = preprocessing.Contour(img, match.matchpoint, match.card.AspectRatio, float64(match.cols))
 	if err != nil {
 		log.Print(log.ErrorLevel, err.Error())
 		return nil, ""
 	}
 
-	regions, err := processing.TextRegions(img, card)
+	regions, err := processing.TextRegions(img, match.card)
 	if err != nil {
 		log.Print(log.ErrorLevel, "Failed to find text regions")
 		return nil, ""
 	}
 
-	blocks, path := processing.RecognizeRegions(img, card, regions, preview)
-	output, err := processing.MatchBlocks(blocks, card)
+	blocks, path := processing.RecognizeRegions(img, match.card, regions, preview)
+	output, err := processing.MatchBlocks(blocks, match.card)
 	if err != nil {
 		log.Print(log.ErrorLevel, err.Error())
 		return nil, ""
 	}
 
-	utils.Sanitize(output, card)
+	utils.Sanitize(output, match.card)
 	return output, path
 }
