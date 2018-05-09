@@ -58,8 +58,12 @@ func saveFile(file *multipart.FileHeader) error {
 }
 
 func landing(c echo.Context) error {
+	list, err := templates.Load("")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 	return c.Render(http.StatusOK, "landing", map[string]interface{}{
-		"templates": templates.List(),
+		"templates": list,
 	})
 }
 
@@ -83,7 +87,7 @@ func result(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	if err := saveFile(id); err != nil {
+	if err = saveFile(id); err != nil {
 		return echo.NewHTTPError(http.StatusUnsupportedMediaType, err.Error())
 	}
 
@@ -94,8 +98,13 @@ func result(c echo.Context) error {
 		idPreview = "static/images/empty-contour.png"
 	}
 
+	list, err := templates.Load("")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
 	return c.Render(http.StatusOK, "landing", map[string]interface{}{
-		"templates":    templates.List(),
+		"templates":    list,
 		"data":         data,
 		"id_preview":   idPreview,
 		"face_preview": facePreview,

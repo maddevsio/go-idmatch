@@ -71,28 +71,3 @@ func Load(name string) (list []Card, err error) {
 	}
 	return list, nil
 }
-
-func List() (list []string) {
-	var f TemplateFile
-
-	dir, err := ioutil.ReadDir(config.Template.Path)
-	if err != nil {
-		return
-	}
-
-	for _, file := range dir {
-		jsonFile, err := ioutil.ReadFile(config.Template.Path + file.Name())
-		if err != nil {
-			return
-		}
-		err = json.Unmarshal(jsonFile, &f)
-		if err != nil {
-			return
-		}
-
-		for _, template := range f.Template {
-			list = append(list, template.Type)
-		}
-	}
-	return list
-}
