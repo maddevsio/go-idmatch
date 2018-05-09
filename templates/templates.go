@@ -3,7 +3,6 @@ package templates
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 
 	"github.com/maddevsio/go-idmatch/config"
@@ -54,7 +53,6 @@ func Load(name string) (list []Card, err error) {
 	for _, file := range dir {
 		jsonFile, err := ioutil.ReadFile(config.Template.Path + file.Name())
 		if err != nil {
-			fmt.Println(err.Error())
 			return list, err
 		}
 		err = json.Unmarshal(jsonFile, &f)
@@ -72,4 +70,29 @@ func Load(name string) (list []Card, err error) {
 		return list, errors.New("Template \"" + name + "\" not found")
 	}
 	return list, nil
+}
+
+func List() (list []string) {
+	var f TemplateFile
+
+	dir, err := ioutil.ReadDir(config.Template.Path)
+	if err != nil {
+		return
+	}
+
+	for _, file := range dir {
+		jsonFile, err := ioutil.ReadFile(config.Template.Path + file.Name())
+		if err != nil {
+			return
+		}
+		err = json.Unmarshal(jsonFile, &f)
+		if err != nil {
+			return
+		}
+
+		for _, template := range f.Template {
+			list = append(list, template.Type)
+		}
+	}
+	return list
 }

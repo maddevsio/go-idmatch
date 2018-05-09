@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo/middleware"
 	"github.com/maddevsio/go-idmatch/config"
 	"github.com/maddevsio/go-idmatch/ocr"
+	"github.com/maddevsio/go-idmatch/templates"
 )
 
 type Template struct {
@@ -57,7 +58,9 @@ func saveFile(file *multipart.FileHeader) error {
 }
 
 func landing(c echo.Context) error {
-	return c.Render(http.StatusOK, "landing", "")
+	return c.Render(http.StatusOK, "landing", map[string]interface{}{
+		"templates": templates.List(),
+	})
 }
 
 func result(c echo.Context) error {
@@ -92,6 +95,7 @@ func result(c echo.Context) error {
 	}
 
 	return c.Render(http.StatusOK, "landing", map[string]interface{}{
+		"templates":    templates.List(),
 		"data":         data,
 		"id_preview":   idPreview,
 		"face_preview": facePreview,
