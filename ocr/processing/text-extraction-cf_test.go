@@ -117,7 +117,7 @@ func tryToFindCoeffForNewID(img gocv.Mat, card templates.Card, cf coefFinder) {
 	fmt.Println(diff)
 }
 
-func TestShowExampleRectangles(t *testing.T) {
+func TestShowExampleHighQualityRectangles(t *testing.T) {
 	var cf coefFinder
 	fp, err := filepath.Glob("json/kg_idcard_new.json")
 
@@ -142,11 +142,51 @@ func TestShowExampleRectangles(t *testing.T) {
 	img := gocv.IMRead(cf.HqImage, gocv.IMReadColor)
 	defer img.Close()
 
+	const xoff = 0
+	const yoff = 0
+	log.SetLevel(log.DebugLevel)
 	for _, r := range cf.HqRects {
-		rect := image.Rectangle{image.Point{r.X0, r.Y0}, image.Point{r.X1, r.Y1}}
+		rect := image.Rectangle{image.Point{r.X0 + xoff, r.Y0 + yoff}, image.Point{r.X1 + xoff, r.Y1 + yoff}}
 		gocv.Rectangle(&img, rect, color.RGBA{0, 255, 0, 255}, 2)
 	}
 
+	utils.ShowImageInNamedWindow(img, "TestShowExampleHighQualityRectangles")
+}
+
+func TestShowExampleLowQualityRectangles(t *testing.T) {
+	var cf coefFinder
+	fp, err := filepath.Glob("json/kg_idcard_new.json")
+
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	if !assert.True(t, len(fp) > 0) {
+		return
+	}
+
+	jsonFile, err := ioutil.ReadFile(fp[0])
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	err = json.Unmarshal(jsonFile, &cf)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	img := gocv.IMRead(cf.LqImage, gocv.IMReadColor)
+	defer img.Close()
+
+	const xoff = 0
+	const yoff = 0
 	log.SetLevel(log.DebugLevel)
-	utils.ShowImageInNamedWindow(img, "rectangles")
+	for _, r := range cf.LqRects {
+		rect := image.Rectangle{image.Point{r.X0 + xoff, r.Y0 + yoff}, image.Point{r.X1 + xoff, r.Y1 + yoff}}
+		gocv.Rectangle(&img, rect, color.RGBA{0, 255, 0, 255}, 2)
+		fmt.Printf("{\"X0\":%d, \"Y0\": %d,\"X1\": %d,\"Y1\": %d},\n",
+			r.X0+xoff, r.Y0+yoff, r.X1+xoff, r.Y1+yoff)
+	}
+
+	utils.ShowImageInNamedWindow(img, "TestShowExampleLowQualityRectangles")
 }
