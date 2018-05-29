@@ -99,7 +99,7 @@ func loadFinderJSON(jsonFilePath string) (coefFinder, error) {
 //takes much time. WARNING!!!
 func tryToFindCoeff(img gocv.Mat, cf coefFinder) []extractTextRegionIntCoeff {
 	lstResult := make([]extractTextRegionIntCoeff, 0)
-	const max = 22
+	const max = 10
 	maxW := max
 	maxH := max
 	maxW2 := max
@@ -132,7 +132,7 @@ func tryToFindCoeff(img gocv.Mat, cf coefFinder) []extractTextRegionIntCoeff {
 
 func TestTryToFindCoeffForNewID(t *testing.T) {
 	log.SetLevel(log.DebugLevel)
-	cf, err := loadFinderJSON("json/kg_idcard_new.json")
+	cf, err := loadFinderJSON("json/kg_idcard_old.json")
 	if !assert.NoError(t, err) {
 		return
 	}
