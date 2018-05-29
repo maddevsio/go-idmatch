@@ -2,6 +2,7 @@ package processing
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"image"
 	"image/color"
@@ -31,22 +32,23 @@ type cfRectDeviation struct {
 	Y float64 `json:"Y"`
 }
 
+type cfRealSize struct {
+	Width  float64 `json:"width"`
+	Height float64 `json:"height"`
+}
+
 type coefFinder struct {
+	MaxSizes templates.MaxQualitySizesT `json:"maxQualitySizes"`
+
 	HqImage     string          `json:"hqImage"`
 	HqRects     []cfRect        `json:"hqRects"`
 	HqDeviation cfRectDeviation `json:"hqDeviation"`
+	HqRealSize  cfRealSize      `json:"hqRealSize"`
 
 	LqImage     string          `json:"lqImage"`
 	LqRects     []cfRect        `json:"lqRects"`
 	LqDeviation cfRectDeviation `json:"lqDeviation"`
-}
-
-type extractTextRegionIntCoeff struct {
-	w1, h1, w2, h2 int
-}
-
-type extractTextRegionFloatCoeff struct {
-	w1, h1, w2, h2 float64
+	LqRealSize  cfRealSize      `json:"lqRealSize"`
 }
 
 func compareRects(x00, y00, x01, y01, x10, y10, x11, y11 int, devX, devY float64) bool {
@@ -70,22 +72,22 @@ func checkRegions(regions [][]image.Point, rects []cfRect, devX, devY float64) b
 	return count >= len(rects) //warning!
 }
 
-func tryToFindCoeffForNewID(img gocv.Mat, card templates.Card, cf coefFinder) {
-	//takes much time
-	const max = 20
+//takes much time. WARNING!!!
+func tryToFindCoeff(img gocv.Mat, cf coefFinder) []extractTextRegionIntCoeff {
+
+	lstResult := make([]extractTextRegionIntCoeff, 0)
+
+	const max = 10
 	maxW := max
 	maxH := max
 	maxW2 := max
 	maxH2 := max
-	index := 0
-
-	fmt.Println("****************************")
 	start := time.Now()
 	for w := maxW; w >= 2; w-- {
 		for h := maxH; h >= 2; h-- {
 			for w2 := maxW2; w2 >= 2; w2-- {
 				for h2 := maxH2; h2 >= 2; h2-- {
-					regions, err := textRegionsInternal(img, card, extractTextRegionIntCoeff{w, h, w2, h2})
+					regions, err := textRegionsInternal(img, cf.MaxSizes, extractTextRegionIntCoeff{w, h, w2, h2})
 					if err != nil {
 						continue
 					}
@@ -94,47 +96,71 @@ func tryToFindCoeffForNewID(img gocv.Mat, card templates.Card, cf coefFinder) {
 						continue
 					}
 
-					original2 := img.Clone()
-					for _, v := range regions {
-						rect := gocv.BoundingRect(v)
-						gocv.Rectangle(&original2, rect, color.RGBA{0, 255, 0, 255}, 2)
-					}
-					fmt.Printf("{%d, %d, %d, %d}, ", w, h, w2, h2)
-					index++
-					if index == 5 {
-						fmt.Printf("\n")
-						index = 0
-					}
-					original2.Close()
+					nItem := extractTextRegionIntCoeff{w1: w, h1: h, w2: w2, h2: h2}
+					lstResult = append(lstResult, nItem)
 				} //for h2
 			} //for w2
 		} //for h
 	} // for w
-	fmt.Printf("\n")
-
 	end := time.Now()
 	diff := end.Sub(start)
 	fmt.Println(diff)
+	return lstResult
 }
 
-func TestShowExampleHighQualityRectangles(t *testing.T) {
-	var cf coefFinder
-	fp, err := filepath.Glob("json/kg_idcard_new.json")
-
+func TestTryToFindCoeffForNewID(t *testing.T) {
+	cf, err := loadFinderJSON("json/kg_idcard_new.json")
 	if !assert.NoError(t, err) {
 		return
 	}
 
-	if !assert.True(t, len(fp) > 0) {
-		return
+	img := gocv.IMRead(cf.LqImage, gocv.IMReadColor)
+	defer img.Close()
+
+	lstIntCoefficients := tryToFindCoeff(img, cf)
+	lstFloatCoefficients := make([]extractTextRegionFloatCoeff, 0, len(lstIntCoefficients))
+
+	for _, ic := range lstIntCoefficients {
+		var nItem extractTextRegionFloatCoeff
+		nItem.w1 = float64(ic.w1) / cf.LqRealSize.Width
+		nItem.w2 = float64(ic.w2) / cf.LqRealSize.Width
+		nItem.h1 = float64(ic.h1) / cf.LqRealSize.Height
+		nItem.h2 = float64(ic.h2) / cf.LqRealSize.Height
+		lstFloatCoefficients = append(lstFloatCoefficients, nItem)
+	}
+
+	fmt.Println(lstFloatCoefficients)
+	//todo find best float coefficients
+	//then test on set of documents
+}
+
+//"json/kg_idcard_new.json"
+func loadFinderJSON(jsonFilePath string) (coefFinder, error) {
+	var cf coefFinder
+	fp, err := filepath.Glob(jsonFilePath)
+
+	if err != nil {
+		return cf, err
+	}
+
+	if len(fp) <= 0 {
+		return cf, errors.New("len(fp) <= 0")
 	}
 
 	jsonFile, err := ioutil.ReadFile(fp[0])
-	if !assert.NoError(t, err) {
-		return
+	if err != nil {
+		return cf, err
 	}
 
 	err = json.Unmarshal(jsonFile, &cf)
+	if err != nil {
+		return cf, err
+	}
+	return cf, nil
+}
+
+func TestShowExampleHighQualityRectangles(t *testing.T) {
+	cf, err := loadFinderJSON("json/kg_idcard_new.json")
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -154,23 +180,7 @@ func TestShowExampleHighQualityRectangles(t *testing.T) {
 }
 
 func TestShowExampleLowQualityRectangles(t *testing.T) {
-	var cf coefFinder
-	fp, err := filepath.Glob("json/kg_idcard_new.json")
-
-	if !assert.NoError(t, err) {
-		return
-	}
-
-	if !assert.True(t, len(fp) > 0) {
-		return
-	}
-
-	jsonFile, err := ioutil.ReadFile(fp[0])
-	if !assert.NoError(t, err) {
-		return
-	}
-
-	err = json.Unmarshal(jsonFile, &cf)
+	cf, err := loadFinderJSON("json/kg_idcard_new.json")
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -184,8 +194,6 @@ func TestShowExampleLowQualityRectangles(t *testing.T) {
 	for _, r := range cf.LqRects {
 		rect := image.Rectangle{image.Point{r.X0 + xoff, r.Y0 + yoff}, image.Point{r.X1 + xoff, r.Y1 + yoff}}
 		gocv.Rectangle(&img, rect, color.RGBA{0, 255, 0, 255}, 2)
-		fmt.Printf("{\"X0\":%d, \"Y0\": %d,\"X1\": %d,\"Y1\": %d},\n",
-			r.X0+xoff, r.Y0+yoff, r.X1+xoff, r.Y1+yoff)
 	}
 
 	utils.ShowImageInNamedWindow(img, "TestShowExampleLowQualityRectangles")

@@ -23,11 +23,19 @@ type block struct {
 	text       string
 }
 
-//
-func textRegionsInternal(img gocv.Mat, card templates.Card, fc extractTextRegionIntCoeff) ([][]image.Point, error) {
+type extractTextRegionIntCoeff struct {
+	w1, h1, w2, h2 int
+}
 
-	symbolHeightCoeff := card.MaxQualitySizes.MaxQualitySymHeight / card.MaxQualitySizes.MaxQualityHeight
-	symbolWidthCoeff := card.MaxQualitySizes.MaxQualitySymWidth / card.MaxQualitySizes.MaxQualityWidth
+type extractTextRegionFloatCoeff struct {
+	w1, h1, w2, h2 float64
+}
+
+//
+func textRegionsInternal(img gocv.Mat, maxQualitySizes templates.MaxQualitySizesT, fc extractTextRegionIntCoeff) ([][]image.Point, error) {
+
+	symbolHeightCoeff := maxQualitySizes.MaxQualitySymHeight / maxQualitySizes.MaxQualityHeight
+	symbolWidthCoeff := maxQualitySizes.MaxQualitySymWidth / maxQualitySizes.MaxQualityWidth
 
 	if fc.w1 == 0 || fc.w2 == 0 || fc.h1 == 0 || fc.h2 == 0 {
 		return nil, errors.New("Couldn't find coefficients")
@@ -85,7 +93,7 @@ func TextRegions(img gocv.Mat, card templates.Card) ([][]image.Point, error) {
 	h1c := card.TextRegionFilterCoefficients.H1 * float64(img.Rows())
 	w2c := card.TextRegionFilterCoefficients.W2 * float64(img.Cols())
 	h2c := card.TextRegionFilterCoefficients.H2 * float64(img.Rows())
-	return textRegionsInternal(img, card, extractTextRegionIntCoeff{
+	return textRegionsInternal(img, card.MaxQualitySizes, extractTextRegionIntCoeff{
 		int(w1c), int(h1c), int(w2c), int(h2c)})
 }
 

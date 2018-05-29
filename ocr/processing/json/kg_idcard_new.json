@@ -1,4 +1,12 @@
 {
+    "maxQualitySizes": {
+        "maxQualitySymWidth": 34.1,
+        "maxQualityWidth": 1239.0,
+        "maxQualitySymHeight": 37.0,
+        "maxQualityHeight": 781.0
+    },
+
+    "hqRealSize" : {"width" : 4037.0, "height" : 2558.0},
     "hqImage":"/home/lezh1k/test_data/idmatch_data/newId/kg_id_new_hqcf.jpg",
     "hqRects": [
         {"X0":1629, "Y0": 1980,"X1": 3265, "Y1": 2115},
@@ -14,6 +22,8 @@
     ],
     "hqDeviation": { "X" : 40.0, "Y" : 40.0},
 
+
+    "lqRealSize" : {"width" : 650.0, "height" : 405.0},
     "lqImage":"/home/lezh1k/test_data/idmatch_data/newId/kg_id_new_lqcf.jpg",
     "lqRects": [
         {"X0":457, "Y0": 368,"X1": 558,"Y1": 389},
