@@ -40,7 +40,9 @@ RUN apt-get update && apt-get -y install \
 RUN wget https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz
 RUN tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz
 
-RUN go get -v -u -d gocv.io/x/gocv
+
+# RUN go get -v -u -d gocv.io/x/gocv
+RUN git clone git@github.com:hybridgroup/gocv.git /go/src/gocv.io/x/gocv
 WORKDIR /go/src/gocv.io/x/gocv
 RUN make download
 RUN make build
