@@ -44,9 +44,7 @@ RUN tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz
 # RUN go get -v -u -d gocv.io/x/gocv
 RUN git clone https://github.com/hybridgroup/gocv.git /go/src/gocv.io/x/gocv
 WORKDIR /go/src/gocv.io/x/gocv
-RUN make download
-RUN make build
-RUN make clean
+RUN make install
 RUN go install gocv.io/x/gocv
 
 WORKDIR /go/src/github.com/maddevsio/go-idmatch
