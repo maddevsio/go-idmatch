@@ -7,13 +7,12 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"os"
-	"strconv"
 	"strings"
-
-	"github.com/maddevsio/go-idmatch/templates"
+	"sync"
 
 	"github.com/maddevsio/go-idmatch/log"
+	"github.com/maddevsio/go-idmatch/templates"
+
 	"github.com/maddevsio/go-idmatch/utils"
 	"github.com/otiai10/gosseract"
 	"gocv.io/x/gocv"
@@ -100,66 +99,67 @@ func RecognizeRegions(img gocv.Mat, card templates.Card, regions [][]image.Point
 	symbolWidth := int(float64(img.Cols()) * symbolWidthCoeff)
 	symbolHeight := int(float64(img.Rows()) * symbolHeightCoeff)
 
-	client := gosseract.NewClient()
-	defer client.Close()
-
-	client.SetLanguage("rus")
-
 	gray := gocv.NewMat()
 	defer gray.Close()
 
 	gocv.CvtColor(img, &gray, gocv.ColorBGRToGray)
 
-	for k, v := range regions {
+	blocks := make(chan block, 15)
+	var wg sync.WaitGroup
 
+	for _, v := range regions {
 		rect := gocv.BoundingRect(v)
-		// Replace absolute size with relative values
 		// roi := img.Region(rect)
 		roi := gray.Region(rect)
 		if rect.Dx() < symbolWidth || rect.Dy() < symbolHeight/2 || rect.Dy() > symbolHeight*3 {
 			continue
 		}
 
-		file := strconv.Itoa(k) + ".jpeg"
 		roix4 := gocv.NewMat()
 		defer roix4.Close()
-
 		gocv.Resize(roi, &roix4, image.Point{0, 0}, 4, 4, gocv.InterpolationCubic)
-		gocv.IMWrite(file, roix4)
-		client.SetImage(file)
-
-		// text := "hoho"
-		text, err := client.Text()
+		buf, err := gocv.IMEncode(gocv.JPEGFileExt, roix4)
 		if err != nil {
 			continue
 		}
 
-		// Handle only upper case text. Remove this block if lower case needed
-		if text != strings.ToUpper(text) {
-			continue
-		}
+		wg.Add(1)
+		go func(buf []byte, v []image.Point) {
+			defer wg.Done()
+			client := gosseract.NewClient()
+			defer client.Close()
+			client.SetLanguage("rus")
+			client.SetImageFromBytes(buf)
+			text, err := client.Text()
+			if err != nil {
+				return
+			}
+			// Handle only upper case text. Remove this block if lower case needed
+			if text != strings.ToUpper(text) {
+				return
+			}
 
-		b := block{
-			x:    float64(rect.Min.X) / float64(img.Cols()),
-			y:    float64(rect.Min.Y) / float64(img.Rows()),
-			w:    float64(rect.Dx()) / float64(img.Cols()),
-			h:    float64(rect.Dy()) / float64(img.Rows()),
-			text: text}
+			b := block{
+				x:    float64(rect.Min.X) / float64(img.Cols()),
+				y:    float64(rect.Min.Y) / float64(img.Rows()),
+				w:    float64(rect.Dx()) / float64(img.Cols()),
+				h:    float64(rect.Dy()) / float64(img.Rows()),
+				text: text}
 
-		log.Print(log.DebugLevel, text)
-		log.Print(log.DebugLevel, fmt.Sprint(b.x, b.y))
-		log.Print(log.DebugLevel, fmt.Sprintln(rect))
+			gocv.Rectangle(&img, gocv.BoundingRect(v), color.RGBA{255, 0, 0, 255}, 2)
+			log.Print(log.DebugLevel, fmt.Sprint(b))
 
+			blocks <- b
+		}(buf, v)
 		// utils.ShowImageInNamedWindow(roix4, fmt.Sprintf("RecognizeRegions: %d %d", rect.Dx(), rect.Dy()))
-		result = append(result, b)
-
-		os.Remove(file)
-		gocv.Rectangle(&img, gocv.BoundingRect(v), color.RGBA{255, 0, 0, 255}, 2)
 	}
 
-	// for _, v := range card.Structure {
-	// gocv.Circle(&img, image.Point{int(v.X * float64(img.Cols())), int(v.Y * float64(img.Rows()))}, 10, color.RGBA{255, 0, 0, 255}, 1)
-	// }
+	wg.Wait()
+	close(blocks)
+
+	for b := range blocks {
+		result = append(result, b)
+	}
 
 	if len(preview) != 0 {
 		hash := md5.New()

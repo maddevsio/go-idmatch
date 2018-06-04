@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo/middleware"
 	"github.com/maddevsio/go-idmatch/config"
 	"github.com/maddevsio/go-idmatch/ocr"
+	"github.com/maddevsio/go-idmatch/templates"
 )
 
 type Template struct {
@@ -57,7 +58,13 @@ func saveFile(file *multipart.FileHeader) error {
 }
 
 func landing(c echo.Context) error {
-	return c.Render(http.StatusOK, "landing", "")
+	list, err := templates.Load("")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	return c.Render(http.StatusOK, "landing", map[string]interface{}{
+		"templates": list,
+	})
 }
 
 func result(c echo.Context) error {
@@ -80,7 +87,7 @@ func result(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	if err := saveFile(id); err != nil {
+	if err = saveFile(id); err != nil {
 		return echo.NewHTTPError(http.StatusUnsupportedMediaType, err.Error())
 	}
 
@@ -91,7 +98,13 @@ func result(c echo.Context) error {
 		idPreview = "static/images/empty-contour.png"
 	}
 
+	list, err := templates.Load("")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
 	return c.Render(http.StatusOK, "landing", map[string]interface{}{
+		"templates":    list,
 		"data":         data,
 		"id_preview":   idPreview,
 		"face_preview": facePreview,

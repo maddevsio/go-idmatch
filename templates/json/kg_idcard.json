@@ -4,7 +4,7 @@
         "type": "KG idcard old",
         "aspectRatio": 1.58,
         "textBlocksThreshold": 0.07,
-        "sample": "templates/sample/kg_id_old2.jpg",
+        "sample": "templates/sample/kg_idcard.png",
         "textRegionFilterCoefficients": 
             {
                 "w1": 0.008511,
@@ -28,7 +28,7 @@
                 {"field": "surname", "type": "cyrillic", "x": 0.36, "y": 0.385},
                 {"field": "firstname", "type": "cyrillic", "x": 0.36, "y": 0.495},
                 {"field": "middlename", "type": "cyrillic", "x": 0.36, "y": 0.605},
-                {"field": "serial", "type": "kg_old_serial", "x": 0.127, "y": 0.89}
+                {"field": "serial", "type": "kg_old_serial", "x": 0.07, "y": 0.87}
             ]
         },
         {

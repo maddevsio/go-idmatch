@@ -3,7 +3,6 @@ package templates
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 
 	"github.com/maddevsio/go-idmatch/config"
@@ -54,7 +53,6 @@ func Load(name string) (list []Card, err error) {
 	for _, file := range dir {
 		jsonFile, err := ioutil.ReadFile(config.Template.Path + file.Name())
 		if err != nil {
-			fmt.Println(err.Error())
 			return list, err
 		}
 		err = json.Unmarshal(jsonFile, &f)
