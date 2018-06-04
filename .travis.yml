@@ -1,7 +1,5 @@
 sudo: required
-language: go
-go:
-  - 1.10.2
+language: generic
 services:
 - docker
 env:
@@ -17,4 +15,4 @@ deploy:
   provider: script
   script: docker push "${IMAGE_NAME}:latest"
   on:
-    branch: dev
+    branch: master
