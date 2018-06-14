@@ -53,7 +53,8 @@ RUN make clean
 
 WORKDIR /go/src/github.com/maddevsio/go-idmatch
 COPY . .
-RUN mv ./xfeatures2d.go /go/src/gocv.io/x/gocv/contrib
+# Temporary workaround
+RUN wget https://github.com/tzununbekov/gocv/blob/master/contrib/xfeatures2d.go -P /go/src/gocv.io/x/gocv/contrib
 
 RUN go get -d -v ./...
 RUN go install -v ./...

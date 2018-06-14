@@ -115,7 +115,7 @@ func filterGoodMatch(match []MatchPoint) []MatchPoint {
 	return goodMatch
 }
 
-func matchTriangles(goodMatch []MatchPoint, threshold int, img, sample gocv.Mat) []MatchPoint {
+func matchTriangles(goodMatch []MatchPoint, threshold int) []MatchPoint {
 	if len(goodMatch) == 0 {
 		return nil
 	}
@@ -147,17 +147,8 @@ func matchTriangles(goodMatch []MatchPoint, threshold int, img, sample gocv.Mat)
 			equals = append(equals, goodMatch[rand2])
 			equals = append(equals, goodMatch[rand3])
 			counter++
-			// gocv.Line(&sample, p1, p2, color.RGBA{255, 255, 0, 255}, 1)
-			// gocv.Line(&sample, p2, p3, color.RGBA{255, 255, 0, 255}, 1)
-			// gocv.Line(&sample, p3, p1, color.RGBA{255, 255, 0, 255}, 1)
-
-			// gocv.Line(&img, pp1, pp2, color.RGBA{255, 255, 0, 255}, 1)
-			// gocv.Line(&img, pp2, pp3, color.RGBA{255, 255, 0, 255}, 1)
-			// gocv.Line(&img, pp3, pp1, color.RGBA{255, 255, 0, 255}, 1)
 		}
 	}
-	// utils.ShowImage(sample)
-	// utils.ShowImage(img)
 	return equals
 }
 
@@ -205,7 +196,7 @@ func Contour(img, sample gocv.Mat, goodMatch []MatchPoint, ratio, sampleWidth fl
 	miss := true
 	for set := 0; set < 5 && miss; set++ {
 		// Getting 3 similar triangles out of most equal descriptors
-		equals = matchTriangles(goodMatch, 3, img, sample)
+		equals = matchTriangles(goodMatch, 3)
 
 		if len(equals)/3 < 3 {
 			fmt.Printf("Not enough similar triangles in set %d (need 3, got %d)\n", set, len(equals)/3)
@@ -229,13 +220,6 @@ func Contour(img, sample gocv.Mat, goodMatch []MatchPoint, ratio, sampleWidth fl
 				miss = true
 				break
 			}
-			// gocv.Line(&img, pp1, pp2, color.RGBA{0, 255, 0, 255}, 1)
-			// gocv.Line(&img, pp2, pp3, color.RGBA{0, 255, 0, 255}, 1)
-			// gocv.Line(&img, pp3, pp1, color.RGBA{0, 255, 0, 255}, 1)
-
-			// gocv.Line(&sample, p1, p2, color.RGBA{0, 255, 0, 255}, 1)
-			// gocv.Line(&sample, p2, p3, color.RGBA{0, 255, 0, 255}, 1)
-			// gocv.Line(&sample, p3, p1, color.RGBA{0, 255, 0, 255}, 1)
 		}
 		if !miss {
 			break
@@ -245,17 +229,6 @@ func Contour(img, sample gocv.Mat, goodMatch []MatchPoint, ratio, sampleWidth fl
 	if miss {
 		return img, errors.New("Cannot find equaly located similar triangles")
 	}
-
-	// // var l, n []gocv.KeyPoint
-	// for _, v := range goodMatch {
-	// gocv.Circle(&sample, image.Point{int(v.a.keypoint.X), int(v.a.keypoint.Y)}, int(v.a.keypoint.Size), color.RGBA{0, 255, 0, 255}, 1)
-	// gocv.Circle(&img, image.Point{int(v.b.keypoint.X), int(v.b.keypoint.Y)}, int(v.b.keypoint.Size), color.RGBA{255, 0, 0, 255}, 1)
-	// 	// l = append(l, v.a.keypoint)
-	// 	// n = append(n, v.b.keypoint)
-	// }
-
-	// // m := gocv.GetHomographyWithKeyPoints(n, l, gocv.RA_RANSAC)
-	// // gocv.WarpPerspective(img, &img, m, image.Point{img.Cols(), img.Rows()})
 
 	theta1 := math.Atan2(equals[1].a.keypoint.Y-equals[0].a.keypoint.Y, equals[1].a.keypoint.X-equals[0].a.keypoint.X)
 	theta2 := math.Atan2(equals[1].b.keypoint.Y-equals[0].b.keypoint.Y, equals[1].b.keypoint.X-equals[0].b.keypoint.X)
@@ -290,15 +263,6 @@ func Contour(img, sample gocv.Mat, goodMatch []MatchPoint, ratio, sampleWidth fl
 	if bottom > float64(img.Rows()) {
 		bottom = float64(img.Rows())
 	}
-
-	// if log.IsDebug() {
-	// gocv.Circle(&img, image.Point{int(equals[1].b.keypoint.X), int(equals[1].b.keypoint.Y)}, 5, color.RGBA{0, 255, 0, 255}, 3)
-	// gocv.Line(&img, image.Point{int(left), int(top)}, image.Point{int(right), int(top)}, color.RGBA{255, 0, 0, 255}, 2)
-	// gocv.Line(&img, image.Point{int(right), int(top)}, image.Point{int(right), int(bottom)}, color.RGBA{255, 0, 0, 255}, 2)
-	// gocv.Line(&img, image.Point{int(right), int(bottom)}, image.Point{int(left), int(bottom)}, color.RGBA{255, 0, 0, 255}, 2)
-	// gocv.Line(&img, image.Point{int(left), int(bottom)}, image.Point{int(left), int(top)}, color.RGBA{255, 0, 0, 255}, 2)
-	// utils.ShowImage(img)
-	// }
 
 	img = img.Region(image.Rect(int(left), int(top), int(right), int(bottom)))
 
