@@ -28,7 +28,7 @@ func Recognize(file, template, preview string) (map[string]interface{}, string) 
 	cards, err := templates.Load(template)
 	if err != nil {
 		log.Print(log.ErrorLevel, "Failed to load \""+template+"\" template")
-		os.Exit(1)
+		return nil, ""
 	}
 
 	img := gocv.IMRead(file, gocv.IMReadColor)
@@ -50,7 +50,8 @@ func Recognize(file, template, preview string) (map[string]interface{}, string) 
 				log.Print(log.ErrorLevel, "Document sample file is missing")
 				return
 			}
-			s := gocv.IMRead(v.Sample, gocv.IMReadGrayScale)
+			s := gocv.IMRead(v.Sample, gocv.IMReadColor)
+			defer s.Close()
 			m := preprocessing.Match(img, s)
 			fmt.Printf("%s: %d\n", v.Type, len(m))
 
@@ -67,7 +68,10 @@ func Recognize(file, template, preview string) (map[string]interface{}, string) 
 		}
 	}
 
-	img, err = preprocessing.Contour(img, match.matchpoint, match.card.AspectRatio, float64(match.cols))
+	sample := gocv.IMRead(match.card.Sample, gocv.IMReadGrayScale)
+	defer sample.Close()
+
+	img, err = preprocessing.Contour(img, sample, match.matchpoint, match.card.AspectRatio, float64(match.cols))
 	if err != nil {
 		log.Print(log.ErrorLevel, err.Error())
 		return nil, ""
@@ -80,12 +84,9 @@ func Recognize(file, template, preview string) (map[string]interface{}, string) 
 	}
 
 	blocks, path := processing.RecognizeRegions(img, match.card, regions, preview)
-	output, err := processing.MatchBlocks(blocks, match.card)
-	if err != nil {
-		log.Print(log.ErrorLevel, err.Error())
-		return nil, ""
-	}
+	output := processing.MatchBlocks(blocks, match.card)
 
+	img.Close()
 	utils.Sanitize(output, match.card)
 	return output, path
 }

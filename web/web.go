@@ -32,7 +32,7 @@ func saveFile(file *multipart.FileHeader) error {
 	defer src.Close()
 
 	buff := make([]byte, 512)
-	if _, err := src.Read(buff); err != nil {
+	if _, err = src.Read(buff); err != nil {
 		return err
 	}
 
@@ -46,7 +46,7 @@ func saveFile(file *multipart.FileHeader) error {
 	}
 	defer dst.Close()
 
-	if _, err := src.Seek(0, 0); err != nil {
+	if _, err = src.Seek(0, 0); err != nil {
 		return err
 	}
 
@@ -77,7 +77,7 @@ func result(c echo.Context) error {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
-		if err := saveFile(face); err != nil {
+		if err = saveFile(face); err != nil {
 			return echo.NewHTTPError(http.StatusUnsupportedMediaType, err.Error())
 		}
 		facePreview = config.Web.Uploads + face.Filename
@@ -116,6 +116,7 @@ func Service() {
 	os.MkdirAll(config.Web.Preview, os.ModePerm)
 
 	e := echo.New()
+	defer e.Close()
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.BodyLimit(config.Web.UploadLimit))

@@ -43,6 +43,7 @@ func descriptorArr(gray gocv.Mat) (p []point) {
 	defer mask.Close()
 
 	k, d := sift.DetectAndCompute(gray, mask)
+	defer d.Close()
 
 	for i, v := range k {
 		var tmp []float64
@@ -51,7 +52,6 @@ func descriptorArr(gray gocv.Mat) (p []point) {
 		}
 		p = append(p, point{keypoint: v, descriptor: tmp})
 	}
-
 	return
 }
 
@@ -94,6 +94,7 @@ func matchDescriptors(a, b []point) []MatchPoint {
 			}
 			if d := arrayDistance(aa.descriptor, bb.descriptor); d < mp.distance {
 				mp = MatchPoint{a: aa, b: bb, distance: d}
+				index = i
 			}
 		}
 		// fmt.Printf("matching descriptors: %d/%d\r", len(a), k)
@@ -114,7 +115,7 @@ func filterGoodMatch(match []MatchPoint) []MatchPoint {
 	return goodMatch
 }
 
-func matchTriangles(goodMatch []MatchPoint, threshold int) []MatchPoint {
+func matchTriangles(goodMatch []MatchPoint, threshold int, img, sample gocv.Mat) []MatchPoint {
 	if len(goodMatch) == 0 {
 		return nil
 	}
@@ -146,8 +147,17 @@ func matchTriangles(goodMatch []MatchPoint, threshold int) []MatchPoint {
 			equals = append(equals, goodMatch[rand2])
 			equals = append(equals, goodMatch[rand3])
 			counter++
+			// gocv.Line(&sample, p1, p2, color.RGBA{255, 255, 0, 255}, 1)
+			// gocv.Line(&sample, p2, p3, color.RGBA{255, 255, 0, 255}, 1)
+			// gocv.Line(&sample, p3, p1, color.RGBA{255, 255, 0, 255}, 1)
+
+			// gocv.Line(&img, pp1, pp2, color.RGBA{255, 255, 0, 255}, 1)
+			// gocv.Line(&img, pp2, pp3, color.RGBA{255, 255, 0, 255}, 1)
+			// gocv.Line(&img, pp3, pp1, color.RGBA{255, 255, 0, 255}, 1)
 		}
 	}
+	// utils.ShowImage(sample)
+	// utils.ShowImage(img)
 	return equals
 }
 
@@ -180,16 +190,22 @@ func Match(img, sample gocv.Mat) []MatchPoint {
 	gocv.CvtColor(img, &gray, gocv.ColorBGRToGray)
 	b := descriptorArr(gray)
 
+	// for _, v := range *a {
+	// gocv.Circle(&sample, image.Point{int(v.keypoint.X), int(v.keypoint.Y)}, int(v.keypoint.Size), color.RGBA{255, 0, 0, 255}, 1)
+	// }
+
+	// utils.ShowImage(sample)
+
 	return filterGoodMatch(matchDescriptors(*a, b))
 }
 
-func Contour(img gocv.Mat, goodMatch []MatchPoint, ratio, sampleWidth float64) (gocv.Mat, error) {
+func Contour(img, sample gocv.Mat, goodMatch []MatchPoint, ratio, sampleWidth float64) (gocv.Mat, error) {
 	// Two steps matching: finding similar triangles and matching their position
 	var equals []MatchPoint
 	miss := true
 	for set := 0; set < 5 && miss; set++ {
 		// Getting 3 similar triangles out of most equal descriptors
-		equals = matchTriangles(goodMatch, 3)
+		equals = matchTriangles(goodMatch, 3, img, sample)
 
 		if len(equals)/3 < 3 {
 			fmt.Printf("Not enough similar triangles in set %d (need 3, got %d)\n", set, len(equals)/3)
@@ -213,6 +229,13 @@ func Contour(img gocv.Mat, goodMatch []MatchPoint, ratio, sampleWidth float64) (
 				miss = true
 				break
 			}
+			// gocv.Line(&img, pp1, pp2, color.RGBA{0, 255, 0, 255}, 1)
+			// gocv.Line(&img, pp2, pp3, color.RGBA{0, 255, 0, 255}, 1)
+			// gocv.Line(&img, pp3, pp1, color.RGBA{0, 255, 0, 255}, 1)
+
+			// gocv.Line(&sample, p1, p2, color.RGBA{0, 255, 0, 255}, 1)
+			// gocv.Line(&sample, p2, p3, color.RGBA{0, 255, 0, 255}, 1)
+			// gocv.Line(&sample, p3, p1, color.RGBA{0, 255, 0, 255}, 1)
 		}
 		if !miss {
 			break
@@ -223,17 +246,16 @@ func Contour(img gocv.Mat, goodMatch []MatchPoint, ratio, sampleWidth float64) (
 		return img, errors.New("Cannot find equaly located similar triangles")
 	}
 
-	// var l, n []gocv.KeyPoint
+	// // var l, n []gocv.KeyPoint
 	// for _, v := range goodMatch {
-	// 	gocv.Circle(&img, image.Point{int(v.a.keypoint.X), int(v.a.keypoint.Y)}, 3, color.RGBA{0, 255, 0, 255}, 4)
-	// 	gocv.Circle(&img, image.Point{int(v.b.keypoint.X), int(v.b.keypoint.Y)}, 3, color.RGBA{0, 0, 255, 255}, 4)
-	// 	l = append(l, v.a.keypoint)
-	// 	n = append(n, v.b.keypoint)
+	// gocv.Circle(&sample, image.Point{int(v.a.keypoint.X), int(v.a.keypoint.Y)}, int(v.a.keypoint.Size), color.RGBA{0, 255, 0, 255}, 1)
+	// gocv.Circle(&img, image.Point{int(v.b.keypoint.X), int(v.b.keypoint.Y)}, int(v.b.keypoint.Size), color.RGBA{255, 0, 0, 255}, 1)
+	// 	// l = append(l, v.a.keypoint)
+	// 	// n = append(n, v.b.keypoint)
 	// }
 
-	// m := gocv.GetHomographyWithKeyPoints(n, l, gocv.RA_RANSAC)
-	// gocv.WarpPerspective(img, &img, m, image.Point{img.Cols(), img.Rows()})
-	// utils.ShowImage(img)
+	// // m := gocv.GetHomographyWithKeyPoints(n, l, gocv.RA_RANSAC)
+	// // gocv.WarpPerspective(img, &img, m, image.Point{img.Cols(), img.Rows()})
 
 	theta1 := math.Atan2(equals[1].a.keypoint.Y-equals[0].a.keypoint.Y, equals[1].a.keypoint.X-equals[0].a.keypoint.X)
 	theta2 := math.Atan2(equals[1].b.keypoint.Y-equals[0].b.keypoint.Y, equals[1].b.keypoint.X-equals[0].b.keypoint.X)

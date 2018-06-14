@@ -2,13 +2,14 @@ FROM ubuntu:16.04
 
 LABEL maintainer="rock@maddevs.io"
 
-ARG GO_VERSION="1.10"
+ARG GO_VERSION="1.10.2"
 
 ENV GOPATH="/go"
 ENV PATH=$PATH:/usr/local/go/bin:/go/bin
+
 ENV CGO_CPPFLAGS="-I/usr/local/include"
-ENV CGO_CXXFLAGS="--std=c++1z"
-ENV CGO_LDFLAGS="-L/usr/local/lib -lopencv_core -lopencv_face -lopencv_videoio -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs -lopencv_objdetect -lopencv_features2d -lopencv_video -lopencv_dnn -lopencv_xfeatures2d -lopencv_plot -lopencv_tracking"
+ENV CGO_LDFLAGS="-L/usr/local/lib -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs -lopencv_objdetect -lopencv_features2d -lopencv_xfeatures2d"
+# ENV CGO_CXXFLAGS="--std=c++1z"
 
 RUN apt-get update && apt-get -y install \
     sudo \
@@ -40,15 +41,19 @@ RUN apt-get update && apt-get -y install \
 RUN wget https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz
 RUN tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz
 
-
-# RUN go get -v -u -d gocv.io/x/gocv
-RUN git clone https://github.com/hybridgroup/gocv.git /go/src/gocv.io/x/gocv
+RUN go get -v -u -d gocv.io/x/gocv
+# RUN git clone https://gocv.io/x/gocv /go/src/gocv.io/x/gocv
 WORKDIR /go/src/gocv.io/x/gocv
-RUN make install
-RUN go install gocv.io/x/gocv
+RUN make download
+RUN make build
+RUN make sudo_install
+RUN make clean
+# RUN make install
+# RUN go install gocv.io/x/gocv
 
 WORKDIR /go/src/github.com/maddevsio/go-idmatch
 COPY . .
+RUN mv ./xfeatures2d.go /go/src/gocv.io/x/gocv/contrib
 
 RUN go get -d -v ./...
 RUN go install -v ./...
