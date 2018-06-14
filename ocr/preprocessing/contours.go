@@ -43,6 +43,7 @@ func descriptorArr(gray gocv.Mat) (p []point) {
 	defer mask.Close()
 
 	k, d := sift.DetectAndCompute(gray, mask)
+	defer d.Close()
 
 	for i, v := range k {
 		var tmp []float64
@@ -51,7 +52,6 @@ func descriptorArr(gray gocv.Mat) (p []point) {
 		}
 		p = append(p, point{keypoint: v, descriptor: tmp})
 	}
-
 	return
 }
 
@@ -94,6 +94,7 @@ func matchDescriptors(a, b []point) []MatchPoint {
 			}
 			if d := arrayDistance(aa.descriptor, bb.descriptor); d < mp.distance {
 				mp = MatchPoint{a: aa, b: bb, distance: d}
+				index = i
 			}
 		}
 		// fmt.Printf("matching descriptors: %d/%d\r", len(a), k)
@@ -180,10 +181,16 @@ func Match(img, sample gocv.Mat) []MatchPoint {
 	gocv.CvtColor(img, &gray, gocv.ColorBGRToGray)
 	b := descriptorArr(gray)
 
+	// for _, v := range *a {
+	// gocv.Circle(&sample, image.Point{int(v.keypoint.X), int(v.keypoint.Y)}, int(v.keypoint.Size), color.RGBA{255, 0, 0, 255}, 1)
+	// }
+
+	// utils.ShowImage(sample)
+
 	return filterGoodMatch(matchDescriptors(*a, b))
 }
 
-func Contour(img gocv.Mat, goodMatch []MatchPoint, ratio, sampleWidth float64) (gocv.Mat, error) {
+func Contour(img, sample gocv.Mat, goodMatch []MatchPoint, ratio, sampleWidth float64) (gocv.Mat, error) {
 	// Two steps matching: finding similar triangles and matching their position
 	var equals []MatchPoint
 	miss := true
@@ -223,18 +230,6 @@ func Contour(img gocv.Mat, goodMatch []MatchPoint, ratio, sampleWidth float64) (
 		return img, errors.New("Cannot find equaly located similar triangles")
 	}
 
-	// var l, n []gocv.KeyPoint
-	// for _, v := range goodMatch {
-	// 	gocv.Circle(&img, image.Point{int(v.a.keypoint.X), int(v.a.keypoint.Y)}, 3, color.RGBA{0, 255, 0, 255}, 4)
-	// 	gocv.Circle(&img, image.Point{int(v.b.keypoint.X), int(v.b.keypoint.Y)}, 3, color.RGBA{0, 0, 255, 255}, 4)
-	// 	l = append(l, v.a.keypoint)
-	// 	n = append(n, v.b.keypoint)
-	// }
-
-	// m := gocv.GetHomographyWithKeyPoints(n, l, gocv.RA_RANSAC)
-	// gocv.WarpPerspective(img, &img, m, image.Point{img.Cols(), img.Rows()})
-	// utils.ShowImage(img)
-
 	theta1 := math.Atan2(equals[1].a.keypoint.Y-equals[0].a.keypoint.Y, equals[1].a.keypoint.X-equals[0].a.keypoint.X)
 	theta2 := math.Atan2(equals[1].b.keypoint.Y-equals[0].b.keypoint.Y, equals[1].b.keypoint.X-equals[0].b.keypoint.X)
 	theta := (theta2 - theta1) * 180 / math.Pi
@@ -268,15 +263,6 @@ func Contour(img gocv.Mat, goodMatch []MatchPoint, ratio, sampleWidth float64) (
 	if bottom > float64(img.Rows()) {
 		bottom = float64(img.Rows())
 	}
-
-	// if log.IsDebug() {
-	// gocv.Circle(&img, image.Point{int(equals[1].b.keypoint.X), int(equals[1].b.keypoint.Y)}, 5, color.RGBA{0, 255, 0, 255}, 3)
-	// gocv.Line(&img, image.Point{int(left), int(top)}, image.Point{int(right), int(top)}, color.RGBA{255, 0, 0, 255}, 2)
-	// gocv.Line(&img, image.Point{int(right), int(top)}, image.Point{int(right), int(bottom)}, color.RGBA{255, 0, 0, 255}, 2)
-	// gocv.Line(&img, image.Point{int(right), int(bottom)}, image.Point{int(left), int(bottom)}, color.RGBA{255, 0, 0, 255}, 2)
-	// gocv.Line(&img, image.Point{int(left), int(bottom)}, image.Point{int(left), int(top)}, color.RGBA{255, 0, 0, 255}, 2)
-	// utils.ShowImage(img)
-	// }
 
 	img = img.Region(image.Rect(int(left), int(top), int(right), int(bottom)))
 

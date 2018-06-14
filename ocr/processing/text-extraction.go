@@ -7,13 +7,10 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"strings"
-	"sync"
 
 	"github.com/maddevsio/go-idmatch/log"
 	"github.com/maddevsio/go-idmatch/templates"
 
-	"github.com/maddevsio/go-idmatch/utils"
 	"github.com/otiai10/gosseract"
 	"gocv.io/x/gocv"
 )
@@ -104,13 +101,17 @@ func RecognizeRegions(img gocv.Mat, card templates.Card, regions [][]image.Point
 
 	gocv.CvtColor(img, &gray, gocv.ColorBGRToGray)
 
-	blocks := make(chan block, 15)
-	var wg sync.WaitGroup
+	// blocks := make(chan block, 15)
+	// var wg sync.WaitGroup
+	client := gosseract.NewClient()
+	defer client.Close()
+	client.SetLanguage("rus")
 
 	for _, v := range regions {
 		rect := gocv.BoundingRect(v)
 		// roi := img.Region(rect)
 		roi := gray.Region(rect)
+		defer roi.Close()
 		if rect.Dx() < symbolWidth || rect.Dy() < symbolHeight/2 || rect.Dy() > symbolHeight*3 {
 			continue
 		}
@@ -123,43 +124,43 @@ func RecognizeRegions(img gocv.Mat, card templates.Card, regions [][]image.Point
 			continue
 		}
 
-		wg.Add(1)
-		go func(buf []byte, v []image.Point) {
-			defer wg.Done()
-			client := gosseract.NewClient()
-			defer client.Close()
-			client.SetLanguage("rus")
-			client.SetImageFromBytes(buf)
-			text, err := client.Text()
-			if err != nil {
-				return
-			}
-			// Handle only upper case text. Remove this block if lower case needed
-			if text != strings.ToUpper(text) {
-				return
-			}
+		client.SetImageFromBytes(buf)
 
-			b := block{
-				x:    float64(rect.Min.X) / float64(img.Cols()),
-				y:    float64(rect.Min.Y) / float64(img.Rows()),
-				w:    float64(rect.Dx()) / float64(img.Cols()),
-				h:    float64(rect.Dy()) / float64(img.Rows()),
-				text: text}
+		// wg.Add(1)
+		// go func(client gosseract.Client) {
+		// defer wg.Done()
+		text, err := client.Text()
+		if err != nil {
+			return
+		}
+		// Handle only upper case text. Remove this block if lower case needed
+		// if text != strings.ToUpper(text) {
+		// return
+		// }
 
-			gocv.Rectangle(&img, gocv.BoundingRect(v), color.RGBA{255, 0, 0, 255}, 2)
-			log.Print(log.DebugLevel, fmt.Sprint(b))
+		b := block{
+			x:    float64(rect.Min.X) / float64(img.Cols()),
+			y:    float64(rect.Min.Y) / float64(img.Rows()),
+			w:    float64(rect.Dx()) / float64(img.Cols()),
+			h:    float64(rect.Dy()) / float64(img.Rows()),
+			text: text}
 
-			blocks <- b
-		}(buf, v)
-		// utils.ShowImageInNamedWindow(roix4, fmt.Sprintf("RecognizeRegions: %d %d", rect.Dx(), rect.Dy()))
-	}
+		log.Print(log.DebugLevel, fmt.Sprint(b))
 
-	wg.Wait()
-	close(blocks)
-
-	for b := range blocks {
+		// blocks <- b
+		// }(*client)
 		result = append(result, b)
+
+		// utils.ShowImageInNamedWindow(roix4, fmt.Sprintf("RecognizeRegions: %d %d", rect.Dx(), rect.Dy()))
+		gocv.Rectangle(&img, rect, color.RGBA{255, 0, 0, 255}, 2)
 	}
+
+	// wg.Wait()
+	// close(blocks)
+
+	// for b := range blocks {
+	// result = append(result, b)
+	// }
 
 	if len(preview) != 0 {
 		hash := md5.New()
@@ -168,7 +169,7 @@ func RecognizeRegions(img gocv.Mat, card templates.Card, regions [][]image.Point
 		gocv.IMWrite(path, img)
 	}
 
-	utils.ShowImage(img)
+	// utils.ShowImage(img)
 
 	return result, path
 }

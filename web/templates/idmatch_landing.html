@@ -163,7 +163,7 @@
             <select id="template" name='template'>
               <option value="">Auto</option>
               {{ range $key, $value := .templates }}
-              <option value={{ $value }}>{{ $value.Type }}</option>
+              <option value={{ $value.Type }}>{{ $value.Type }}</option>
               {{ end }}
             </select>
             <input type='hidden' name='template' id="template" value=""/>

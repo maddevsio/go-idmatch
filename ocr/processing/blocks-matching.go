@@ -6,7 +6,7 @@ import (
 	"github.com/maddevsio/go-idmatch/templates"
 )
 
-func MatchBlocks(blocks []block, t templates.Card) (map[string]interface{}, error) {
+func MatchBlocks(blocks []block, t templates.Card) map[string]interface{} {
 	data := make(map[string]interface{})
 	for _, field := range t.Structure {
 		min := 100.0
@@ -18,5 +18,5 @@ func MatchBlocks(blocks []block, t templates.Card) (map[string]interface{}, erro
 			}
 		}
 	}
-	return data, nil
+	return data
 }
