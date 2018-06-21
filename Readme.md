@@ -1,5 +1,5 @@
 # Go-idmatch
-Go-idmatch is a golang implementation of [idmatch](github.com/maddevsio/idmatch) project - opensource text recognition service. Currently, go-idmatch supports recognition of Kyrgyz Republic ID cards.
+Go-idmatch is a golang implementation of [idmatch](https://github.com/maddevsio/idmatch) project - opensource text recognition service.
 
 Demo website: [idmatch.co](https://idmatch.co/) 
 

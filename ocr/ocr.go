@@ -84,7 +84,7 @@ func Recognize(file, template, preview string) (map[string]interface{}, string) 
 	}
 
 	blocks, path := processing.RecognizeRegions(img, match.card, regions, preview)
-	output := processing.MatchBlocks(blocks, match.card)
+	output := processing.MatchBlocks(blocks, match.card, img)
 
 	img.Close()
 	utils.Sanitize(output, match.card)
