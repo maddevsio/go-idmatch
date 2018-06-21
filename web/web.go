@@ -1,6 +1,7 @@
 package web
 
 import (
+	"encoding/json"
 	"errors"
 	"html/template"
 	"io"
@@ -55,6 +56,23 @@ func saveFile(file *multipart.FileHeader) error {
 	}
 
 	return nil
+}
+
+func api(c echo.Context) error {
+	id, err := c.FormFile("id")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	if err = saveFile(id); err != nil {
+		return echo.NewHTTPError(http.StatusUnsupportedMediaType, err.Error())
+	}
+
+	data, _ := ocr.Recognize(config.Web.Uploads+id.Filename, "", "")
+	response, err := json.Marshal(data)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, "")
+	}
+	return c.JSON(http.StatusOK, string(response))
 }
 
 func landing(c echo.Context) error {
@@ -132,6 +150,7 @@ func Service() {
 
 	e.GET("/", landing)
 	e.POST("/", result)
+	e.POST("/match-and-ocr", api)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
