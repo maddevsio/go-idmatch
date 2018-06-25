@@ -19,14 +19,14 @@ paths:
       summary: Send document image to recognition engine
       parameters:
         - in: formData
+          name: url
+          type: string
+          description: Image URL
+          example: http://grs.gov.kg/uploads/a/admin/5733b07170.png
+        - in: formData
           name: id
           description: Document image
-          required: true
           type: file
-          examples:
-              cat:  # <--- example name
-                summary: An example of a cat
-                externalValue: http://api.example.com/examples/cat.json
       responses:
         200:
           description: JSON with recognized text
@@ -46,16 +46,22 @@ definitions:
     properties:
       firstname:
         type: string
+        example: Гитхаб
       surname:
         type: string
+        example: Октокот
       middlename:
         type: string
+        example: Оупенсорсович
       serial:
         type: string
+        example: AN01234567
       birthday:
         type: string
+        example: 01.01.1970
       gender:
         type: string
+        example: Э
   error:
     type: object
     required:
@@ -63,3 +69,4 @@ definitions:
     properties:
       message:
         type: string
+        example: "Internal server error"
