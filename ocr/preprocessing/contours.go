@@ -264,6 +264,10 @@ func Contour(img, sample gocv.Mat, goodMatch []MatchPoint, ratio, sampleWidth fl
 		bottom = float64(img.Rows())
 	}
 
+	// gocv.Rectangle(&img, image.Rect(int(left), int(top), int(right), int(bottom)), color.RGBA{0, 255, 0, 255}, 2)
+
+	// utils.ShowImage(img)
+
 	img = img.Region(image.Rect(int(left), int(top), int(right), int(bottom)))
 
 	return img, nil
