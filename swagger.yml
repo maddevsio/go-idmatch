@@ -8,28 +8,54 @@ info:
     email: rock@maddevs.io
     url: https://idmatch.co
 consumes:
-- application/json
+- multipart/form-data
 produces:
 - application/json
 schemes:
 - https
 paths:
-  /match-and-ocr:
+  /ocr:
     post:
-      description: Send document image to recognition engine
+      summary: Send document image to recognition engine
       parameters:
-        - name: id
+        - in: formData
+          name: id
+          description: Document image
           required: true
           type: file
-          description: Document image
+          examples:
+              cat:  # <--- example name
+                summary: An example of a cat
+                externalValue: http://api.example.com/examples/cat.json
       responses:
         200:
           description: JSON with recognized text
+          content:
+            application/json:
+          schema:
+            $ref: "#/definitions/item"
         default:
           description: generic error response
+          content:
+            application/json:
           schema:
             $ref: "#/definitions/error"
 definitions:
+  item:
+    type: object
+    properties:
+      firstname:
+        type: string
+      surname:
+        type: string
+      middlename:
+        type: string
+      serial:
+        type: string
+      birthday:
+        type: string
+      gender:
+        type: string
   error:
     type: object
     required:

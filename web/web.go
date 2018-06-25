@@ -150,7 +150,7 @@ func Service() {
 
 	e.GET("/", landing)
 	e.POST("/", result)
-	e.POST("/match-and-ocr", api)
+	e.POST("/ocr", api)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
