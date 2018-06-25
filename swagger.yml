@@ -1,0 +1,39 @@
+swagger: "2.0"
+info:
+  host: idmatch.co
+  description: Document recognition based on OpenCV
+  title: Go-idmatch
+  contact:
+    name: Mad Devs
+    email: rock@maddevs.io
+    url: https://idmatch.co
+consumes:
+- application/json
+produces:
+- application/json
+schemes:
+- https
+paths:
+  /match-and-ocr:
+    post:
+      description: Send document image to recognition engine
+      parameters:
+        - name: id
+          required: true
+          type: file
+          description: Document image
+      responses:
+        200:
+          description: JSON with recognized text
+        default:
+          description: generic error response
+          schema:
+            $ref: "#/definitions/error"
+definitions:
+  error:
+    type: object
+    required:
+      - message
+    properties:
+      message:
+        type: string
