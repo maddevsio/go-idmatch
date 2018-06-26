@@ -186,6 +186,7 @@ func Service() {
 	e.Static("/static", config.Web.Static)
 	e.Static("web/uploads", config.Web.Uploads)
 	e.Static("web/preview", config.Web.Preview)
+	e.Static("swagger", "swagger.yml")
 
 	t := &Template{
 		templates: template.Must(template.ParseGlob(config.Web.Templates + "/idmatch_landing.html")),
