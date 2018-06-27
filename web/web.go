@@ -3,6 +3,7 @@ package web
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -116,7 +117,8 @@ func api(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, "")
 	}
-	return c.JSON(http.StatusOK, string(response))
+	fmt.Println(string(response))
+	return c.JSONPretty(http.StatusOK, json.RawMessage(string(response)), "   ")
 }
 
 func landing(c echo.Context) error {
@@ -164,6 +166,8 @@ func result(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
+
+	fmt.Println(data)
 
 	return c.Render(http.StatusOK, "landing", map[string]interface{}{
 		"templates":    list,
