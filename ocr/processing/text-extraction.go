@@ -131,7 +131,7 @@ func RecognizeRegions(img gocv.Mat, card templates.Card, regions [][]image.Point
 		// defer wg.Done()
 		text, err := client.Text()
 		if err != nil {
-			return
+			continue
 		}
 		// Handle only upper case text. Remove this block if lower case needed
 		// if text != strings.ToUpper(text) {

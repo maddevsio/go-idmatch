@@ -43,7 +43,6 @@ type Card struct {
 }
 
 func Load(name string) (list []Card, err error) {
-	var f TemplateFile
 	// Need to add config package with paths
 	dir, err := ioutil.ReadDir(config.Template.Path)
 	if err != nil {
@@ -51,6 +50,7 @@ func Load(name string) (list []Card, err error) {
 	}
 
 	for _, file := range dir {
+		var f TemplateFile
 		jsonFile, err := ioutil.ReadFile(config.Template.Path + file.Name())
 		if err != nil {
 			return list, err
