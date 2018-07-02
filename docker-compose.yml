@@ -1,0 +1,29 @@
+version: '2'
+
+services:
+
+  proxy:
+    image: jwilder/nginx-proxy:alpine
+    ports:
+      - 80:80
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./headers.conf:/etc/nginx/conf.d/headers.conf:ro
+    depends_on:
+      - go-idmatch
+      - swagger-ui
+
+  go-idmatch:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - VIRTUAL_HOST=idmatch.local
+      - VIRTUAL_PORT=8080
+
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    environment:
+      - VIRTUAL_HOST=api.idmatch.local
+      - VIRTUAL_PORT=8080
+      - API_URL=http://idmatch.local/swagger
