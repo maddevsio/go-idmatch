@@ -37,20 +37,7 @@ func Sanitize(documentMap map[string]interface{}, card templates.Card) {
 			regex = "[^0-9]+"
 		case "gender":
 			text = gender(text)
-			regex = "[^а-яА-Я]+"
-		// Need to find a better way to handle following cases
-		case "kg_old_serial":
-			if len(text) < 4 {
-				continue
-			}
-			text = "AN" + text[4:]
-			regex = "[^AN0-9]+"
-		case "kg_new_serial":
-			if len(text) < 2 {
-				continue
-			}
-			text = "ID" + text[2:]
-			regex = "[^ID0-9]+"
+			regex = "[^а-яА-Я]$"
 		}
 
 		if n := strings.Index(text, "\n"); n > 0 {
@@ -63,6 +50,13 @@ func Sanitize(documentMap map[string]interface{}, card templates.Card) {
 		clearText := reg.ReplaceAllString(text, "")
 		if len(clearText) == 0 {
 			clearText = ErrorMessage
+			continue
+		}
+		if v.Length != 0 && len(clearText) > v.Length {
+			clearText = clearText[len(clearText)-v.Length:]
+		}
+		if v.Prefix != "" {
+			clearText = v.Prefix + clearText
 		}
 		// else if text != clearText {
 		// 	clearText += " (?)"

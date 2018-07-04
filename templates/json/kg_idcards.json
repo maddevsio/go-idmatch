@@ -28,7 +28,7 @@
                 {"field": "surname", "type": "cyrillic", "x": 0.36, "y": 0.375},
                 {"field": "firstname", "type": "cyrillic", "x": 0.36, "y": 0.475},
                 {"field": "middlename", "type": "cyrillic", "x": 0.36, "y": 0.605},
-                {"field": "serial", "type": "kg_old_serial", "x": 0.07, "y": 0.87}
+                {"field": "serial", "type": "number", "prefix": "AN", "length": 7, "x": 0.07, "y": 0.87}
             ]
         },
         {
@@ -58,7 +58,7 @@
                 {"field": "firstname", "type": "cyrillic", "x": 0.39, "y": 0.40},
                 {"field": "middlename", "type": "cyrillic", "x": 0.38, "y": 0.54},
                 {"field": "nationality", "type": "cyrillic", "x": 0.38, "y": 0.72},
-                {"field": "serial", "type": "kg_new_serial", "x": 0.72, "y": 0.84}
+                {"field": "serial", "type": "number", "prefix": "ID", "length": 7, "x": 0.72, "y": 0.84}
             ]
         }
     ]
