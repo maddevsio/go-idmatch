@@ -35,10 +35,12 @@ type Card struct {
 	MaxQualitySizes              MaxQualitySizesT              `json:"maxQualitySizes"`
 
 	Structure []struct {
-		Field string  `json:"field"`
-		X     float64 `json:"x"`
-		Y     float64 `json:"y"`
-		Type  string  `json:"type"`
+		Field  string  `json:"field"`
+		X      float64 `json:"x"`
+		Y      float64 `json:"y"`
+		Type   string  `json:"type"`
+		Prefix string  `json:"prefix"`
+		Length int     `json:"length"`
 	} `json:"structure"`
 }
 
