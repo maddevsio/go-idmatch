@@ -99,25 +99,38 @@ func getFile(url string) (string, error) {
 }
 
 func api(c echo.Context) error {
-	var filename, url string
-	if id, err := c.FormFile("id"); err == nil {
-		if filename, err = saveFile(id); err != nil {
-			return echo.NewHTTPError(http.StatusUnsupportedMediaType, err.Error())
-		}
-	} else if url = c.FormValue("url"); len(url) != 0 {
-		if filename, err = getFile(url); err != nil {
-			return echo.NewHTTPError(http.StatusUnsupportedMediaType, err.Error())
-		}
-	} else {
+	id, err := c.FormFile("id")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	filename, err := saveFile(id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnsupportedMediaType, err.Error())
+	}
+
+	id2, err := c.FormFile("id2")
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	data, _ := ocr.Recognize(config.Web.Uploads+filename, "", "")
+	filename2, err := saveFile(id2)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnsupportedMediaType, err.Error())
+	}
+
+	uploadFolder := config.Web.Uploads
+	data, _ := ocr.Recognize(uploadFolder+filename, "", "")
+
+	data2, _ := ocr.Recognize(uploadFolder+filename2, "", "")
+	for k, v := range data2 {
+		data[k] = v
+	}
+
 	response, err := json.Marshal(data)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, "")
 	}
-	fmt.Println(string(response))
+
 	return c.JSONPretty(http.StatusOK, json.RawMessage(string(response)), "   ")
 }
 
@@ -156,7 +169,6 @@ func result(c echo.Context) error {
 	}
 
 	data, idPreview := ocr.Recognize(config.Web.Uploads+id.Filename, template, config.Web.Preview)
-
 	if data == nil || len(data) == 0 {
 		data = map[string]interface{}{"error": "Could not recognize document"}
 		idPreview = "static/images/empty-contour.png"
