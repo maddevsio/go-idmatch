@@ -70,9 +70,9 @@ func getFile(url string) (string, error) {
 	}
 
 	defer response.Body.Close()
-	filename := path.Base(response.Request.URL.String())
+	frontside := path.Base(response.Request.URL.String())
 
-	file, err := os.Create(config.Web.Uploads + filename)
+	file, err := os.Create(config.Web.Uploads + frontside)
 	if err != nil {
 		return "", err
 	}
@@ -95,24 +95,34 @@ func getFile(url string) (string, error) {
 		return "", errors.New("Image is too big")
 	}
 
-	return filename, file.Close()
+	return frontside, file.Close()
 }
 
 func api(c echo.Context) error {
-	var filename, url string
+	var frontside, backside string
+
 	if id, err := c.FormFile("id"); err == nil {
-		if filename, err = saveFile(id); err != nil {
+		if frontside, err = saveFile(id); err != nil {
 			return echo.NewHTTPError(http.StatusUnsupportedMediaType, err.Error())
 		}
-	} else if url = c.FormValue("url"); len(url) != 0 {
-		if filename, err = getFile(url); err != nil {
+	} else if url := c.FormValue("url"); len(url) != 0 {
+		if frontside, err = getFile(url); err != nil {
 			return echo.NewHTTPError(http.StatusUnsupportedMediaType, err.Error())
+		}
+	} else if front, err := c.FormFile("front"); err == nil {
+		if frontside, err = saveFile(front); err != nil {
+			return echo.NewHTTPError(http.StatusUnsupportedMediaType, err.Error())
+		}
+		if back, err := c.FormFile("back"); err == nil {
+			if backside, err = saveFile(back); err != nil {
+				return echo.NewHTTPError(http.StatusUnsupportedMediaType, err.Error())
+			}
 		}
 	} else {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	data, _ := ocr.Recognize(config.Web.Uploads+filename, "", "")
+	data, _ := ocr.Recognize(config.Web.Uploads+frontside, config.Web.Uploads+backside, "", "")
 	response, err := json.Marshal(data)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, "")
@@ -155,7 +165,8 @@ func result(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnsupportedMediaType, err.Error())
 	}
 
-	data, idPreview := ocr.Recognize(config.Web.Uploads+id.Filename, template, config.Web.Preview)
+	// TODO: add backside support
+	data, idPreview := ocr.Recognize(config.Web.Uploads+id.Filename, "", template, config.Web.Preview)
 
 	if data == nil || len(data) == 0 {
 		data = map[string]interface{}{"error": "Could not recognize document"}

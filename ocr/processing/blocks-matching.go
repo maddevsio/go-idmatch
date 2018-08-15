@@ -10,7 +10,7 @@ import (
 	"gocv.io/x/gocv"
 )
 
-func MatchBlocks(blocks []block, t templates.Card, img gocv.Mat) map[string]interface{} {
+func MatchBlocks(blocks []block, t templates.Side, img gocv.Mat) map[string]interface{} {
 	data := make(map[string]interface{})
 	for _, field := range t.Structure {
 		min := 100.0

@@ -1,8 +1,6 @@
 package processing
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"image"
@@ -87,7 +85,7 @@ func TextRegions(img gocv.Mat, card templates.Card) ([][]image.Point, error) {
 }
 
 //RecognizeRegions sends found regions to tesseract ocr
-func RecognizeRegions(img gocv.Mat, card templates.Card, regions [][]image.Point, preview string) (result []block, path string) {
+func RecognizeRegions(img gocv.Mat, card templates.Card, regions [][]image.Point) (result []block, preview gocv.Mat) {
 	//We have to get these values from JSON or somehow from document
 
 	symbolHeightCoeff := card.MaxQualitySizes.MaxQualitySymHeight / card.MaxQualitySizes.MaxQualityHeight
@@ -162,14 +160,14 @@ func RecognizeRegions(img gocv.Mat, card templates.Card, regions [][]image.Point
 	// result = append(result, b)
 	// }
 
-	if len(preview) != 0 {
-		hash := md5.New()
-		hash.Write(img.ToBytes())
-		path = preview + "/" + hex.EncodeToString(hash.Sum(nil)) + ".jpeg"
-		gocv.IMWrite(path, img)
-	}
+	// if len(preview) != 0 {
+	// 	hash := md5.New()
+	// 	hash.Write(img.ToBytes())
+	// 	path = preview + "/" + hex.EncodeToString(hash.Sum(nil)) + ".jpeg"
+	// 	gocv.IMWrite(path, img)
+	// }
 
 	// utils.ShowImage(img)
 
-	return result, path
+	return result, img
 }

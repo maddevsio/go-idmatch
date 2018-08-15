@@ -22,7 +22,7 @@ func gender(gender string) string {
 func Sanitize(documentMap map[string]interface{}, card templates.Card) {
 	regex := "[^а-яa-zА-ЯA-Z0-9№ ]+"
 
-	for _, v := range card.Structure {
+	for _, v := range card.Front.Structure {
 		if documentMap[v.Field] == nil {
 			continue
 		}

@@ -26,26 +26,29 @@ type TextRegionFilterCoefficientsT struct {
 	H2 float64 `json:"h2"`
 }
 
-type Card struct {
-	Type                         string                        `json:"type"`
-	AspectRatio                  float64                       `json:"aspectRatio"`
-	TextBlocksThreshold          float64                       `json:"textBlocksThreshold"`
-	Sample                       string                        `json:"sample"`
-	TextRegionFilterCoefficients TextRegionFilterCoefficientsT `json:"textRegionFilterCoefficients"`
-	MaxQualitySizes              MaxQualitySizesT              `json:"maxQualitySizes"`
-
+type Side struct {
+	Sample    string
 	Structure []struct {
-		Field  string  `json:"field"`
-		X      float64 `json:"x"`
-		Y      float64 `json:"y"`
-		Type   string  `json:"type"`
-		Prefix string  `json:"prefix"`
-		Length int     `json:"length"`
-	} `json:"structure"`
+		Field  string
+		X      float64
+		Y      float64
+		Type   string
+		Prefix string
+		Length int
+	}
+}
+
+type Card struct {
+	Type                         string
+	AspectRatio                  float64
+	TextBlocksThreshold          float64
+	TextRegionFilterCoefficients TextRegionFilterCoefficientsT
+	MaxQualitySizes              MaxQualitySizesT
+	Front                        Side
+	Back                         Side
 }
 
 func Load(name string) (list []Card, err error) {
-	// Need to add config package with paths
 	dir, err := ioutil.ReadDir(config.Template.Path)
 	if err != nil {
 		return list, err

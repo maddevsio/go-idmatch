@@ -4,22 +4,23 @@
         "type": "KG idcard old",
         "aspectRatio": 1.58,
         "textBlocksThreshold": 0.07,
-        "sample": "templates/sample/kg_idcard.png",
         "textRegionFilterCoefficients": 
-            {
-                "w1": 0.008511,
-                "h1": 0.006689,
-                "w2": 0.010638, 
-                "h2": 0.006689
-            },
+        {
+            "w1": 0.008511,
+            "h1": 0.006689,
+            "w2": 0.010638, 
+            "h2": 0.006689
+        },
         "maxQualitySizes":
-            {
-                "maxQualitySymWidth": 34.1,
-                "maxQualityWidth": 1239.0,
-                "maxQualitySymHeight": 37.0,
-                "maxQualityHeight": 781.0
-            },
-        "structure": 
+        {
+            "maxQualitySymWidth": 34.1,
+            "maxQualityWidth": 1239.0,
+            "maxQualitySymHeight": 37.0,
+            "maxQualityHeight": 781.0
+        },
+        "front": {
+            "sample": "templates/sample/kg_idcard.png",
+            "structure": 
             [
                 {"field": "inn", "type": "number", "x": 0.67, "y": 0.97},
                 {"field": "pob", "type": "cyrillic", "x": 0.36, "y": 0.825},
@@ -31,35 +32,13 @@
                 {"field": "serial", "type": "number", "prefix": "AN", "length": 7, "x": 0.07, "y": 0.87}
             ]
         },
-        {
-        "type": "KG idcard new",
-        "aspectRatio": 1.58,
-        "textBlocksThreshold": 0.025,
-        "sample": "templates/sample/kg_idcard_new.png",
-        "textRegionFilterCoefficients": 
-            {
-                "w1": 0.008511,
-                "h1": 0.006689,
-                "w2": 0.010638, 
-                "h2": 0.006689
-            },
-        "maxQualitySizes":
-            {
-                "maxQualitySymWidth": 34.1,
-                "maxQualityWidth": 1239.0,
-                "maxQualitySymHeight": 37.0,
-                "maxQualityHeight": 781.0
-            },
-        "structure": 
-            [
-                {"field": "gender", "type": "gender", "x": 0.39, "y": 0.61},
-                {"field": "birthday", "type": "number", "x": 0.39, "y": 0.82},
-                {"field": "surname", "type": "cyrillic", "x": 0.38, "y": 0.27},
-                {"field": "firstname", "type": "cyrillic", "x": 0.39, "y": 0.40},
-                {"field": "middlename", "type": "cyrillic", "x": 0.38, "y": 0.54},
-                {"field": "nationality", "type": "cyrillic", "x": 0.38, "y": 0.72},
-                {"field": "serial", "type": "number", "prefix": "ID", "length": 7, "x": 0.72, "y": 0.84}
-            ]
+        "back": {
+            "sample": "/home/ubuntu/Pictures/old_back.jpg",
+            "structure": 
+                [
+                    {"field": "inn", "type": "number", "x": 0.67, "y": 0.97}
+                ]
+            }
         }
     ]
 }

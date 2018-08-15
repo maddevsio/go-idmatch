@@ -62,8 +62,8 @@ func CheckSolution(folderPath, flagTemplate string) error {
 
 	fmt.Println(folderPath)
 	filepath.Walk(folderPath,
-		func(path string, info os.FileInfo, err error) error {
-			ext := filepath.Ext(path)
+		func(frontside string, info os.FileInfo, err error) error {
+			ext := filepath.Ext(frontside)
 			if info.IsDir() || !isImage(ext) {
 				return nil
 			}
@@ -89,7 +89,7 @@ func CheckSolution(folderPath, flagTemplate string) error {
 				return nil
 			}
 
-			ocrInfo, _ := Recognize(path, flagTemplate, "")
+			ocrInfo, _ := Recognize(frontside, "", flagTemplate, "")
 			fmt.Println((1.0 - compareJSONAndOcr(jsonInfo, ocrInfo)) * 100.0)
 			return nil
 		})
