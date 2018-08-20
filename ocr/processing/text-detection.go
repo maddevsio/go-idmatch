@@ -160,13 +160,6 @@ func RecognizeRegions(img gocv.Mat, card templates.Card, regions [][]image.Point
 	// result = append(result, b)
 	// }
 
-	// if len(preview) != 0 {
-	// 	hash := md5.New()
-	// 	hash.Write(img.ToBytes())
-	// 	path = preview + "/" + hex.EncodeToString(hash.Sum(nil)) + ".jpeg"
-	// 	gocv.IMWrite(path, img)
-	// }
-
 	// utils.ShowImage(img)
 
 	return result, img

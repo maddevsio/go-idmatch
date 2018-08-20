@@ -192,7 +192,9 @@
               </div>
               {{ end }}
           <div class="results-images--item-wrap">
-            <img src="/{{ .id_preview }}">
+            {{ range $key, $value := .id_preview }}
+            <img src="/{{ $value }}">
+            {{ end }}
           </div>
         </div>
         <div class="results-code">

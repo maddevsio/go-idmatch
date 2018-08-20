@@ -57,11 +57,10 @@ func main() {
 						cli.StringFlag{Name: "template", Usage: "document template to use"},
 						cli.StringFlag{Name: "preview", Usage: "path to export preview image"}},
 					Action: func(c *cli.Context) error {
-						result, path := ocr.Recognize(c.String("front"), c.String("back"), c.String("template"), c.String("preview"))
+						result, _ := ocr.Recognize(c.String("front"), c.String("back"), c.String("template"), c.String("preview"))
 						for k, v := range result {
 							fmt.Printf("%s: %s\n", k, v)
 						}
-						fmt.Println(path)
 						return nil
 					},
 				},

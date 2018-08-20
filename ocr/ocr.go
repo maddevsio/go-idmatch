@@ -1,6 +1,8 @@
 package ocr
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"os"
 	"sync"
@@ -9,6 +11,7 @@ import (
 	"github.com/maddevsio/go-idmatch/ocr/preprocessing"
 	"github.com/maddevsio/go-idmatch/ocr/processing"
 	"github.com/maddevsio/go-idmatch/templates"
+	"github.com/maddevsio/go-idmatch/utils"
 	"gocv.io/x/gocv"
 )
 
@@ -29,24 +32,25 @@ func contour(side templates.Side, ratio float64) (gocv.Mat, error) {
 }
 
 func regions(img gocv.Mat, c templates.Card) ([]processing.Block, error) {
-	regions, err := processing.TextRegions(img, c)
+	region, err := processing.TextRegions(img, c)
 	if err != nil {
 		return nil, err
 	}
-	blocks, _ := processing.RecognizeRegions(img, c, regions)
+	blocks, _ := processing.RecognizeRegions(img, c, region)
 	return blocks, nil
 }
 
-func Recognize(front, back, template, preview string) (map[string]interface{}, string) {
+func Recognize(front, back, template, preview string) (map[string]interface{}, []string) {
+	var path []string
 	cards, err := templates.Load(template)
 	if err != nil {
 		log.Print(log.ErrorLevel, "Failed to load \""+template+"\" template")
-		return nil, ""
+		return nil, path
 	}
 
 	if len(front) == 0 && len(back) == 0 {
 		log.Print(log.ErrorLevel, "Please provide at least one side image of document")
-		return nil, ""
+		return nil, path
 	}
 
 	// A bit more uglyness
@@ -91,7 +95,7 @@ func Recognize(front, back, template, preview string) (map[string]interface{}, s
 
 	match.Front.Img = frontside
 	match.Back.Img = backside
-	output := make(chan []templates.Field, 10)
+	output := make(chan templates.Side, 10)
 
 	for _, v := range []templates.Side{match.Front, match.Back} {
 		wg.Add(1)
@@ -108,24 +112,43 @@ func Recognize(front, back, template, preview string) (map[string]interface{}, s
 					log.Print(log.ErrorLevel, err.Error())
 					return
 				}
+				v.Img = img
 				processing.MatchBlocks(blocks, v, v.Img)
 				processing.RecognizeText(v.Structure)
-				fmt.Println(v.Structure)
-				output <- v.Structure
+				output <- v
 			}
 		}(v)
 	}
 	wg.Wait()
 	close(output)
 
-	var data []templates.Field
+	var data []templates.Side
 	for m := range output {
-		data = append(m, data...)
+		data = append(data, m)
 	}
+
+	if len(preview) != 0 {
+		hash := md5.New()
+		for _, v := range data {
+			hash.Write(v.Img.ToBytes())
+			p := preview + "/" + hex.EncodeToString(hash.Sum(nil)) + ".jpeg"
+			gocv.IMWrite(p, v.Img)
+			path = append(path, p)
+		}
+	}
+
+	utils.Sanitize(data)
 
 	r := make(map[string]interface{})
 	for _, v := range data {
-		r[v.Name] = v.Text
+		if log.IsDebug() {
+			utils.ShowImageInNamedWindow(v.Img, v.Sample)
+		}
+		for _, vv := range v.Structure {
+			if len(vv.Text) != 0 && !vv.Hide {
+				r[vv.Name] = vv.Text
+			}
+		}
 	}
-	return r, ""
+	return r, path
 }

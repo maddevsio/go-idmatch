@@ -165,12 +165,11 @@ func result(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnsupportedMediaType, err.Error())
 	}
 
-	// TODO: add backside support
 	data, idPreview := ocr.Recognize(config.Web.Uploads+id.Filename, "", template, config.Web.Preview)
 
 	if data == nil || len(data) == 0 {
 		data = map[string]interface{}{"error": "Could not recognize document"}
-		idPreview = "static/images/empty-contour.png"
+		idPreview = []string{"static/images/empty-contour.png"}
 	}
 
 	list, err := templates.Load("")
