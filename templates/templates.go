@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 
 	"github.com/maddevsio/go-idmatch/config"
+	"github.com/maddevsio/go-idmatch/ocr/preprocessing"
+	"gocv.io/x/gocv"
 )
 
 type TemplateFile struct {
@@ -26,16 +28,26 @@ type TextRegionFilterCoefficientsT struct {
 	H2 float64 `json:"h2"`
 }
 
-type Side struct {
-	Sample    string
-	Structure []struct {
-		Field  string
-		X      float64
-		Y      float64
-		Type   string
-		Prefix string
-		Length int
+type Field struct {
+	Name     string
+	Text     string
+	Raw      []byte
+	Type     string
+	Language string
+	Prefix   string
+	Length   int
+	Position struct {
+		X float64
+		Y float64
 	}
+}
+
+type Side struct {
+	Img       gocv.Mat
+	Sample    string
+	Match     []preprocessing.MatchPoint
+	Cols      float64
+	Structure []Field
 }
 
 type Card struct {
@@ -44,8 +56,7 @@ type Card struct {
 	TextBlocksThreshold          float64
 	TextRegionFilterCoefficients TextRegionFilterCoefficientsT
 	MaxQualitySizes              MaxQualitySizesT
-	Front                        Side
-	Back                         Side
+	Front, Back                  Side
 }
 
 func Load(name string) (list []Card, err error) {

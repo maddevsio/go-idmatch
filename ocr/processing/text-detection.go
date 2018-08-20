@@ -2,20 +2,18 @@ package processing
 
 import (
 	"errors"
-	"fmt"
 	"image"
 	"image/color"
 
-	"github.com/maddevsio/go-idmatch/log"
 	"github.com/maddevsio/go-idmatch/templates"
 
-	"github.com/otiai10/gosseract"
 	"gocv.io/x/gocv"
 )
 
-type block struct {
+type Block struct {
 	x, y, h, w float64
 	text       string
+	raw        []byte
 }
 
 //
@@ -85,7 +83,7 @@ func TextRegions(img gocv.Mat, card templates.Card) ([][]image.Point, error) {
 }
 
 //RecognizeRegions sends found regions to tesseract ocr
-func RecognizeRegions(img gocv.Mat, card templates.Card, regions [][]image.Point) (result []block, preview gocv.Mat) {
+func RecognizeRegions(img gocv.Mat, card templates.Card, regions [][]image.Point) (result []Block, preview gocv.Mat) {
 	//We have to get these values from JSON or somehow from document
 
 	symbolHeightCoeff := card.MaxQualitySizes.MaxQualitySymHeight / card.MaxQualitySizes.MaxQualityHeight
@@ -99,11 +97,11 @@ func RecognizeRegions(img gocv.Mat, card templates.Card, regions [][]image.Point
 
 	gocv.CvtColor(img, &gray, gocv.ColorBGRToGray)
 
-	// blocks := make(chan block, 15)
+	// blocks := make(chan Block, 15)
 	// var wg sync.WaitGroup
-	client := gosseract.NewClient()
-	defer client.Close()
-	client.SetLanguage("rus")
+	// client := gosseract.NewClient()
+	// defer client.Close()
+	// client.SetLanguage("rus")
 
 	for _, v := range regions {
 		rect := gocv.BoundingRect(v)
@@ -122,28 +120,30 @@ func RecognizeRegions(img gocv.Mat, card templates.Card, regions [][]image.Point
 			continue
 		}
 
-		client.SetImageFromBytes(buf)
+		// client.SetImageFromBytes(buf)
 
 		// wg.Add(1)
 		// go func(client gosseract.Client) {
 		// defer wg.Done()
-		text, err := client.Text()
-		if err != nil {
-			continue
-		}
-		// Handle only upper case text. Remove this block if lower case needed
+		// text, err := client.Text()
+		// if err != nil {
+		// continue
+		// }
+		// Handle only upper case text. Remove this Block if lower case needed
 		// if text != strings.ToUpper(text) {
-		// return
+		// 	return
 		// }
 
-		b := block{
-			x:    float64(rect.Min.X) / float64(img.Cols()),
-			y:    float64(rect.Min.Y) / float64(img.Rows()),
-			w:    float64(rect.Dx()) / float64(img.Cols()),
-			h:    float64(rect.Dy()) / float64(img.Rows()),
-			text: text}
+		b := Block{
+			x: float64(rect.Min.X) / float64(img.Cols()),
+			y: float64(rect.Min.Y) / float64(img.Rows()),
+			w: float64(rect.Dx()) / float64(img.Cols()),
+			h: float64(rect.Dy()) / float64(img.Rows()),
+			// text: text,
+			raw: buf,
+		}
 
-		log.Print(log.DebugLevel, fmt.Sprint(b))
+		// log.Print(log.DebugLevel, fmt.Sprint(b))
 
 		// blocks <- b
 		// }(*client)

@@ -22,7 +22,7 @@ func showImageInternal(image gocv.Mat, winName string) {
 }
 
 func ShowImage(image gocv.Mat) {
-	showImageInternal(image, "Hello")
+	showImageInternal(image, "idmatch")
 }
 
 func ShowImageInNamedWindow(image gocv.Mat, winName string) {

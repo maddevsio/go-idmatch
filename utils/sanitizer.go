@@ -19,16 +19,11 @@ func gender(gender string) string {
 	return ""
 }
 
-func Sanitize(documentMap map[string]interface{}, card templates.Card) {
+func Sanitize(data []templates.Field) {
 	regex := "[^а-яa-zА-ЯA-Z0-9№ ]+"
 
-	for _, v := range card.Front.Structure {
-		if documentMap[v.Field] == nil {
-			continue
-		}
-		text := documentMap[v.Field].(string)
-
-		switch v.Type {
+	for i, field := range data {
+		switch field.Type {
 		case "cyrillic":
 			regex = "[^а-яА-Я№ ]+"
 		case "latin":
@@ -36,31 +31,31 @@ func Sanitize(documentMap map[string]interface{}, card templates.Card) {
 		case "number":
 			regex = "[^0-9]+"
 		case "gender":
-			text = gender(text)
+			data[i].Text = gender(field.Text)
 			regex = "[^а-яА-Я]$"
 		}
 
-		if n := strings.Index(text, "\n"); n > 0 {
-			text = text[:n]
+		if n := strings.Index(data[i].Text, "\n"); n > 0 {
+			data[i].Text = data[i].Text[:n]
 		}
 		reg, err := regexp.Compile(regex)
 		if err != nil {
 			log.Print(log.ErrorLevel, err.Error())
 		}
-		clearText := reg.ReplaceAllString(text, "")
+		clearText := reg.ReplaceAllString(data[i].Text, "")
 		if len(clearText) == 0 {
 			clearText = ErrorMessage
 			continue
 		}
-		if v.Length != 0 && len(clearText) > v.Length {
-			clearText = clearText[len(clearText)-v.Length:]
+		if field.Length != 0 && len(clearText) > field.Length {
+			clearText = clearText[len(clearText)-field.Length:]
 		}
-		if v.Prefix != "" {
-			clearText = v.Prefix + clearText
+		if field.Prefix != "" {
+			clearText = field.Prefix + clearText
 		}
 		// else if text != clearText {
 		// 	clearText += " (?)"
 		// }
-		documentMap[v.Field] = strings.ToUpper(clearText)
+		data[i].Text = strings.ToUpper(clearText)
 	}
 }
