@@ -22,21 +22,25 @@
             "sample": "templates/sample/kg_idcard.png",
             "structure": 
             [
-                {"name": "inn", "type": "number", 
+                {"name": "inn", "type": "custom", "regex": "^[1,2][0-9]{13}$",
+                    "position": {"x": 0.67, "y": 0.97}},
+                {"name": "birthday", "type": "date", "fragment": "1-9",
+                    "position": {"x": 0.67, "y": 0.97}},
+                {"name": "gender", "type": "gender", "fragment": "0-1",
                     "position": {"x": 0.67, "y": 0.97}},
                 {"name": "pob", "type": "string", 
                     "position": {"x": 0.36, "y": 0.825}},
                 {"name": "gender", "type": "gender",
                     "position": {"x": 0.73, "y": 0.715}},
-                {"name": "birthday", "type": "date", "length": 8,
+                {"name": "birthday", "type": "date",
                     "position": {"x": 0.36, "y": 0.715}},
                 {"name": "surname", "type": "string",
                     "position": {"x": 0.36, "y": 0.375}},
                 {"name": "firstname", "type": "string", 
                     "position": {"x": 0.36, "y": 0.475}},
-                {"name": "middlename", "type": "string", 
+                {"name": "secondname", "type": "string", 
                     "position": {"x": 0.36, "y": 0.605}},
-                {"name": "serial", "type": "number", "language": "eng", "prefix": "AN", "length": 7, 
+                {"name": "serial", "language": "eng", "length": 9, 
                     "position": {"x": 0.07, "y": 0.87}}
             ]
         },
@@ -47,29 +51,29 @@
                     {"name": "family", "type": "string", 
                         "options": ["НИКЕСИ ЖОК", "НИКЕСИЗ", "НИКЕСИ БАР", "НИКЕЛУУ", "ЖЕСИР"],
                         "position": {"x": 0.13, "y": 0.10}},
-                    {"name": "residence", 
+                    {"name": "address", "multiline": true, 
                         "position": {"x": 0.13, "y": 0.20}},
-                    {"name": "issued", "type": "date",  "length": 8,
+                    {"name": "issued_date", "type": "date", "length": 8,
                         "position": {"x": 0.13, "y": 0.35}},
-                    {"name": "expiration", "type": "date", "length": 8,
+                    {"name": "expiry_date", "type": "date", 
                         "position": {"x": 0.13, "y": 0.5}},
-                    {"name": "dept", "prefix": "МКК 50-", "length": 2,
+                    {"name": "issued_by", 
                         "position": {"x": 0.13, "y": 0.6}},
-                    {"name": "1", "language": "eng", "hide": true, 
-                        "position": {"x": 0.13, "y": 0.7},
-                        "validate": [
-                            {"field": "serial", "position" : "4-14"},
-                            {"field": "inn", "position": "16-30"},
-                            {"field": "birthday", "position": "17-24"}
-                        ]
-                    },
-                    {"name": "2", "language": "eng", "hide": true,
-                        "position": {"x": 0.13, "y": 0.87},
-                        "validate": [
-                            {"field": "surname", "delimeter": "<"},
-                            {"field": "firstname", "delimeter": "<"}
-                        ]
-                    }
+                    {"name": "birthday", "type": "date", "language": "eng", 
+                        "fragment": "9-17",
+                        "position": {"x": 0.13, "y": 0.7}},
+                    {"name": "inn", "type": "custom", "regex": "^[1-2]+[0-9]+$",
+                        "language": "eng", "fragment": "8-22",
+                        "position": {"x": 0.13, "y": 0.7}},
+                    {"name": "serial", "language": "eng", "type": "number",
+                        "fragment": "0-7", "prefix": "AN",
+                        "position": {"x": 0.13, "y": 0.7}},
+                    {"name": "gender", "type": "gender", "language": "eng", 
+                        "fragment": "8-8",
+                        "position": {"x": 0.13, "y": 0.7}},
+                    {"name": "name", "type": "cutsom", "regex": "[^A-Z<]+",
+                        "language": "eng", 
+                        "position": {"x": 0.13, "y": 0.85}}
                 ]
             }
         }

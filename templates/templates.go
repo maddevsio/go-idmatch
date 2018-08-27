@@ -28,24 +28,19 @@ type TextRegionFilterCoefficientsT struct {
 	H2 float64 `json:"h2"`
 }
 
-type Marker struct {
-	Field     string
-	Position  string
-	Delimeter string
-}
-
 type Field struct {
-	Name     string
-	Text     string
-	Raw      []byte
-	Type     string
-	Language string
-	Prefix   string
-	Length   int
-	Hide     bool
-	Options  []string
-	Validate []Marker
-	Position struct {
+	Name      string
+	Raw       []byte
+	Text      string
+	Type      string
+	Regex     string
+	Language  string
+	Prefix    string
+	Length    int
+	Fragment  string
+	Multiline bool
+	Options   []string
+	Position  struct {
 		X float64
 		Y float64
 	}

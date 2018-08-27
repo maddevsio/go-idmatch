@@ -44,7 +44,7 @@ func Recognize(front, back, template, preview string) (map[string]interface{}, [
 	var path []string
 	cards, err := templates.Load(template)
 	if err != nil {
-		log.Print(log.ErrorLevel, "Failed to load \""+template+"\" template")
+		log.Print(log.ErrorLevel, "Failed to load \""+template+"\" template: "+err.Error())
 		return nil, path
 	}
 
@@ -137,18 +137,18 @@ func Recognize(front, back, template, preview string) (map[string]interface{}, [
 		}
 	}
 
-	utils.Sanitize(data)
+	res := utils.Sanitize(data)
 
-	r := make(map[string]interface{})
-	for _, v := range data {
-		if log.IsDebug() {
-			utils.ShowImageInNamedWindow(v.Img, v.Sample)
-		}
-		for _, vv := range v.Structure {
-			if len(vv.Text) != 0 && !vv.Hide {
-				r[vv.Name] = vv.Text
-			}
-		}
-	}
-	return r, path
+	// r := make(map[string]interface{})
+	// for _, v := range data {
+	// 	if log.IsDebug() {
+	// 		utils.ShowImageInNamedWindow(v.Img, v.Sample)
+	// 	}
+	// 	for _, vv := range v.Structure {
+	// 		if len(vv.Text) != 0 {
+	// 			r[vv.Name] = vv.Text
+	// 		}
+	// 	}
+	// }
+	return res, path
 }
