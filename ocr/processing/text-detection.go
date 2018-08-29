@@ -99,13 +99,9 @@ func RecognizeRegions(img gocv.Mat, card templates.Card, regions [][]image.Point
 
 	// blocks := make(chan Block, 15)
 	// var wg sync.WaitGroup
-	// client := gosseract.NewClient()
-	// defer client.Close()
-	// client.SetLanguage("rus")
 
 	for _, v := range regions {
 		rect := gocv.BoundingRect(v)
-		// roi := img.Region(rect)
 		roi := gray.Region(rect)
 		defer roi.Close()
 		if rect.Dx() < symbolWidth || rect.Dy() < symbolHeight/2 || rect.Dy() > symbolHeight*3 {
@@ -135,32 +131,22 @@ func RecognizeRegions(img gocv.Mat, card templates.Card, regions [][]image.Point
 		// }
 
 		b := Block{
-			x: float64(rect.Min.X) / float64(img.Cols()),
-			y: float64(rect.Min.Y) / float64(img.Rows()),
-			w: float64(rect.Dx()) / float64(img.Cols()),
-			h: float64(rect.Dy()) / float64(img.Rows()),
-			// text: text,
+			x:   float64(rect.Min.X) / float64(img.Cols()),
+			y:   float64(rect.Min.Y) / float64(img.Rows()),
+			w:   float64(rect.Dx()) / float64(img.Cols()),
+			h:   float64(rect.Dy()) / float64(img.Rows()),
 			raw: buf,
 		}
-
-		// log.Print(log.DebugLevel, fmt.Sprint(b))
 
 		// blocks <- b
 		// }(*client)
 		result = append(result, b)
 
-		// utils.ShowImageInNamedWindow(roix4, fmt.Sprintf("RecognizeRegions: %d %d", rect.Dx(), rect.Dy()))
 		gocv.Rectangle(&img, rect, color.RGBA{255, 0, 0, 255}, 2)
 	}
 
 	// wg.Wait()
 	// close(blocks)
-
-	// for b := range blocks {
-	// result = append(result, b)
-	// }
-
-	// utils.ShowImage(img)
 
 	return result, img
 }

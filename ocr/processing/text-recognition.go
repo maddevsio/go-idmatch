@@ -1,8 +1,6 @@
 package processing
 
 import (
-	"image"
-	"image/color"
 	"math"
 
 	"github.com/maddevsio/go-idmatch/log"
@@ -14,11 +12,11 @@ import (
 func MatchBlocks(blocks []Block, t templates.Side, img gocv.Mat) {
 	for i, field := range t.Structure {
 		for _, item := range blocks {
-			gocv.Circle(&t.Img, image.Point{int(float64(img.Cols()) * field.Position.X), int(float64(img.Rows()) * field.Position.Y)}, 4, color.RGBA{0, 255, 0, 255}, 2)
-			gocv.PutText(&t.Img, field.Name, image.Point{int(float64(img.Cols()) * field.Position.X), int(float64(img.Rows()) * field.Position.Y)}, gocv.FontHersheyPlain, 1, color.RGBA{0, 0, 0, 255}, 1)
-			if math.Sqrt(float64((item.x-field.Position.X)*(item.x-field.Position.X))+float64((item.y-field.Position.Y)*(item.y-field.Position.Y))) < 0.1 {
+			// gocv.Circle(&t.Img, image.Point{int(float64(img.Cols()) * field.Position.X), int(float64(img.Rows()) * field.Position.Y)}, 4, color.RGBA{0, 255, 0, 255}, 2)
+			// gocv.PutText(&t.Img, field.Name, image.Point{int(float64(img.Cols()) * field.Position.X), int(float64(img.Rows()) * field.Position.Y)}, gocv.FontHersheyPlain, 1, color.RGBA{0, 0, 0, 255}, 1)
+			if math.Sqrt(float64((item.x-field.Position.X)*(item.x-field.Position.X))+float64((item.y-field.Position.Y)*(item.y-field.Position.Y))) < 0.11 {
 				t.Structure[i].Raw = item.raw
-				gocv.PutText(&img, field.Name, image.Point{int(float64(img.Cols()) * item.x), int(float64(img.Rows()) * item.y)}, gocv.FontHersheyPlain, 1, color.RGBA{0, 0, 0, 255}, 1)
+				// gocv.PutText(&img, field.Name, image.Point{int(float64(img.Cols()) * item.x), int(float64(img.Rows()) * item.y)}, gocv.FontHersheyPlain, 1, color.RGBA{0, 0, 0, 255}, 1)
 			}
 		}
 	}
