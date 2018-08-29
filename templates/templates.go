@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 
 	"github.com/maddevsio/go-idmatch/config"
+	"github.com/maddevsio/go-idmatch/ocr/preprocessing"
+	"gocv.io/x/gocv"
 )
 
 type TemplateFile struct {
@@ -26,26 +28,42 @@ type TextRegionFilterCoefficientsT struct {
 	H2 float64 `json:"h2"`
 }
 
-type Card struct {
-	Type                         string                        `json:"type"`
-	AspectRatio                  float64                       `json:"aspectRatio"`
-	TextBlocksThreshold          float64                       `json:"textBlocksThreshold"`
-	Sample                       string                        `json:"sample"`
-	TextRegionFilterCoefficients TextRegionFilterCoefficientsT `json:"textRegionFilterCoefficients"`
-	MaxQualitySizes              MaxQualitySizesT              `json:"maxQualitySizes"`
+type Field struct {
+	Name      string
+	Raw       []byte
+	Text      string
+	Type      string
+	Regex     string
+	Language  string
+	Prefix    string
+	Length    int
+	Fragment  string
+	Multiline bool
+	Options   []string
+	Position  struct {
+		X float64
+		Y float64
+	}
+}
 
-	Structure []struct {
-		Field  string  `json:"field"`
-		X      float64 `json:"x"`
-		Y      float64 `json:"y"`
-		Type   string  `json:"type"`
-		Prefix string  `json:"prefix"`
-		Length int     `json:"length"`
-	} `json:"structure"`
+type Side struct {
+	Img       gocv.Mat
+	Sample    string
+	Match     []preprocessing.MatchPoint
+	Cols      float64
+	Structure []Field
+}
+
+type Card struct {
+	Type                         string
+	AspectRatio                  float64
+	TextBlocksThreshold          float64
+	TextRegionFilterCoefficients TextRegionFilterCoefficientsT
+	MaxQualitySizes              MaxQualitySizesT
+	Front, Back                  Side
 }
 
 func Load(name string) (list []Card, err error) {
-	// Need to add config package with paths
 	dir, err := ioutil.ReadDir(config.Template.Path)
 	if err != nil {
 		return list, err

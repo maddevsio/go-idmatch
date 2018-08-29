@@ -52,14 +52,15 @@ func main() {
 					Name:  "image",
 					Usage: "send the image to ocr recognition",
 					Flags: []cli.Flag{
+						cli.StringFlag{Name: "front", Usage: "document frontside image"},
+						cli.StringFlag{Name: "back", Usage: "document backside image"},
 						cli.StringFlag{Name: "template", Usage: "document template to use"},
 						cli.StringFlag{Name: "preview", Usage: "path to export preview image"}},
 					Action: func(c *cli.Context) error {
-						result, path := ocr.Recognize(c.Args().Get(0), c.String("template"), c.String("preview"))
+						result, _ := ocr.Recognize(c.String("front"), c.String("back"), c.String("template"), c.String("preview"))
 						for k, v := range result {
 							fmt.Printf("%s: %s\n", k, v)
 						}
-						fmt.Println(path)
 						return nil
 					},
 				},
@@ -69,12 +70,8 @@ func main() {
 			Name:  "check_solution",
 			Usage: "Send folder with images and related json files to ocr recognition with match percentage calculating",
 			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name: flagNameCSFolderPath, Usage: "Path to data folder",
-				},
-				cli.StringFlag{
-					Name: flagNameTemplate, Value: flagOldKgId, Usage: "document template to use",
-				},
+				cli.StringFlag{Name: flagNameCSFolderPath, Usage: "Path to data folder"},
+				cli.StringFlag{Name: flagNameTemplate, Value: flagOldKgId, Usage: "document template to use"},
 			},
 			Action: func(c *cli.Context) error {
 				dir := c.String(flagNameCSFolderPath)

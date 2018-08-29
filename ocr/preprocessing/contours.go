@@ -182,7 +182,7 @@ func Match(img, sample gocv.Mat) []MatchPoint {
 	b := descriptorArr(gray)
 
 	// for _, v := range *a {
-	// gocv.Circle(&sample, image.Point{int(v.keypoint.X), int(v.keypoint.Y)}, int(v.keypoint.Size), color.RGBA{255, 0, 0, 255}, 1)
+	// 	gocv.Circle(&sample, image.Point{int(v.keypoint.X), int(v.keypoint.Y)}, int(v.keypoint.Size), color.RGBA{255, 0, 0, 255}, 1)
 	// }
 
 	// utils.ShowImage(sample)
@@ -194,7 +194,7 @@ func Contour(img, sample gocv.Mat, goodMatch []MatchPoint, ratio, sampleWidth fl
 	// Two steps matching: finding similar triangles and matching their position
 	var equals []MatchPoint
 	miss := true
-	for set := 0; set < 5 && miss; set++ {
+	for set := 0; set < 10 && miss; set++ {
 		// Getting 3 similar triangles out of most equal descriptors
 		equals = matchTriangles(goodMatch, 3)
 
@@ -265,7 +265,6 @@ func Contour(img, sample gocv.Mat, goodMatch []MatchPoint, ratio, sampleWidth fl
 	}
 
 	// gocv.Rectangle(&img, image.Rect(int(left), int(top), int(right), int(bottom)), color.RGBA{0, 255, 0, 255}, 2)
-
 	// utils.ShowImage(img)
 
 	img = img.Region(image.Rect(int(left), int(top), int(right), int(bottom)))
