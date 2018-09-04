@@ -1,4 +1,4 @@
-package utils
+package postprocessing
 
 import (
 	"fmt"
@@ -7,13 +7,14 @@ import (
 	"strings"
 	"time"
 
+	translit "github.com/gen1us2k/go-translit"
 	"github.com/maddevsio/go-idmatch/log"
 	"github.com/maddevsio/go-idmatch/templates"
 	"github.com/texttheater/golang-levenshtein/levenshtein"
 )
 
 const (
-	layout = "02012006"
+	dateLayout = "02012006"
 )
 
 func Sanitize(data []templates.Side) map[string]interface{} {
@@ -48,7 +49,6 @@ func Sanitize(data []templates.Side) map[string]interface{} {
 				log.Print(log.DebugLevel, "***END***")
 				continue
 			}
-
 			if len(field.Fragment) != 0 {
 				n := getFragment(clearText, field.Fragment)
 				// fmt.Println("FRAGMENT: ", field.Type, clearText, n)
@@ -80,10 +80,25 @@ func Sanitize(data []templates.Side) map[string]interface{} {
 				clearText = gender(clearText)
 			}
 
-			log.Print(log.DebugLevel, field.Name+" : "+clearText)
-			log.Print(log.DebugLevel, "***SUCCESS***")
-			data[i].Structure[j].Text = clearText
-			result[field.Name] = clearText
+			if len(field.Subfield.Fields) != 0 {
+				for k, v := range field.Subfield.Fields {
+					if fields := strings.Split(clearText, field.Subfield.Delimeter); len(fields) >= k {
+						if _, ok := result[field.Name]; !ok {
+							result[v] = fields[k]
+							if field.Transliterate {
+								result[v] = translit.Translit(fields[k])
+							}
+						}
+					}
+				}
+			}
+
+			if len(clearText) != 0 && len(field.Name) != 0 {
+				log.Print(log.DebugLevel, field.Name+" : "+clearText)
+				log.Print(log.DebugLevel, "***SUCCESS***")
+				data[i].Structure[j].Text = clearText
+				result[field.Name] = clearText
+			}
 		}
 	}
 	return result
@@ -116,12 +131,12 @@ func distance(source, target string) int {
 }
 
 func isDate(value string) bool {
-	t, err := time.Parse(layout, value)
+	t, err := time.Parse(dateLayout, value)
 	if err != nil {
 		// log.Print(log.WarnLevel, err.Error())
 		return false
 	}
-	if t.Format(layout) != value {
+	if t.Format(dateLayout) != value {
 		// log.Print(log.WarnLevel, "Date format error: "+value)
 		return false
 	}

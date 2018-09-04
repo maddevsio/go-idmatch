@@ -29,18 +29,23 @@ type TextRegionFilterCoefficientsT struct {
 }
 
 type Field struct {
-	Name      string
-	Raw       []byte
-	Text      string
-	Type      string
-	Regex     string
-	Language  string
-	Prefix    string
-	Length    int
-	Fragment  string
-	Multiline bool
-	Options   []string
-	Position  struct {
+	Name          string
+	Raw           []byte
+	Text          string
+	Type          string
+	Regex         string
+	Language      string
+	Prefix        string
+	Length        int
+	Fragment      string
+	Multiline     bool
+	Transliterate bool
+	Options       []string
+	Subfield      struct {
+		Fields    []string
+		Delimeter string
+	}
+	Position struct {
 		X float64
 		Y float64
 	}

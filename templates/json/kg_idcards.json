@@ -22,7 +22,8 @@
             "sample": "templates/sample/kg_idcard.png",
             "structure": 
             [
-                {"name": "inn", "type": "custom", "regex": "^[1,2][0-9]{13}$",
+                {"name": "inn", "type": "custom", 
+                    "length": 14, "regex": "^[1,2]^[0-9]",
                     "position": {"x": 0.67, "y": 0.97}},
                 {"name": "birthday", "type": "date", "fragment": "1-9",
                     "position": {"x": 0.67, "y": 0.97}},
@@ -40,7 +41,8 @@
                     "position": {"x": 0.36, "y": 0.475}},
                 {"name": "secondname", "type": "string", 
                     "position": {"x": 0.36, "y": 0.605}},
-                {"name": "serial", "language": "eng", "length": 9, 
+                {"name": "serial", "language": "eng", "length": 9,
+                    "type": "custom", "regex": "^[0-9]", 
                     "position": {"x": 0.07, "y": 0.87}}
             ]
         },
@@ -63,16 +65,20 @@
                         "fragment": "9-17",
                         "position": {"x": 0.13, "y": 0.7}},
                     {"name": "inn", "type": "number",
-                        "language": "eng", "fragment": "7-21",
+                        "language": "eng", "fragment": "9-23",
                         "position": {"x": 0.13, "y": 0.7}},
-                    {"name": "serial", "language": "eng", "type": "number",
-                        "fragment": "0-7", "prefix": "AN",
+                    {"name": "serial", "language": "eng", "fragment": "0-9",
+                        "type": "custom", "regex": "[^AN ^0-9]",
                         "position": {"x": 0.13, "y": 0.7}},
                     {"name": "gender", "type": "gender", "language": "eng", 
                         "fragment": "8-8",
                         "position": {"x": 0.13, "y": 0.7}},
-                    {"name": "name", "type": "cutsom", "regex": "[^A-Z <]+",
-                        "language": "eng", 
+                    {"type": "custom", "regex": "[^<A-Z]",
+                        "language": "eng", "transliterate": true,
+                        "subfield": {
+                            "fields": ["firstname", "surname"],
+                            "delimeter": "<<"
+                        },
                         "position": {"x": 0.13, "y": 0.85}}
                 ]
             }
