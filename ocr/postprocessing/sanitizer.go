@@ -25,8 +25,11 @@ func Sanitize(data []templates.Side) map[string]interface{} {
 				continue
 			}
 
-			log.Print(log.DebugLevel, "***BEGIN***")
-			log.Print(log.DebugLevel, field.Name)
+			if field.Minlength == 0 {
+				field.Minlength = 1
+			}
+
+			log.Print(log.DebugLevel, "***"+field.Name+"***")
 			log.Print(log.DebugLevel, fmt.Sprintf("%s %s", field.Text, field.Type))
 			regex := fieldRegex(field)
 			if n := strings.Index(field.Text, "\n"); n > 0 && !field.Multiline {
@@ -37,37 +40,36 @@ func Sanitize(data []templates.Side) map[string]interface{} {
 				log.Print(log.ErrorLevel, err.Error())
 				continue
 			}
-			clearText := reg.ReplaceAllString(field.Text, "")
-			if len(clearText) == 0 {
-				log.Print(log.DebugLevel, fmt.Sprintf("Regex mismatch: %s", regex))
+			clearText := strings.TrimSpace(reg.ReplaceAllString(field.Text, ""))
+			if (field.Length != 0 && len(clearText) != field.Length) || len(clearText) < field.Minlength {
+				log.Print(log.DebugLevel, fmt.Sprintf("Length mismatch: %s(%d), length: %d, min length: %d\n", clearText, len(clearText), field.Length, field.Minlength))
 				log.Print(log.DebugLevel, "***END***")
 				continue
 			}
 
-			if field.Length != 0 && len(clearText) != field.Length {
-				log.Print(log.DebugLevel, fmt.Sprintf("Len mismatch: %s(%d) != %d\n", clearText, len(clearText), field.Length))
-				log.Print(log.DebugLevel, "***END***")
-				continue
-			}
+			fmt.Println(clearText, field.Minlength)
+
 			if len(field.Fragment) != 0 {
-				n := getFragment(clearText, field.Fragment)
 				// fmt.Println("FRAGMENT: ", field.Type, clearText, n)
-				clearText = n
+				clearText = getFragment(clearText, field.Fragment)
+				fmt.Println("CCC: ", clearText)
 				if len(clearText) == 0 {
-					log.Print(log.DebugLevel, "Fragment len mismatch")
+					log.Print(log.DebugLevel, "Fragment length mismatch")
 					log.Print(log.DebugLevel, "***END***")
 					continue
 				}
 			}
 			clearText = field.Prefix + clearText
 
-			min := 10
-			for _, option := range field.Options {
-				if m := distance(clearText, option); min < m {
-					min = m
-					clearText = option
-					// fmt.Printf("OPTION: %s, DISTANCE: %d\n", option, m)
+			if len(field.Options) != 0 {
+				min := 10
+				for _, option := range field.Options {
+					if m := distance(clearText, option); m < min {
+						min = m
+						field.Text = option
+					}
 				}
+				clearText = field.Text
 			}
 
 			switch field.Type {
@@ -81,9 +83,9 @@ func Sanitize(data []templates.Side) map[string]interface{} {
 			}
 
 			if len(field.Subfield.Fields) != 0 {
-				for k, v := range field.Subfield.Fields {
-					if fields := strings.Split(clearText, field.Subfield.Delimeter); len(fields) >= k {
-						if _, ok := result[field.Name]; !ok {
+				if fields := strings.Split(clearText, field.Subfield.Delimeter); len(fields) >= len(field.Subfield.Fields) {
+					for k, v := range field.Subfield.Fields {
+						if _, ok := result[v]; !ok {
 							result[v] = fields[k]
 							if field.Transliterate {
 								result[v] = translit.Translit(fields[k])
@@ -157,8 +159,4 @@ func getFragment(text, fragment string) string {
 		return ""
 	}
 	return text[begin:end]
-}
-
-func splitField(templates.Field) {
-
 }

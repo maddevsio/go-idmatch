@@ -60,10 +60,6 @@ func Recognize(front, back, template, preview string) (map[string]interface{}, [
 	defer frontside.Close()
 	defer backside.Close()
 
-	var result map[string]interface{}
-	// var found float64
-
-	// for i := 0; i < 5 && found < 60; i++ {
 	var wg sync.WaitGroup
 	res := make(chan templates.Card, 5)
 
@@ -142,25 +138,13 @@ func Recognize(front, back, template, preview string) (map[string]interface{}, [
 		}
 	}
 
-	result = postprocessing.Sanitize(data)
+	result := postprocessing.Sanitize(data)
 
 	if log.IsDebug() {
 		for _, v := range data {
 			utils.ShowImageInNamedWindow(v.Img, v.Sample)
 		}
 	}
-
-	// var totalFields int
-	// if len(match.Front.Match) != 0 {
-	// 	totalFields += len(match.Front.Structure)
-	// }
-	// if len(match.Back.Match) != 0 {
-	// 	totalFields += len(match.Back.Structure)
-	// }
-	// found = (float64(len(result)) / float64(totalFields)) * 100
-
-	// fmt.Printf("ITERATION: %d, PERCENT: %f\n", i, found)
-	// }
 
 	return result, path
 }

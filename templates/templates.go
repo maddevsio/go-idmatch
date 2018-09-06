@@ -37,6 +37,7 @@ type Field struct {
 	Language      string
 	Prefix        string
 	Length        int
+	Minlength     int
 	Fragment      string
 	Multiline     bool
 	Transliterate bool
