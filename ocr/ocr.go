@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/maddevsio/go-idmatch/log"
+	"github.com/maddevsio/go-idmatch/ocr/postprocessing"
 	"github.com/maddevsio/go-idmatch/ocr/preprocessing"
 	"github.com/maddevsio/go-idmatch/ocr/processing"
 	"github.com/maddevsio/go-idmatch/templates"
@@ -60,7 +61,7 @@ func Recognize(front, back, template, preview string) (map[string]interface{}, [
 	defer backside.Close()
 
 	var wg sync.WaitGroup
-	result := make(chan templates.Card, 5)
+	res := make(chan templates.Card, 5)
 
 	for _, v := range cards {
 		wg.Add(1)
@@ -80,14 +81,14 @@ func Recognize(front, back, template, preview string) (map[string]interface{}, [
 				t.Back.Match = preprocessing.Match(backside, backSample)
 			}
 			fmt.Printf("%s: frontside %d, backside %d\n", v.Type, len(t.Front.Match), len(t.Back.Match))
-			result <- t
+			res <- t
 		}(v)
 	}
 	wg.Wait()
-	close(result)
+	close(res)
 
 	var match templates.Card
-	for v := range result {
+	for v := range res {
 		if len(v.Front.Match)+len(v.Back.Match) > len(match.Front.Match)+len(match.Back.Match) {
 			match = v
 		}
@@ -137,18 +138,13 @@ func Recognize(front, back, template, preview string) (map[string]interface{}, [
 		}
 	}
 
-	res := utils.Sanitize(data)
+	result := postprocessing.Sanitize(data)
 
-	// r := make(map[string]interface{})
-	// for _, v := range data {
-	// 	if log.IsDebug() {
-	// 		utils.ShowImageInNamedWindow(v.Img, v.Sample)
-	// 	}
-	// 	for _, vv := range v.Structure {
-	// 		if len(vv.Text) != 0 {
-	// 			r[vv.Name] = vv.Text
-	// 		}
-	// 	}
-	// }
-	return res, path
+	if log.IsDebug() {
+		for _, v := range data {
+			utils.ShowImageInNamedWindow(v.Img, v.Sample)
+		}
+	}
+
+	return result, path
 }

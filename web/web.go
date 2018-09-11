@@ -122,8 +122,17 @@ func api(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	data, _ := ocr.Recognize(config.Web.Uploads+frontside, config.Web.Uploads+backside, "", "")
-	response, err := json.Marshal(data)
+	result := make(map[string]interface{})
+	for i := 0; i < 3; i++ {
+		data, _ := ocr.Recognize(config.Web.Uploads+frontside, config.Web.Uploads+backside, "", "")
+		for k, v := range data {
+			if _, ok := result[k]; ok {
+				continue
+			}
+			result[k] = v
+		}
+	}
+	response, err := json.Marshal(result)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, "")
 	}

@@ -3,7 +3,6 @@ package processing
 import (
 	"errors"
 	"image"
-	"image/color"
 
 	"github.com/maddevsio/go-idmatch/templates"
 
@@ -142,7 +141,7 @@ func RecognizeRegions(img gocv.Mat, card templates.Card, regions [][]image.Point
 		// }(*client)
 		result = append(result, b)
 
-		gocv.Rectangle(&img, rect, color.RGBA{255, 0, 0, 255}, 2)
+		// gocv.Rectangle(&img, rect, color.RGBA{255, 0, 0, 255}, 2)
 	}
 
 	// wg.Wait()
