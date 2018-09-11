@@ -47,12 +47,9 @@ func Sanitize(data []templates.Side) map[string]interface{} {
 				continue
 			}
 
-			fmt.Println(clearText, field.Minlength)
-
 			if len(field.Fragment) != 0 {
 				// fmt.Println("FRAGMENT: ", field.Type, clearText, n)
 				clearText = getFragment(clearText, field.Fragment)
-				fmt.Println("CCC: ", clearText)
 				if len(clearText) == 0 {
 					log.Print(log.DebugLevel, "Fragment length mismatch")
 					log.Print(log.DebugLevel, "***END***")
