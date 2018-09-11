@@ -123,7 +123,7 @@ func api(c echo.Context) error {
 	}
 
 	result := make(map[string]interface{})
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 3; i++ {
 		data, _ := ocr.Recognize(config.Web.Uploads+frontside, config.Web.Uploads+backside, "", "")
 		for k, v := range data {
 			if _, ok := result[k]; ok {

@@ -178,6 +178,10 @@ func Match(img, sample gocv.Mat) []MatchPoint {
 	gray := gocv.NewMat()
 	defer gray.Close()
 
+	if img.Empty() {
+		return []MatchPoint{}
+	}
+
 	gocv.CvtColor(img, &gray, gocv.ColorBGRToGray)
 	b := descriptorArr(gray)
 
