@@ -88,7 +88,7 @@
         {
         "type": "KG idcard new",
         "aspectRatio": 1.58,
-        "textBlocksThreshold": 0.025,
+        "textBlocksThreshold": 0.07,
         "textRegionFilterCoefficients": 
         {
             "w1": 0.008511,
@@ -104,25 +104,51 @@
             "maxQualityHeight": 781.0
         },
         "front": {
-                "sample": "templates/sample/kg_idcard_new.png",
+                "sample": "templates/sample/kg_new_front.png",
                 "structure": 
                 [
                     {"name": "gender", "type": "gender", 
-                        "position": { "x": 0.43, "y": 0.65}},
+                        "position": { "x": 0.43, "y": 0.64}},
                     {"name": "birthday", "type": "date", 
-                        "position": { "x": 0.5, "y": 0.83}},
+                        "position": { "x": 0.5, "y": 0.81}},
                     {"name": "surname", "type": "string", 
-                        "position": { "x": 0.5, "y": 0.28}},
+                        "position": { "x": 0.5, "y": 0.27}},
                     {"name": "firstname", "type": "string", 
-                        "position": { "x": 0.45, "y": 0.41}},
+                        "position": { "x": 0.45, "y": 0.42}},
                     {"name": "secondname", "type": "string", 
-                        "position": { "x": 0.48, "y": 0.55}},
-                    {"name": "nationality", "type": "string", 
-                        "position": { "x": 0.5, "y": 0.73}},
-                    {"name": "serial", "language": "eng", "length": 9, 
-                        "position": {"x": 0.82, "y": 0.86}},
+                        "position": { "x": 0.48, "y": 0.56}},
+                    {"name": "nationallity", "type": "string", 
+                        "position": { "x": 0.5, "y": 0.72}},
+                    {"name": "serial", "language": "eng", "length": 9,
+                        "position": {"x": 0.82, "y": 0.83}},
                     {"name": "expiry_date", "type": "date", 
-                        "position": {"x": 0.82, "y": 0.98}}
+                        "position": {"x": 0.82, "y": 0.96}}
+                ]
+            },
+        "back": {
+            "sample": "templates/sample/kg_new_back.jpg",
+            "structure": 
+                [
+                    {"name": "pob", "type": "string", "multiline": true,  
+                        "position": { "x": 0.35, "y": 0.15}},
+                    {"name": "issued_by",
+                        "position": {"x": 0.35, "y": 0.35}},
+                    {"name": "issued_date", "type": "date", 
+                        "position": {"x": 0.35, "y": 0.48}},
+                    {"name": "inn", "type": "number",
+                        "position": {"x": 0.78, "y": 0.3}},
+                    {"name": "serial", "language": "eng", "length": 9, 
+                        "position": {"x": 0.78, "y": 0.48}},
+                    {"name": "gender", "type": "gender", "language": "eng", 
+                        "fragment": "0-0",
+                        "position": {"x": 0.78, "y": 0.3}},
+                    {"type": "custom", "regex": "[^<A-Z]",
+                        "language": "eng", "transliterate": true,
+                        "subfield": {
+                            "fields": ["firstname", "surname"],
+                            "delimeter": "<<"
+                        },
+                        "position": {"x": 0.15, "y": 0.9}}
                 ]
             }
         }
