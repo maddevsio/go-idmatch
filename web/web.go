@@ -12,6 +12,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"sync"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -122,16 +123,8 @@ func api(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	result := make(map[string]interface{})
-	for i := 0; i < 5; i++ {
-		data, _ := ocr.Recognize(config.Web.Uploads+frontside, config.Web.Uploads+backside, "", "")
-		for k, v := range data {
-			if _, ok := result[k]; ok {
-				continue
-			}
-			result[k] = v
-		}
-	}
+	result := getElectedResult(frontside, backside, c.FormValue("template"))
+
 	response, err := json.Marshal(result)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, "")
@@ -148,6 +141,56 @@ func landing(c echo.Context) error {
 	return c.Render(http.StatusOK, "landing", map[string]interface{}{
 		"templates": list,
 	})
+}
+
+func getElectedResult(frontside, backside, templ string) map[string]interface{} {
+	var wg sync.WaitGroup
+	resChan := make(chan map[string]interface{}, 3)
+	results := make(map[string]map[interface{}]int)
+
+	for i := 0; i < 3; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			data, _ := ocr.Recognize(config.Web.Uploads+frontside, config.Web.Uploads+backside, templ, "")
+			resChan <- data
+		}()
+	}
+	wg.Wait()
+	close(resChan)
+
+	for data := range resChan {
+		for field, value := range data {
+			if _, ok := results[field]; ok {
+				if _, ok := results[field][value]; ok {
+					results[field][value]++
+				} else {
+					results[field][value] = 1
+				}
+			} else {
+				results[field] = map[interface{}]int{
+					value: 1,
+				}
+			}
+		}
+	}
+
+	result := make(map[string]interface{})
+
+	for field, options := range results {
+		max := 1
+		for value, weight := range options {
+			if weight >= max {
+				result[field] = value
+				max = weight
+			}
+		}
+	}
+
+	fmt.Printf("Results: %+v\n", results)
+	fmt.Printf("Result: %+v\n", result)
+
+	return result
 }
 
 func result(c echo.Context) error {
