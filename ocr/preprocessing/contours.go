@@ -240,9 +240,35 @@ func Contour(img, sample gocv.Mat, goodMatch []MatchPoint, ratio, sampleWidth fl
 
 	fmt.Printf("rotation angle: %v\n", theta)
 
-	// Need to fix this ugly "*2" workaround with proper bounding rotation not to cut off edges
+	if theta < 0 {
+		theta = theta + 360
+	}
+
+	var theta_ float64 = 0
+
+	if theta <= 90 {
+		theta_ = theta
+	} else if theta <= 180 {
+		theta_ = (180 - theta)
+	} else if theta <= 270 {
+		theta_ = (theta - 180)
+	} else if theta <= 360 {
+		theta_ = (360 - theta)
+	} else {
+		return img, errors.New("Atan2 angle range violated")
+	}
+
+	theta_ = theta_ * math.Pi / 180
+
+	var dx_1 int = img.Cols()
+	var dy_1 int = img.Rows()
+
+	//proper bounding that doesn't cut off edges
+	dy_2 := int(math.Ceil(float64(dx_1)*math.Sin(theta_) + float64(dy_1)*math.Cos(theta_)))
+	dx_2 := int(math.Ceil(float64(dy_1)*math.Sin(theta_) + float64(dx_1)*math.Cos(theta_)))
+
 	rotation := gocv.GetRotationMatrix2D(image.Point{int(equals[1].b.keypoint.X), int(equals[1].b.keypoint.Y)}, theta, 1)
-	gocv.WarpAffine(img, &img, rotation, image.Point{img.Cols() * 2, img.Rows() * 2})
+	gocv.WarpAffine(img, &img, rotation, image.Point{dx_2, dy_2})
 
 	d1 := math.Sqrt(math.Pow(equals[1].a.keypoint.X-equals[0].a.keypoint.X, 2) + math.Pow(equals[1].a.keypoint.Y-equals[0].a.keypoint.Y, 2))
 	d2 := math.Sqrt(math.Pow(equals[1].b.keypoint.X-equals[0].b.keypoint.X, 2) + math.Pow(equals[1].b.keypoint.Y-equals[0].b.keypoint.Y, 2))
