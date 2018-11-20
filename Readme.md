@@ -15,7 +15,7 @@ go run main.go service
 **Docker**
 ```
 docker pull maddevsio/go-idmatch
-docker run -p 8080:8080 -it --rm --name go-idmatch-service go-idmatch
+docker run -p 8080:8080 -it --rm --name go-idmatch-service maddevsio/go-idmatch
 ```
 **CLI**
 ```
