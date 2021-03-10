@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/LibertusDio/go-idmatch/log"
+	"github.com/LibertusDio/go-idmatch/templates"
 	translit "github.com/gen1us2k/go-translit"
-	"github.com/maddevsio/go-idmatch/log"
-	"github.com/maddevsio/go-idmatch/templates"
 	"github.com/texttheater/golang-levenshtein/levenshtein"
 )
 

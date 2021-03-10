@@ -14,11 +14,11 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/LibertusDio/go-idmatch/config"
+	"github.com/LibertusDio/go-idmatch/ocr"
+	"github.com/LibertusDio/go-idmatch/templates"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"github.com/maddevsio/go-idmatch/config"
-	"github.com/maddevsio/go-idmatch/ocr"
-	"github.com/maddevsio/go-idmatch/templates"
 )
 
 type Template struct {

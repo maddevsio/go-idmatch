@@ -10,7 +10,7 @@ import (
 	"sync"
 
 	"gocv.io/x/gocv"
-	"gocv.io/x/gocv/contrib"
+	_ "gocv.io/x/gocv/contrib"
 )
 
 type point struct {
@@ -36,7 +36,7 @@ func InitCache() {
 }
 
 func descriptorArr(gray gocv.Mat) (p []point) {
-	sift := contrib.NewSIFT()
+	sift := gocv.NewSIFT()
 	defer sift.Close()
 
 	mask := gocv.NewMat()

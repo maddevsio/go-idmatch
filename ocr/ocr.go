@@ -7,12 +7,12 @@ import (
 	"os"
 	"sync"
 
-	"github.com/maddevsio/go-idmatch/log"
-	"github.com/maddevsio/go-idmatch/ocr/postprocessing"
-	"github.com/maddevsio/go-idmatch/ocr/preprocessing"
-	"github.com/maddevsio/go-idmatch/ocr/processing"
-	"github.com/maddevsio/go-idmatch/templates"
-	"github.com/maddevsio/go-idmatch/utils"
+	"github.com/LibertusDio/go-idmatch/log"
+	"github.com/LibertusDio/go-idmatch/ocr/postprocessing"
+	"github.com/LibertusDio/go-idmatch/ocr/preprocessing"
+	"github.com/LibertusDio/go-idmatch/ocr/processing"
+	"github.com/LibertusDio/go-idmatch/templates"
+	"github.com/LibertusDio/go-idmatch/utils"
 	"gocv.io/x/gocv"
 )
 

@@ -5,8 +5,8 @@ import (
 	"image/color"
 	"math"
 
-	"github.com/maddevsio/go-idmatch/log"
-	"github.com/maddevsio/go-idmatch/templates"
+	"github.com/LibertusDio/go-idmatch/log"
+	"github.com/LibertusDio/go-idmatch/templates"
 	"github.com/otiai10/gosseract"
 	"gocv.io/x/gocv"
 )

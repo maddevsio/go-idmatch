@@ -7,8 +7,8 @@ import (
 	"math"
 	"time"
 
-	"github.com/maddevsio/go-idmatch/templates"
-	"github.com/maddevsio/go-idmatch/utils"
+	"github.com/LibertusDio/go-idmatch/templates"
+	"github.com/LibertusDio/go-idmatch/utils"
 	"gocv.io/x/gocv"
 )
 

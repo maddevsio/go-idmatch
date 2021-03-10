@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/maddevsio/go-idmatch/log"
-	"github.com/maddevsio/go-idmatch/ocr"
-	"github.com/maddevsio/go-idmatch/ocr/preprocessing"
-	"github.com/maddevsio/go-idmatch/web"
+	"github.com/LibertusDio/go-idmatch/log"
+	"github.com/LibertusDio/go-idmatch/ocr"
+	"github.com/LibertusDio/go-idmatch/ocr/preprocessing"
+	"github.com/LibertusDio/go-idmatch/web"
 	"github.com/urfave/cli"
 )
 
@@ -21,7 +21,7 @@ func main() {
 	app.Version = "0.0.1"
 	app.Authors = []cli.Author{
 		cli.Author{
-			Name:  "Maddevsio",
+			Name:  "LibertusDio",
 			Email: "rock@maddevs.io",
 		},
 	}

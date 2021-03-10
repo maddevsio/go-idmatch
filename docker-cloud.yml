@@ -24,10 +24,10 @@ le-companion:
 
 idmatch:
   restart: always
-  image: maddevsio/go-idmatch
+  image: LibertusDio/go-idmatch
   autoredeploy: true
   volumes:
-    - /data/uploads:/go/src/github.com/maddevsio/go-idmatch/web/uploads
+    - /data/uploads:/go/src/github.com/LibertusDio/go-idmatch/web/uploads
   environment:
     - VIRTUAL_HOST=idmatch.co
     - VIRTUAL_PORT=80

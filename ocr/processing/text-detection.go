@@ -5,7 +5,7 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/maddevsio/go-idmatch/templates"
+	"github.com/LibertusDio/go-idmatch/templates"
 
 	"gocv.io/x/gocv"
 )

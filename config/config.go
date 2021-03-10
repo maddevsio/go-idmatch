@@ -3,7 +3,7 @@ package config
 import (
 	"os"
 
-	"github.com/maddevsio/go-idmatch/log"
+	"github.com/LibertusDio/go-idmatch/log"
 
 	gcfg "gopkg.in/gcfg.v1"
 )

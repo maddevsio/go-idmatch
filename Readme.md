@@ -1,5 +1,5 @@
 # Go-idmatch
-Go-idmatch is a golang implementation of [idmatch](https://github.com/maddevsio/idmatch) project - opensource text recognition service.
+Go-idmatch is a golang implementation of [idmatch](https://github.com/LibertusDio/idmatch) project - opensource text recognition service.
 
 Demo website: [idmatch.co](https://idmatch.co/) 
 
@@ -8,13 +8,13 @@ Demo website: [idmatch.co](https://idmatch.co/)
  
 **Installation**
 ```
-go get -u -d github.com/maddevsio/go-idmatch
-cd $GOPATH/src/github.com/maddevsio/go-idmatch
+go get -u -d github.com/LibertusDio/go-idmatch
+cd $GOPATH/src/github.com/LibertusDio/go-idmatch
 go run main.go service
 ```
 **Docker**
 ```
-docker pull maddevsio/go-idmatch
+docker pull LibertusDio/go-idmatch
 docker run -p 8080:8080 -it --rm --name go-idmatch-service go-idmatch
 ```
 **CLI**
