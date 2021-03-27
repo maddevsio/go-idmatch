@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"image"
+	"image/color"
 	"math"
 	"math/rand"
 	"sync"
 
+	"github.com/LibertusDio/go-idmatch/utils"
 	"gocv.io/x/gocv"
 	_ "gocv.io/x/gocv/contrib"
 )
@@ -185,11 +187,11 @@ func Match(img, sample gocv.Mat) []MatchPoint {
 	gocv.CvtColor(img, &gray, gocv.ColorBGRToGray)
 	b := descriptorArr(gray)
 
-	// for _, v := range *a {
-	// 	gocv.Circle(&sample, image.Point{int(v.keypoint.X), int(v.keypoint.Y)}, int(v.keypoint.Size), color.RGBA{255, 0, 0, 255}, 1)
-	// }
+	for _, v := range *a {
+		gocv.Circle(&sample, image.Point{int(v.keypoint.X), int(v.keypoint.Y)}, int(v.keypoint.Size), color.RGBA{255, 0, 0, 255}, 1)
+	}
 
-	// utils.ShowImage(sample)
+	utils.ShowImage(sample)
 
 	return filterGoodMatch(matchDescriptors(*a, b))
 }

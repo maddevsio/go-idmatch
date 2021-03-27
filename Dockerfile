@@ -1,6 +1,6 @@
 FROM denismakogon/gocv-alpine:3.4.2-buildstage as build-stage
 
-RUN apk add --update leptonica tesseract-ocr-dev tesseract-ocr-data-rus
+RUN apk add --update leptonica tesseract-ocr-dev tesseract-ocr-data-vie
 RUN go get -u -d github.com/LibertusDio/go-idmatch
 RUN cd $GOPATH/src/github.com/LibertusDio/go-idmatch && go build main.go
 

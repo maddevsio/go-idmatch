@@ -1,154 +1,65 @@
-{"card":
-    [
+{
+    "card": [
         {
-        "type": "KG idcard old",
-        "aspectRatio": 1.58,
-        "textBlocksThreshold": 0.07,
-        "textRegionFilterCoefficients": 
-        {
-            "w1": 0.008511,
-            "h1": 0.006689,
-            "w2": 0.010638, 
-            "h2": 0.006689
-        },
-        "maxQualitySizes":
-        {
-            "maxQualitySymWidth": 34.1,
-            "maxQualityWidth": 1239.0,
-            "maxQualitySymHeight": 37.0,
-            "maxQualityHeight": 781.0
-        },
-        "front": {
-            "sample": "templates/sample/kg_idcard.png",
-            "structure": 
-            [
-                {"name": "inn", "type": "custom", 
-                    "length": 14, "regex": "^[1,2]^[0-9]",
-                    "position": {"x": 0.67, "y": 0.97}},
-                {"name": "pob", "type": "string", 
-                    "position": {"x": 0.36, "y": 0.825}},
-                {"name": "gender", "type": "gender",
-                    "position": {"x": 0.73, "y": 0.715}},
-                {"name": "birthday", "type": "date",
-                    "position": {"x": 0.36, "y": 0.715}},
-                {"name": "surname", "type": "string", "minlength": 2,
-                    "position": {"x": 0.36, "y": 0.375}},
-                {"name": "firstname", "type": "string", "minlength": 2,
-                    "position": {"x": 0.36, "y": 0.475}},
-                {"name": "secondname", "type": "string", "minlength": 2,
-                    "position": {"x": 0.36, "y": 0.605}},
-                {"name": "serial", "language": "eng", "length": 9,
-                    "type": "custom", "regex": "^[0-9]", 
-                    "position": {"x": 0.07, "y": 0.87}},
-                {"name": "birthday", "type": "date", 
-                    "length": 14, "fragment": "1-9",
-                    "position": {"x": 0.67, "y": 0.97}},
-                {"name": "gender", "type": "gender", 
-                    "length": 14, "fragment": "0-1",
-                    "position": {"x": 0.67, "y": 0.97}}
-            ]
-        },
-        "back": {
-            "sample": "templates/sample/old_back.jpg",
-            "structure": 
-                [
-                    {"name": "family", "type": "string", 
-                        "options": ["НИКЕСИ ЖОК", "НИКЕСИЗ", "НИКЕСИ БАР", "НИКЕЛУУ", "ЖЕСИР"],
-                        "position": {"x": 0.13, "y": 0.10}},
-                    {"name": "address", "multiline": true, 
-                        "position": {"x": 0.13, "y": 0.20}},
-                    {"name": "issued_date", "type": "date", "length": 8,
-                        "position": {"x": 0.13, "y": 0.35}},
-                    {"name": "expiry_date", "type": "date", 
-                        "position": {"x": 0.13, "y": 0.5}},
-                    {"name": "issued_by", 
-                        "position": {"x": 0.13, "y": 0.6}},
-                    {"name": "birthday", "type": "date", "language": "eng", 
-                        "fragment": "9-17",
-                        "position": {"x": 0.13, "y": 0.7}},
-                    {"name": "inn", "type": "number",
-                        "language": "eng", "fragment": "9-23",
-                        "position": {"x": 0.13, "y": 0.7}},
-                    {"name": "serial", "language": "eng", "fragment": "0-9",
-                        "type": "custom", "regex": "[^AN ^0-9]",
-                        "position": {"x": 0.13, "y": 0.7}},
-                    {"name": "gender", "type": "gender", "language": "eng", 
-                        "fragment": "8-8",
-                        "position": {"x": 0.13, "y": 0.7}},
-                    {"type": "custom", "regex": "[^<A-Z]",
-                        "language": "eng", "transliterate": true,
-                        "subfield": {
-                            "fields": ["firstname", "surname"],
-                            "delimeter": "<<"
-                        },
-                        "position": {"x": 0.13, "y": 0.85}}
-                ]
-            }
-        },
-        {
-        "type": "KG idcard new",
-        "aspectRatio": 1.58,
-        "textBlocksThreshold": 0.07,
-        "textRegionFilterCoefficients": 
-        {
-            "w1": 0.008511,
-            "h1": 0.006689,
-            "w2": 0.010638, 
-            "h2": 0.006689
-        },
-        "maxQualitySizes":
-        {
-            "maxQualitySymWidth": 34.1,
-            "maxQualityWidth": 1239.0,
-            "maxQualitySymHeight": 37.0,
-            "maxQualityHeight": 781.0
-        },
-        "front": {
-                "sample": "templates/sample/kg_new_front.png",
-                "structure": 
-                [
-                    {"name": "gender", "type": "gender", 
-                        "position": { "x": 0.43, "y": 0.64}},
-                    {"name": "birthday", "type": "date", 
-                        "position": { "x": 0.5, "y": 0.81}},
-                    {"name": "surname", "type": "string", 
-                        "position": { "x": 0.5, "y": 0.27}},
-                    {"name": "firstname", "type": "string", 
-                        "position": { "x": 0.45, "y": 0.42}},
-                    {"name": "secondname", "type": "string", 
-                        "position": { "x": 0.48, "y": 0.56}},
-                    {"name": "nationallity", "type": "string", 
-                        "position": { "x": 0.5, "y": 0.72}},
-                    {"name": "serial", "language": "eng", "length": 9,
-                        "position": {"x": 0.82, "y": 0.83}},
-                    {"name": "expiry_date", "type": "date", 
-                        "position": {"x": 0.82, "y": 0.96}}
-                ]
+            "type": "2020 reg card car",
+            "aspectRatio": 1.58,
+            "textBlocksThreshold": 0.15,
+            "textRegionFilterCoefficients": {
+                "w1": 0.008511,
+                "h1": 0.006689,
+                "w2": 0.010638,
+                "h2": 0.006689
             },
-        "back": {
-            "sample": "templates/sample/kg_new_back.jpg",
-            "structure": 
-                [
-                    {"name": "pob", "type": "string", "multiline": true,  
-                        "position": { "x": 0.35, "y": 0.15}},
-                    {"name": "issued_by",
-                        "position": {"x": 0.35, "y": 0.35}},
-                    {"name": "issued_date", "type": "date", 
-                        "position": {"x": 0.35, "y": 0.48}},
-                    {"name": "inn", "type": "number",
-                        "position": {"x": 0.78, "y": 0.3}},
-                    {"name": "serial", "language": "eng", "length": 9, 
-                        "position": {"x": 0.78, "y": 0.48}},
-                    {"name": "gender", "type": "gender", "language": "eng", 
-                        "fragment": "0-0",
-                        "position": {"x": 0.78, "y": 0.3}},
-                    {"type": "custom", "regex": "[^<A-Z]",
-                        "language": "eng", "transliterate": true,
-                        "subfield": {
-                            "fields": ["firstname", "surname"],
-                            "delimeter": "<<"
-                        },
-                        "position": {"x": 0.15, "y": 0.9}}
+            "maxQualitySizes": {
+                "maxQualitySymWidth": 60.1,
+                "maxQualityWidth": 1800.0,
+                "maxQualitySymHeight": 72.0,
+                "maxQualityHeight": 1000.0
+            },
+            "front": {
+                "sample": "templates/sample/2020_car_back.jpg",
+                "structure": [
+                    {
+                        "name": "fullname",
+                        "type": "string",
+                        "multiline": false,
+                        "position": {
+                            "x": 0.03,
+                            "y": 0.13
+                        }
+                    },
+                    {
+                        "name": "address",
+                        "type": "string",
+                        "position": {
+                            "x": 0.025,
+                            "y": 0.20
+                        }
+                    },
+                    {
+                        "name": "brand",
+                        "type": "string",
+                        "position": {
+                            "x": 0.25,
+                            "y": 0.25
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "type": "string",
+                        "position": {
+                            "x": 0.2,
+                            "y": 0.30
+                        }
+                    },
+                    {
+                        "name": "color",
+                        "type": "string",
+                        "position": {
+                            "x": 0.225,
+                            "y": 0.35
+                        }
+                    }
                 ]
             }
         }

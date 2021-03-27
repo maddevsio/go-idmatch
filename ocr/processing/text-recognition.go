@@ -29,7 +29,7 @@ func RecognizeText(fields []templates.Field) {
 	defer client.Close()
 	for k, field := range fields {
 		if len(field.Language) == 0 {
-			field.Language = "rus"
+			field.Language = "Vietnamese"
 		}
 		client.SetPageSegMode(gosseract.PSM_SINGLE_LINE)
 		if field.Multiline {

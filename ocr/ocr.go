@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"image"
 	"os"
 	"sync"
 
@@ -21,8 +22,8 @@ func readAndScale(path string) (gocv.Mat, error) {
 		return gocv.Mat{}, err
 	}
 	img := gocv.IMRead(path, gocv.IMReadColor)
-	// k := 1000.0 / float64(img.Rows())
-	// gocv.Resize(img, &img, image.Point{0, 0}, k, k, gocv.InterpolationCubic)
+	k := 1000.0 / float64(img.Rows())
+	gocv.Resize(img, &img, image.Point{0, 0}, k, k, gocv.InterpolationCubic)
 	return img, nil
 }
 

@@ -71,9 +71,9 @@ func textRegionsInternal(img gocv.Mat, card templates.Card, fc extractTextRegion
 //TextRegions returns text regions on image
 func TextRegions(img gocv.Mat, card templates.Card) ([][]image.Point, error) {
 	// showExampleRectangles(img)
-	// tryToFindCoeffForNewID(img)
+	// tryToFindCoeffForNewID(img, card)
 	// buildFloatCoeffs(img)
-	// testCoefficientsForID(img)
+	// testCoefficientsForID(img, card)
 	w1c := card.TextRegionFilterCoefficients.W1 * float64(img.Cols())
 	h1c := card.TextRegionFilterCoefficients.H1 * float64(img.Rows())
 	w2c := card.TextRegionFilterCoefficients.W2 * float64(img.Cols())
